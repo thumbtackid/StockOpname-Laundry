@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V2.0 Connected)</title>
+    <title>Sistem Linen RS Charlie (V2.1 Final)</title>
     
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- SheetJS -->
+    <!-- SheetJS (Untuk Export Excel) -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
     <style>
@@ -21,7 +21,7 @@
             --danger: #ef4444; --danger-bg: #fee2e2; --danger-text: #991b1b;
             --info: #64748b; --info-bg: #f1f5f9; --info-text: #475569;
             
-            --bg-body: #f8fafc; --bg-surface: #ffffff; --bg-hover: #f1f5f9;
+            --bg-body: #f1f5f9; --bg-surface: #ffffff; --bg-hover: #f8fafc;
             --border-light: #e2e8f0; --border-focus: #0284c7;
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
             --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
@@ -32,67 +32,73 @@
            RESET & BASE
            ========================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        body { font-family: var(--font-main); background-color: var(--bg-body); color: var(--text-primary); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; padding: 24px; }
+        body { font-family: var(--font-main); background-color: var(--bg-body); color: var(--text-primary); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; padding: 20px; }
         ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-light); outline-offset: 1px; border-color: var(--primary) !important; }
-        button { cursor: pointer; font-family: inherit; }
+        button { cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        input, select, textarea { font-family: inherit; }
 
         /* =========================================
            LAYOUT
            ========================================= */
-        .app-container { max-width: 1440px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        .app-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         
         /* Header */
-        header { background: var(--bg-surface); padding: 20px 24px; border-radius: 8px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
+        header { background: var(--bg-surface); padding: 20px 24px; border-radius: 12px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
         header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary-dark), var(--primary)); }
         .brand { display: flex; flex-direction: column; gap: 4px; }
-        .brand h1 { font-size: 1.25rem; font-weight: 700; color: var(--primary-dark); letter-spacing: -0.025em; }
+        .brand h1 { font-size: 1.35rem; font-weight: 800; color: var(--primary-dark); letter-spacing: -0.03em; }
         .brand p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
-        .meta-info { display: flex; gap: 20px; align-items: center; }
-        .meta-info label { display: flex; flex-direction: column; gap: 4px; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
-        .meta-info input { padding: 8px 12px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 0.9rem; background: var(--bg-body); min-width: 140px; }
+        .meta-info { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+        .meta-info label { display: flex; flex-direction: column; gap: 4px; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+        .meta-info input { padding: 8px 12px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 0.9rem; background: var(--bg-body); min-width: 140px; transition: border 0.2s; }
+        .meta-info input:focus { border-color: var(--primary); background: #fff; }
 
         /* Tabs */
-        .tabs { display: flex; gap: 4px; background: #e2e8f0; padding: 4px; border-radius: 8px; width: fit-content; overflow-x: auto; max-width: 100%; }
-        .tab-btn { padding: 10px 18px; background: transparent; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
-        .tab-btn:hover { background: rgba(255,255,255, 0.5); color: var(--primary-dark); }
-        .tab-btn.active { background: var(--bg-surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: 700; }
+        .tabs { display: flex; gap: 4px; background: #e2e8f0; padding: 4px; border-radius: 10px; width: 100%; overflow-x: auto; }
+        .tab-btn { padding: 10px 20px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .tab-btn:hover { background: rgba(255,255,255, 0.5); color: var(--text-primary); }
+        .tab-btn.active { background: var(--bg-surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-weight: 700; }
 
         /* Views & Cards */
-        .section-view { display: none; animation: fadeIn 0.2s ease-in-out; } .section-view.active { display: block; }
-        @keyframes fadeIn { from {opacity: 0; transform: translateY(5px);} to {opacity: 1; transform: translateY(0);} }
+        .section-view { display: none; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .section-view.active { display: block; }
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
         
-        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .card { background: var(--bg-surface); padding: 20px; border-radius: 8px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); }
-        .card label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
-        .card .value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: var(--bg-surface); padding: 20px; border-radius: 10px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .card label { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
+        .card .value { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
         .card.text-danger .value { color: var(--danger); } .card.text-success .value { color: var(--success); } .card.text-primary .value { color: var(--primary-dark); }
 
         /* Toolbar */
-        .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; background: var(--bg-surface); padding: 16px; border-radius: 8px; border: 1px solid var(--border-light); align-items: center; }
+        .toolbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; background: var(--bg-surface); padding: 16px; border-radius: 10px; border: 1px solid var(--border-light); align-items: center; }
         .search-box { flex-grow: 1; min-width: 250px; position: relative; }
-        .search-box input { width: 100%; padding: 10px 16px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 0.9rem; background: var(--bg-body); }
-        select { padding: 10px 16px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 0.9rem; background: var(--bg-surface); cursor: pointer; }
+        .search-box input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-body); transition: all 0.2s; }
+        .search-box input:focus { background: #fff; box-shadow: 0 0 0 3px var(--primary-light); border-color: var(--primary); }
+        .search-box::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 0.9rem; }
+        select { padding: 10px 16px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-surface); cursor: pointer; }
 
         /* Buttons */
-        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary { background-color: var(--primary); color: white; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); } .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
-        .btn-success { background-color: var(--success); color: white; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); } .btn-success:hover { background-color: #059669; }
-        .btn-secondary { background-color: #fff; color: var(--text-secondary); border: 1px solid var(--border-light); } .btn-secondary:hover { background-color: #f8fafc; color: var(--text-primary); }
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn:active { transform: translateY(1px); }
+        .btn-primary { background-color: var(--primary); color: white; } .btn-primary:hover { background-color: var(--primary-dark); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
+        .btn-success { background-color: var(--success); color: white; } .btn-success:hover { background-color: #059669; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .btn-secondary { background-color: #fff; color: var(--text-secondary); border: 1px solid var(--border-light); } .btn-secondary:hover { background-color: #f8fafc; color: var(--text-primary); border-color: #cbd5e1; }
         .btn-danger { background-color: #fff; color: var(--danger); border: 1px solid #fecdd3; } .btn-danger:hover { background-color: var(--danger-bg); }
-        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+        .btn-sm { padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; }
 
         /* Table */
-        .table-container { background: var(--bg-surface); border-radius: 8px; border: 1px solid var(--border-light); overflow: hidden; }
-        .table-scroll-wrapper { overflow-x: auto; max-height: 70vh; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; text-align: left; }
-        thead { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .table-container { background: var(--bg-surface); border-radius: 10px; border: 1px solid var(--border-light); overflow: hidden; box-shadow: var(--shadow-sm); }
+        .table-scroll-wrapper { overflow-x: auto; max-height: 65vh; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; text-align: left; }
+        thead { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; }
         th { padding: 14px 16px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; border-bottom: 2px solid var(--border-light); white-space: nowrap; }
         td { padding: 14px 16px; border-bottom: 1px solid var(--border-light); color: var(--text-primary); vertical-align: middle; font-size: 0.9rem; }
         tr:last-child td { border-bottom: none; } tr:hover { background-color: #f8fafc; }
-        .col-center { text-align: center; } .col-right { text-align: right; } .text-mono { font-family: monospace; font-size: 0.85rem; }
+        .col-center { text-align: center; } .col-right { text-align: right; } .text-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 0.8rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: var(--primary-dark); }
         
-        .badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; min-width: 60px; }
+        .badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; min-width: 60px; letter-spacing: 0.025em; }
         .status-ok { background: var(--success-bg); color: var(--success-text); border: 1px solid #bbf7d0; }
         .status-warning { background: var(--warning-bg); color: var(--warning-text); border: 1px solid #fde68a; }
         .status-danger { background: var(--danger-bg); color: var(--danger-text); border: 1px solid #fecaca; }
@@ -101,19 +107,20 @@
         input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); }
 
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
         .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
-        .modal-content { background: var(--bg-surface); width: 100%; max-width: 700px; border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-light); display: flex; flex-direction: column; max-height: 90vh; }
-        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+        .modal-content { background: var(--bg-surface); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-light); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
         .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--primary-dark); }
-        .close-modal { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary); }
-        .modal-body { padding: 24px; overflow-y: auto; } .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-light); background: #f8fafc; text-align: right; }
+        .close-modal { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary); line-height: 1; }
+        .modal-body { padding: 24px; overflow-y: auto; } .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-light); background: #f8fafc; display: flex; justify-content: flex-end; gap: 10px; }
         
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; } .full-width { grid-column: span 2; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } .full-width { grid-column: span 2; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
-        .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 0.95rem; }
-        .readonly-field { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
+        .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
+        .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: #fff; }
+        .form-group small { font-size: 0.75rem; color: var(--text-tertiary); }
+        .readonly-field { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
 
         /* Toast */
         #toast { visibility: hidden; min-width: 300px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 8px; padding: 12px 20px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -121,17 +128,17 @@
         #toast::before { content: '✓'; font-weight: 700; color: var(--success); }
 
         /* Set Composition Style */
-        .set-item-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; border: 1px solid var(--border-light); border-radius: 6px; padding: 10px; background: #f8fafc; }
-        .set-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid var(--border-light); }
-        .set-item-row span { font-size: 0.9rem; }
+        .set-item-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px; background: #f8fafc; max-height: 200px; overflow-y: auto; }
+        .set-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 6px; border: 1px solid var(--border-light); }
+        .set-item-row span { font-size: 0.85rem; }
 
         /* Loading Overlay */
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 1024px) { .app-container { max-width: 100%; } header { flex-direction: column; align-items: flex-start; } .meta-info { width: 100%; justify-content: space-between; } }
-        @media (max-width: 768px) { body { padding: 12px; } .toolbar { flex-direction: column; align-items: stretch; } .form-grid { grid-template-columns: 1fr; } .btn { width: 100%; justify-content: center; } }
+        @media (max-width: 768px) { body { padding: 12px; } .toolbar { flex-direction: column; align-items: stretch; } .form-grid { grid-template-columns: 1fr; } .btn { width: 100%; } }
     </style>
 </head>
 <body>
@@ -139,8 +146,12 @@
     <!-- Loading Screen -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <h3 style="color:var(--primary);">Menghubungkan ke Google Sheets...</h3>
+        <h3 style="color:var(--primary); margin-bottom: 5px;">Menghubungkan ke Server...</h3>
         <p style="color:var(--text-secondary); font-size:0.9rem;">Mohon tunggu sebentar</p>
+        <div id="loadingError" style="display:none; text-align:center; margin-top:20px;">
+            <p style="color:var(--danger); font-weight:600;">Gagal Terhubung</p>
+            <button class="btn btn-primary" onclick="forceOfflineMode()" style="margin-top:10px;">Lanjutkan Mode Offline</button>
+        </div>
     </div>
 
     <div class="app-container">
@@ -160,21 +171,20 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Kategori</label>
-                                <input type="text" id="inpKategori" list="listKategori" required placeholder="Contoh: Sprei, Selimut">
+                                <input type="text" id="inpKategori" list="listKategori" required placeholder="Contoh: Sprei">
                                 <datalist id="listKategori">
                                     <option value="SPR"> <option value="SLM"> <option value="SB"> <option value="DKN"> <option value="LKN"> <option value="JDK"> <option value="PRS"> <option value="BED">
                                 </datalist>
-                                <small style="color:var(--text-tertiary)">Singkatan kode otomatis (cth: SPR)</small>
                             </div>
                             <div class="form-group">
                                 <label>Nama Item</label>
                                 <input type="text" id="inpNama" required placeholder="Nama Lengkap Item">
                             </div>
 
-                            <div class="form-group full-width" style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                            <div class="form-group full-width" style="background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
                                 <label style="color:var(--primary-dark)">Kode Otomatis (Read-Only)</label>
                                 <input type="text" id="inpKode" class="readonly-field" placeholder="LIN-XXX-000" readonly>
-                                <small style="color:var(--text-tertiary)">Sistem membuat kode berdasarkan kategori dan urutan.</small>
+                                <small>Kode digenerate otomatis oleh sistem.</small>
                             </div>
                             
                             <div class="form-group">
@@ -195,7 +205,6 @@
                                 <input type="number" id="inpHarga" min="0" required>
                             </div>
 
-                            <!-- Attributes (Editable metadata) -->
                             <div class="form-group">
                                 <label>Batch / Th. Pengadaan</label>
                                 <input type="text" id="inpBatch" placeholder="Misal: 2023-B01">
@@ -212,12 +221,7 @@
                             <div class="form-group full-width">
                                 <label>Rasio Rotasi (Analisa)</label>
                                 <input type="number" id="inpRotasi" value="1.0" step="0.5" min="0.5" placeholder="Default 1.0">
-                                <small style="color:var(--text-tertiary)">Berapa kali item ini dipakai per siklus (1 Bed = 1 Sprei).</small>
-                            </div>
-
-                            <div class="form-group full-width">
-                                <label>Catatan</label>
-                                <textarea id="inpCatatan" rows="2" placeholder="Catatan tambahan..."></textarea>
+                                <small>Berapa kali item ini dipakai per siklus (1 Bed = 1 Sprei).</small>
                             </div>
                         </div>
                     </form>
@@ -256,8 +260,7 @@
                         </div>
 
                         <div id="setCompositionList" class="set-item-list">
-                            <!-- JS will populate this -->
-                            <div style="text-align:center; color:#94a3b8; padding:10px;">Belum ada item di dalam set.</div>
+                            <div style="text-align:center; color:#94a3b8; padding:10px; font-size:0.85rem;">Belum ada item di dalam set.</div>
                         </div>
                     </form>
                 </div>
@@ -272,11 +275,11 @@
         <header>
             <div class="brand">
                 <h1>Sistem Linen RS Charlie</h1>
-                <p>Smart Set Management & Auto-Code System V2.0</p>
+                <p>Smart Set Management & Auto-Code System V2.1</p>
             </div>
             <div class="meta-info">
                 <label>
-                    Tanggal
+                    Tanggal Opname
                     <input type="date" id="opnameDate">
                 </label>
                 <label>
@@ -288,7 +291,7 @@
 
         <!-- Navigation Tabs -->
         <div class="tabs">
-            <button class="tab-btn" onclick="switchTab('item')">📦 Master Item (Satuan)</button>
+            <button class="tab-btn active" onclick="switchTab('item')">📦 Master Item (Satuan)</button>
             <button class="tab-btn" onclick="switchTab('set')">🎁 Master Set (Komposisi)</button>
             <button class="tab-btn" onclick="switchTab('ruangan')">🏥 Ruangan & Config</button>
             <button class="tab-btn" onclick="switchTab('opname')">📊 Stock Opname</button>
@@ -456,7 +459,9 @@
         // ==========================================
         // 1. SERVER URL CONFIGURATION
         // ==========================================
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMZr-e8m_2edwCsf1J-gGccCZaTNoYqZspI1o8gKrYa8IdFk_1p9CnbGpPs22xaQSUIw/exec"; 
+        // GANTI SCRIPT_ID INI DENGAN MILIK ANDA
+        const SCRIPT_ID = "AKfycbzMZr-e8m_2edwCsf1J-gGccCZaTNoYqZspI1o8gKrYa8IdFk_1p9CnbGpPs22xaQSUIw"; 
+        const BASE_URL = `https://script.google.com/macros/s/${SCRIPT_ID}/exec`;
 
         // ==========================================
         // 2. INITIAL DATA (NEW FORMAT)
@@ -504,61 +509,105 @@
         let masterItems = [];
         let masterSets = [];
         let roomConfig = {};
-        let opnameResults = {}; // { kode: stokFisik }
+        let opnameResults = {};
 
         // ==========================================
-        // 4. CLOUD FUNCTIONS (LOAD & SAVE)
+        // 4. CLOUD FUNCTIONS (FIXED VERSION - JSONP)
         // ==========================================
         
-        // --- LOAD DATA FROM CLOUD ---
-        async function loadFromCloud() {
-            try {
-                const [items, sets, config, opname] = await Promise.all([
-                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=masterItems`).then(r => r.json()),
-                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=masterSets`).then(r => r.json()),
-                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=config`).then(r => r.json()),
-                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=opname`).then(r => r.json())
-                ]);
+        function loadFromCloud() {
+            console.log("Menghubungkan ke Google Sheets...");
+            const callbackName = 'cb_' + Math.floor(Math.random() * 1000000);
+            const url = `${BASE_URL}?action=getData&callback=${callbackName}`;
 
-                if (Array.isArray(items) && items.length > 0) masterItems = items;
-                else masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
+            const script = document.createElement('script');
+            script.src = url;
+            
+            // Fallback jika script gagal dimuat (misal internet mati)
+            script.onerror = function() {
+                console.error("Script gagal dimuat.");
+                handleConnectionError(true);
+            };
 
-                if (Array.isArray(sets)) masterSets = sets;
-                if (config && config.beds) roomConfig = config;
-                if (typeof opname === 'object') opnameResults = opname;
+            document.body.appendChild(script);
 
-                initUI();
-                document.getElementById('loadingOverlay').style.display = 'none';
-                showToast("Data berhasil dimuat dari Cloud!");
-                
-            } catch (error) {
-                console.error("Gagal load data:", error);
-                document.getElementById('loadingOverlay').innerHTML = `
-                    <div style="color:red; text-align:center;">
-                        <h3>Gagal Terhubung ke Server</h3>
-                        <p>Cek koneksi internet dan pastikan URL Script sudah benar.</p>
-                        <button onclick="location.reload()" class="btn btn-primary" style="margin-top:10px;">Coba Lagi</button>
-                    </div>`;
-            }
+            window[callbackName] = function(response) {
+                document.body.removeChild(script);
+                delete window[callbackName];
+
+                try {
+                    if (response && response.status === 'success') {
+                        const d = response.data;
+                        if (d.masterItems) masterItems = d.masterItems;
+                        if (d.masterSets) masterSets = d.masterSets;
+                        if (d.roomConfig) roomConfig = d.roomConfig;
+                        if (d.opnameResults) opnameResults = d.opnameResults;
+
+                        // Fallback jika kosong
+                        if (!masterItems || masterItems.length === 0) masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
+                        if (!masterSets || masterSets.length === 0) masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
+                        if (!roomConfig || !roomConfig.beds) roomConfig = defaultRoomConfig;
+
+                        initUI();
+                        hideLoading();
+                        showToast("✅ Data Berhasil Dimuat!");
+                    } else {
+                        throw new Error("Format data salah.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    handleConnectionError(false);
+                }
+            };
         }
 
-        // --- SAVE DATA TO CLOUD ---
         function saveToCloud() {
-            const payload = { masterItems, masterSets, roomConfig, opnameResults };
-            fetch(GOOGLE_SCRIPT_URL, {
+            const payload = { 
+                action: "saveData",
+                masterItems: masterItems,
+                masterSets: masterSets,
+                roomConfig: roomConfig,
+                opnameResults: opnameResults
+            };
+
+            fetch(BASE_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Penting untuk GAS
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(() => console.log("Data tersimpan ke Cloud."))
-            .catch(err => console.error("Gagal simpan:", err));
+            .then(() => showToast("💾 Perubahan tersimpan di Cloud."))
+            .catch(err => {
+                console.error(err);
+                showToast("⚠️ Gagal menyimpan ke Cloud.");
+            });
+        }
+
+        function handleConnectionError(isNetworkError) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            // Jika error jaringan parah, gunakan default
+            if (isNetworkError) {
+                masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
+                masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
+                roomConfig = defaultRoomConfig;
+                initUI();
+                showToast("⚠️ Mode Offline: Menggunakan Data Default");
+            } else {
+                alert("Terjadi kesalahan saat membaca data dari server.");
+            }
+        }
+
+        function hideLoading() {
+            const loader = document.getElementById('loadingOverlay');
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 300);
         }
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('opnameDate').valueAsDate = new Date();
-            loadFromCloud();
+            // Timeout sedikit untuk memastikan UI siap
+            setTimeout(() => loadFromCloud(), 500);
         });
 
         // ==========================================
@@ -616,7 +665,6 @@
                     document.getElementById('inpBatch').value = item.batch || "";
                     document.getElementById('inpKondisi').value = item.kondisi || "Baik";
                     document.getElementById('inpRotasi').value = item.rotasi || 1.0;
-                    document.getElementById('inpCatatan').value = item.catatan || "";
                 } else {
                     title.textContent = "Tambah Item Baru (Auto Code)";
                     document.getElementById('editIndex').value = "";
@@ -629,7 +677,7 @@
                 const modal = document.getElementById('setModal');
                 const title = document.getElementById('setModalTitle');
                 document.getElementById('setForm').reset();
-                currentSetComposition = []; // Reset temp composition
+                currentSetComposition = [];
 
                 if (id) {
                     const set = masterSets.find(s => s.id === id);
@@ -716,7 +764,7 @@
                 batch: document.getElementById('inpBatch').value,
                 kondisi: document.getElementById('inpKondisi').value,
                 rotasi: parseFloat(document.getElementById('inpRotasi').value) || 1.0,
-                catatan: document.getElementById('inpCatatan').value
+                catatan: document.getElementById('inpCatatan') ? document.getElementById('inpCatatan').value : "" 
             };
 
             if (editCode) {
@@ -730,7 +778,7 @@
 
             saveToCloud();
             renderMasterItemTable();
-            renderOpnameTable(); // Refresh opname if needed
+            renderOpnameTable();
             closeModal('itemModal');
         }
 
@@ -783,7 +831,7 @@
             container.innerHTML = '';
             
             if (currentSetComposition.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:10px;">Belum ada item di dalam set.</div>';
+                container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:10px; font-size:0.85rem;">Belum ada item di dalam set.</div>';
                 return;
             }
 
@@ -886,7 +934,7 @@
         }
 
         // ==========================================
-        // 10. OPNAME & FINALIZE LOGIC (UPDATED)
+        // 10. OPNAME & FINALIZE LOGIC
         // ==========================================
         
         function renderOpnameTable() {
@@ -919,26 +967,13 @@
                 `;
                 tbody.appendChild(tr);
             });
-            updateOpnameSummary();
         }
 
         function updateOpname(kode, val) {
             if (val === "") delete opnameResults[kode];
             else opnameResults[kode] = parseInt(val);
-            saveToCloud(); // Auto save input sementara
+            saveToCloud(); 
             renderOpnameTable(); 
-        }
-
-        function updateOpnameSummary() {
-            let totalDiff = 0;
-            masterItems.forEach(item => {
-                const fisik = opnameResults[item.kode] !== undefined ? parseInt(opnameResults[item.kode]) : 0;
-                if (opnameResults[item.kode] !== undefined) {
-                    totalDiff += (fisik - item.stokAwal);
-                }
-            });
-            document.getElementById('op-totalItems').innerText = masterItems.length;
-            document.getElementById('op-totalDiff').innerText = totalDiff;
         }
 
         function resetOpname() {
@@ -949,7 +984,6 @@
             }
         }
 
-        // --- FITUR BARU: FINALISASI OPNAME ---
         function finalizeOpname() {
             const hasInput = Object.keys(opnameResults).length > 0;
             if (!hasInput) {
@@ -957,34 +991,28 @@
                 return;
             }
 
-            const confirmMsg = "Apakah Anda yakin ingin memperbarui Stok Master berdasarkan hasil hitungan fisik ini?\n\n" +
-                                "Stok Lama akan ditimpa dengan Stok Fisik yang Anda input.\n\n" +
-                                "Stok yang berkurang akan dianggap HILANG/RUSAK/AFKIR.";
-
-            if(confirm(confirmMsg)) {
+            if(confirm("Apakah Anda yakin ingin memperbarui Stok Master berdasarkan hasil hitungan fisik ini?\n\nStok Lama akan ditimpa dengan Stok Fisik yang Anda input.")) {
                 let updatedCount = 0;
                 
                 masterItems.forEach(item => {
                     const fisik = opnameResults[item.kode];
-                    // Jika ada input fisik, update stokAwal master item
                     if (fisik !== undefined && fisik !== "") {
                         item.stokAwal = parseInt(fisik);
                         updatedCount++;
                     }
                 });
 
-                // Kosongkan temporary opname
                 opnameResults = {};
                 
                 saveToCloud();
-                renderMasterItemTable(); // Update tabel master stok baru
-                renderOpnameTable(); // Reset tabel opname
+                renderMasterItemTable();
+                renderOpnameTable();
                 showToast(`Berhasil! ${updatedCount} item stoknya diperbarui.`);
             }
         }
 
         // ==========================================
-        // 11. ANALISA KEBUTUHAN (SMART)
+        // 11. ANALISA KEBUTUHAN
         // ==========================================
         function runAnalysis() {
             const tbody = document.getElementById('anBody');
@@ -1059,8 +1087,16 @@
         }
 
         function exportAnalysisExcel() {
-            runAnalysis(); 
-            alert("Fitur export analisa segera hadir.");
+            // Simple implementation for export analysis
+            const data = [];
+            document.querySelectorAll('#anBody tr').forEach(tr => {
+                const row = [];
+                tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
+                if(row.length > 0) data.push(row);
+            });
+            const ws = XLSX.utils.aoa_to_sheet([['Status','Kode','Nama','Stok','Kebutuhan','Selisih','Biaya'], ...data]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Analisa");
+            XLSX.writeFile(wb, "Analisa_Linen.xlsx");
         }
 
         // Utils
@@ -1082,4 +1118,3 @@
     </script>
 </body>
 </html>
-
