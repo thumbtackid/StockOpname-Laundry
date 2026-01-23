@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V2.1 Final)</title>
+    <title>Sistem Linen RS Charlie Hospital Kendal</title>
     
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- SheetJS (Untuk Export Excel) -->
+    <!-- SheetJS -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
     <style>
@@ -52,7 +52,6 @@
         .meta-info { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
         .meta-info label { display: flex; flex-direction: column; gap: 4px; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
         .meta-info input { padding: 8px 12px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 0.9rem; background: var(--bg-body); min-width: 140px; transition: border 0.2s; }
-        .meta-info input:focus { border-color: var(--primary); background: #fff; }
 
         /* Tabs */
         .tabs { display: flex; gap: 4px; background: #e2e8f0; padding: 4px; border-radius: 10px; width: 100%; overflow-x: auto; }
@@ -65,8 +64,7 @@
         @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
         
         .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .card { background: var(--bg-surface); padding: 20px; border-radius: 10px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .card { background: var(--bg-surface); padding: 20px; border-radius: 10px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); }
         .card label { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
         .card .value { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
         .card.text-danger .value { color: var(--danger); } .card.text-success .value { color: var(--success); } .card.text-primary .value { color: var(--primary-dark); }
@@ -74,25 +72,23 @@
         /* Toolbar */
         .toolbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; background: var(--bg-surface); padding: 16px; border-radius: 10px; border: 1px solid var(--border-light); align-items: center; }
         .search-box { flex-grow: 1; min-width: 250px; position: relative; }
-        .search-box input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-body); transition: all 0.2s; }
-        .search-box input:focus { background: #fff; box-shadow: 0 0 0 3px var(--primary-light); border-color: var(--primary); }
+        .search-box input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-body); }
         .search-box::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 0.9rem; }
         select { padding: 10px 16px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-surface); cursor: pointer; }
 
         /* Buttons */
-        .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .btn:active { transform: translateY(1px); }
-        .btn-primary { background-color: var(--primary); color: white; } .btn-primary:hover { background-color: var(--primary-dark); box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3); }
-        .btn-success { background-color: var(--success); color: white; } .btn-success:hover { background-color: #059669; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .btn-secondary { background-color: #fff; color: var(--text-secondary); border: 1px solid var(--border-light); } .btn-secondary:hover { background-color: #f8fafc; color: var(--text-primary); border-color: #cbd5e1; }
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn-primary { background-color: var(--primary); color: white; } .btn-primary:hover { background-color: var(--primary-dark); }
+        .btn-success { background-color: var(--success); color: white; } .btn-success:hover { background-color: #059669; }
+        .btn-secondary { background-color: #fff; color: var(--text-secondary); border: 1px solid var(--border-light); } .btn-secondary:hover { background-color: #f8fafc; }
         .btn-danger { background-color: #fff; color: var(--danger); border: 1px solid #fecdd3; } .btn-danger:hover { background-color: var(--danger-bg); }
         .btn-sm { padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; }
 
         /* Table */
         .table-container { background: var(--bg-surface); border-radius: 10px; border: 1px solid var(--border-light); overflow: hidden; box-shadow: var(--shadow-sm); }
         .table-scroll-wrapper { overflow-x: auto; max-height: 65vh; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; text-align: left; }
-        thead { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; text-align: left; }
+        thead { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         th { padding: 14px 16px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; border-bottom: 2px solid var(--border-light); white-space: nowrap; }
         td { padding: 14px 16px; border-bottom: 1px solid var(--border-light); color: var(--text-primary); vertical-align: middle; font-size: 0.9rem; }
         tr:last-child td { border-bottom: none; } tr:hover { background-color: #f8fafc; }
@@ -103,8 +99,6 @@
         .status-warning { background: var(--warning-bg); color: var(--warning-text); border: 1px solid #fde68a; }
         .status-danger { background: var(--danger-bg); color: var(--danger-text); border: 1px solid #fecaca; }
         .status-info { background: var(--info-bg); color: var(--info-text); border: 1px solid #e2e8f0; }
-
-        input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); }
 
         /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
@@ -122,19 +116,19 @@
         .form-group small { font-size: 0.75rem; color: var(--text-tertiary); }
         .readonly-field { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
 
-        /* Toast */
-        #toast { visibility: hidden; min-width: 300px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 8px; padding: 12px 20px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
-        #toast::before { content: '✓'; font-weight: 700; color: var(--success); }
-
         /* Set Composition Style */
         .set-item-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px; background: #f8fafc; max-height: 200px; overflow-y: auto; }
         .set-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 6px; border: 1px solid var(--border-light); }
         .set-item-row span { font-size: 0.85rem; }
 
-        /* Loading Overlay */
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; }
-        .spinner { width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        /* Toast */
+        #toast { visibility: hidden; min-width: 300px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 8px; padding: 12px 20px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
+        #toast::before { content: '✓'; font-weight: 700; color: var(--success); }
+
+        /* Loading */
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 1024px) { .app-container { max-width: 100%; } header { flex-direction: column; align-items: flex-start; } .meta-info { width: 100%; justify-content: space-between; } }
@@ -146,12 +140,7 @@
     <!-- Loading Screen -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <h3 style="color:var(--primary); margin-bottom: 5px;">Menghubungkan ke Server...</h3>
-        <p style="color:var(--text-secondary); font-size:0.9rem;">Mohon tunggu sebentar</p>
-        <div id="loadingError" style="display:none; text-align:center; margin-top:20px;">
-            <p style="color:var(--danger); font-weight:600;">Gagal Terhubung</p>
-            <button class="btn btn-primary" onclick="forceOfflineMode()" style="margin-top:10px;">Lanjutkan Mode Offline</button>
-        </div>
+        <h3 style="color:var(--primary);">Memuat Data Sistem...</h3>
     </div>
 
     <div class="app-container">
@@ -173,7 +162,7 @@
                                 <label>Kategori</label>
                                 <input type="text" id="inpKategori" list="listKategori" required placeholder="Contoh: Sprei">
                                 <datalist id="listKategori">
-                                    <option value="SPR"> <option value="SLM"> <option value="SB"> <option value="DKN"> <option value="LKN"> <option value="JDK"> <option value="PRS"> <option value="BED">
+                                    <option value="SPR"> <option value="SLM"> <option value="SB"> <option value="DKN"> <option value="LKN"> <option value="JDK"> <option value="BED">
                                 </datalist>
                             </div>
                             <div class="form-group">
@@ -184,44 +173,25 @@
                             <div class="form-group full-width" style="background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
                                 <label style="color:var(--primary-dark)">Kode Otomatis (Read-Only)</label>
                                 <input type="text" id="inpKode" class="readonly-field" placeholder="LIN-XXX-000" readonly>
-                                <small>Kode digenerate otomatis oleh sistem.</small>
                             </div>
                             
                             <div class="form-group">
-                                <label>Ukuran</label>
-                                <input type="text" id="inpUkuran" placeholder="Contoh: 180x200">
+                                <label>Stok Awal (Baik)</label>
+                                <input type="number" id="inpStokAwal" min="0" required placeholder="Jml Baik">
                             </div>
                             <div class="form-group">
-                                <label>Warna</label>
-                                <input type="text" id="inpWarna" placeholder="Contoh: Biru Tua">
+                                <label>Stok Rusak / Afkir</label>
+                                <input type="number" id="inpStokRusak" min="0" value="0" placeholder="Jml Rusak">
                             </div>
 
-                            <div class="form-group">
-                                <label>Stok Awal</label>
-                                <input type="number" id="inpStokAwal" min="0" required>
-                            </div>
                             <div class="form-group">
                                 <label>Harga Satuan (Rp)</label>
                                 <input type="number" id="inpHarga" min="0" required>
                             </div>
-
                             <div class="form-group">
-                                <label>Batch / Th. Pengadaan</label>
-                                <input type="text" id="inpBatch" placeholder="Misal: 2023-B01">
-                            </div>
-                            <div class="form-group">
-                                <label>Kondisi</label>
-                                <select id="inpKondisi">
-                                    <option value="Baik">Baik</option>
-                                    <option value="Rusak Ringan">Rusak Ringan</option>
-                                    <option value="Afkir">Afkir</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group full-width">
                                 <label>Rasio Rotasi (Analisa)</label>
-                                <input type="number" id="inpRotasi" value="1.0" step="0.5" min="0.5" placeholder="Default 1.0">
-                                <small>Berapa kali item ini dipakai per siklus (1 Bed = 1 Sprei).</small>
+                                <input type="number" id="inpRotasi" value="1.0" step="0.5" min="0.5">
+                                <small>Default 1.0</small>
                             </div>
                         </div>
                     </form>
@@ -275,39 +245,36 @@
         <header>
             <div class="brand">
                 <h1>Sistem Linen RS Charlie</h1>
-                <p>Smart Set Management & Auto-Code System V2.1</p>
+                <p>Smart Set Management & Auto-Code System V2.2</p>
             </div>
             <div class="meta-info">
                 <label>
-                    Tanggal Opname
+                    Tanggal
                     <input type="date" id="opnameDate">
                 </label>
                 <label>
-                    Petugas
-                    <input type="text" id="officerName" placeholder="Nama Petugas">
+                    Mode Simpan
+                    <select id="saveMode" style="width:140px;">
+                        <option value="local">Browser (Offline)</option>
+                        <option value="cloud">Google Sheets</option>
+                    </select>
                 </label>
             </div>
         </header>
 
         <!-- Navigation Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('item')">📦 Master Item (Satuan)</button>
-            <button class="tab-btn" onclick="switchTab('set')">🎁 Master Set (Komposisi)</button>
-            <button class="tab-btn" onclick="switchTab('ruangan')">🏥 Ruangan & Config</button>
-            <button class="tab-btn" onclick="switchTab('opname')">📊 Stock Opname</button>
+            <button class="tab-btn active" onclick="switchTab('item')">📦 Master Item</button>
+            <button class="tab-btn" onclick="switchTab('set')">🎁 Master Set</button>
+            <button class="tab-btn" onclick="switchTab('ruangan')">🏥 Config Ruangan</button>
             <button class="tab-btn" onclick="switchTab('analisa')">📉 Analisa Kebutuhan</button>
         </div>
 
         <!-- VIEW 1: MASTER ITEM -->
         <section id="view-item" class="section-view active">
-            <div class="card" style="margin-bottom:20px; border-left:4px solid var(--primary);">
-                <h3 style="font-size:1rem; color:var(--primary-dark);">Master Item Satuan</h3>
-                <p style="font-size:0.85rem; color:var(--text-secondary);">Semua stok dihitung per item. Kode dibuat otomatis oleh sistem (LIN-KAT-XXX).</p>
-            </div>
-
             <div class="toolbar">
                 <div class="search-box"><input type="text" id="masterSearch" placeholder="Cari kode atau nama..." oninput="renderMasterItemTable()"></div>
-                <button class="btn btn-primary" onclick="openModal('item')">➕ Tambah Item (Auto Code)</button>
+                <button class="btn btn-primary" onclick="openModal('item')">➕ Tambah Item</button>
                 <button class="btn btn-secondary" onclick="downloadExcel()">📥 Download Excel</button>
             </div>
 
@@ -316,8 +283,9 @@
                     <table id="masterTable">
                         <thead>
                             <tr>
-                                <th>Kode Item</th><th>Nama Item</th><th>Kategori</th><th>Stok</th>
-                                <th>Detail (Uk/Warna)</th><th>Batch/Kondisi</th><th>Harga</th><th>Aksi</th>
+                                <th>Kode</th><th>Nama Item</th><th>Kategori</th>
+                                <th>Stok Baik</th><th>Stok Rusak</th><th>Total</th>
+                                <th>Harga</th><th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="masterBody"></tbody>
@@ -328,11 +296,6 @@
 
         <!-- VIEW 2: MASTER SET -->
         <section id="view-set" class="section-view">
-            <div class="card" style="margin-bottom:20px; border-left:4px solid var(--warning);">
-                <h3 style="font-size:1rem; color:var(--warning-text);">Master Set (Template)</h3>
-                <p style="font-size:0.85rem; color:var(--text-secondary);">Definisikan paket linen (misal: Set Operasi). Set ini akan digunakan untuk perhitungan analisa kebutuhan otomatis.</p>
-            </div>
-
             <div class="toolbar">
                 <button class="btn btn-primary" onclick="openModal('set')">➕ Buat Set Baru</button>
             </div>
@@ -342,7 +305,7 @@
                     <table id="setTable">
                         <thead>
                             <tr>
-                                <th>Nama Set</th><th>Jumlah Komponen</th><th>Isi Komposisi</th><th>Aksi</th>
+                                <th>Nama Set</th><th>Jml Item</th><th>Komposisi</th><th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="setBody"></tbody>
@@ -355,7 +318,7 @@
         <section id="view-ruangan" class="section-view">
             <div class="summary-cards">
                 <div class="card">
-                    <label>Jumlah Bed Rawat Inap</label>
+                    <label>Bed Rawat Inap</label>
                     <input type="number" id="configBeds" value="100" style="font-size:1.5rem; border:none; background:transparent; font-weight:700; color:var(--primary-dark); width:100px;">
                 </div>
                 <div class="card">
@@ -367,70 +330,25 @@
                     <input type="number" id="configOps" value="20" style="font-size:1.5rem; border:none; background:transparent; font-weight:700; color:var(--primary-dark); width:80px;">
                 </div>
                 <div class="card">
-                    <label>Buffer (Siklus Laundry)</label>
+                    <label>Buffer (Siklus)</label>
                     <input type="number" id="configBuffer" value="3" style="font-size:1.5rem; border:none; background:transparent; font-weight:700; color:var(--warning-text); width:80px;">
                 </div>
             </div>
-
-            <div class="card">
-                <h3 style="margin-bottom:15px;">Penjelasan Parameter</h3>
-                <ul style="margin-left:20px; font-size:0.9rem; color:var(--text-secondary); line-height:1.8;">
-                    <li><strong>Bed Rawat Inap:</strong> Jumlah total bed yang tersedia.</li>
-                    <li><strong>BOR (Bed Occupancy Rate):</strong> Persentase keterisian rata-rata rumah sakit (default 70%).</li>
-                    <li><strong>Operasi / Hari:</strong> Estimasi rata-rata operasi per hari untuk kebutuhan set operasi.</li>
-                    <li><strong>Buffer:</strong> Jumlah siklus laundry cadangan (Safety Stock). Default 3 siklus.</li>
-                </ul>
-                <div style="margin-top:20px;">
-                    <button class="btn btn-primary" onclick="saveRoomConfig()">Simpan Konfigurasi</button>
-                </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveRoomConfig()">Simpan Konfigurasi</button>
             </div>
         </section>
 
-        <!-- VIEW 4: STOCK OPNAME -->
-        <section id="view-opname" class="section-view">
-            <div class="card" style="border-left:4px solid var(--success);">
-                <h3 style="font-size:1rem; color:var(--success-text);">Stock Opname (Penghitungan Fisik)</h3>
-                <p style="font-size:0.85rem; color:var(--text-secondary);">
-                    1. Input jumlah barang fisik yang ditemukan.<br>
-                    2. Jika ada selisih (kurang/rusak/hilang), sistem akan menandainya.<br>
-                    3. Klik <strong>"Finalisasi & Update Stok"</strong> untuk menjadikan angka fisik ini sebagai stok master baru.
-                </p>
-            </div>
-
-            <div class="toolbar">
-                <div class="search-box"><input type="text" id="opSearch" placeholder="🔍 Cari item..." oninput="renderOpnameTable()"></div>
-                <button class="btn btn-secondary" onclick="resetOpname()">↺ Reset Input</button>
-                <button class="btn btn-success" onclick="finalizeOpname()">✅ Finalisasi & Update Stok</button>
-                <button class="btn btn-primary" onclick="exportOpnameExcel()">📥 Export Excel</button>
-            </div>
-
-            <div class="table-container">
-                <div class="table-scroll-wrapper">
-                    <table id="opTable">
-                        <thead>
-                            <tr>
-                                <th>Kode</th><th>Nama</th><th>Stok Sistem</th>
-                                <th style="background:var(--primary-light)">Stok Fisik</th>
-                                <th>Selisih</th><th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="opBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- VIEW 5: ANALISA KEBUTUHAN -->
+        <!-- VIEW 4: ANALISA KEBUTUHAN -->
         <section id="view-analisa" class="section-view">
             <div class="summary-cards">
-                <div class="card text-danger"><label>Item Defisit</label><div class="value" id="an-deficitCount">0</div></div>
-                <div class="card text-success"><label>Item Surplus</label><div class="value" id="an-surplusCount">0</div></div>
-                <div class="card text-danger"><label>Biaya Defisit</label><div class="value" id="an-deficitCost">Rp 0</div></div>
+                <div class="card text-danger"><label>Total Rusak/Afkir</label><div class="value" id="an-damagedCount">0</div></div>
+                <div class="card text-danger"><label>Biaya Penggantian</label><div class="value" id="an-replacementCost">Rp 0</div></div>
             </div>
 
             <div class="toolbar">
                 <button class="btn btn-primary" onclick="runAnalysis()">🔄 Hitung Analisa Otomatis</button>
-                <button class="btn btn-secondary" onclick="exportAnalysisExcel()">📥 Download Analisa</button>
+                <button class="btn btn-secondary" onclick="exportAnalysisExcel()">📥 Download Laporan</button>
             </div>
 
             <div class="table-container">
@@ -439,9 +357,8 @@
                         <thead>
                             <tr>
                                 <th>Status</th><th>Kode</th><th>Nama Item</th>
-                                <th>Stok Aktual</th>
-                                <th>Kebutuhan (Total)</th>
-                                <th>Selisih</th><th>Biaya</th>
+                                <th>Stok Baik</th><th>Stok Rusak</th>
+                                <th>Kebutuhan</th><th>Selisih</th><th>Biaya</th>
                             </tr>
                         </thead>
                         <tbody id="anBody"></tbody>
@@ -449,7 +366,7 @@
                 </div>
             </div>
             <div style="margin-top:12px; font-size:0.8rem; color:var(--text-tertiary);">
-                *Kebutuhan dihitung dari (Rawat Inap x Rotasi) + (Operasi x Set Komposisi) dikali Buffer.
+                *Kebutuhan dihitung berdasarkan konfigurasi Ruangan (Bed Active) + Kebutuhan Set Operasi.
             </div>
         </section>
 
@@ -457,76 +374,85 @@
 
     <script>
         // ==========================================
-        // 1. SERVER URL CONFIGURATION
+        // 1. CONFIG & STATE
         // ==========================================
-        // GANTI SCRIPT_ID INI DENGAN MILIK ANDA
+        // Ganti ID Script Anda di sini jika ingin menggunakan Cloud
         const SCRIPT_ID = "AKfycbzMZr-e8m_2edwCsf1J-gGccCZaTNoYqZspI1o8gKrYa8IdFk_1p9CnbGpPs22xaQSUIw"; 
         const BASE_URL = `https://script.google.com/macros/s/${SCRIPT_ID}/exec`;
 
-        // ==========================================
-        // 2. INITIAL DATA (NEW FORMAT)
-        // ==========================================
+        // Initial Default Data
         const defaultMasterItems = [
-            { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", ukuran: "180x200", warna: "Putih", stokAwal: 150, harga: 85000, batch: "2023-A", rotasi: 1.0, kondisi: "Baik" },
-            { kode: "LIN-SB-001", nama: "Sarung Bantal Standar", kategori: "SB", ukuran: "50x70", warna: "Putih", stokAwal: 200, harga: 25000, batch: "2023-A", rotasi: 1.0, kondisi: "Baik" },
-            { kode: "LIN-SLM-001", nama: "Selimut Pasien", kategori: "SLM", ukuran: "150x200", warna: "Biru", stokAwal: 80, harga: 120000, batch: "2023-B", rotasi: 1.0, kondisi: "Baik" },
-            { kode: "LIN-DKN-001", nama: "Duk Kecil", kategori: "DKN", ukuran: "Standar", warna: "Hijau", stokAwal: 300, harga: 30000, batch: "2023-A", rotasi: 2.0, kondisi: "Baik" },
-            { kode: "LIN-JDK-001", nama: "Jas Dokter", kategori: "JDK", ukuran: "L", warna: "Hijau Tua", stokAwal: 50, harga: 150000, batch: "2023-C", rotasi: 3.0, kondisi: "Baik" },
-            { kode: "LIN-LKN-001", nama: "Stik Laken", kategori: "LKN", ukuran: "160x75", warna: "Hijau", stokAwal: 120, harga: 40000, batch: "2023-A", rotasi: 1.0, kondisi: "Baik" }
+            { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", stokAwal: 100, stokRusak: 5, harga: 85000, rotasi: 1.0 },
+            { kode: "LIN-SB-001", nama: "Sarung Bantal", kategori: "SB", stokAwal: 120, stokRusak: 2, harga: 25000, rotasi: 1.0 },
+            { kode: "LIN-DKN-001", nama: "Duk Kecil", kategori: "DKN", stokAwal: 200, stokRusak: 10, harga: 30000, rotasi: 2.0 },
+            { kode: "LIN-JDK-001", nama: "Jas Dokter", kategori: "JDK", stokAwal: 30, stokRusak: 0, harga: 150000, rotasi: 3.0 }
         ];
 
         const defaultMasterSets = [
-            { 
-                id: "SET-001", 
-                nama: "Set Bed Rawat Inap", 
-                items: [ 
-                    { kode: "LIN-SPR-001", qty: 1 }, 
-                    { kode: "LIN-SB-001", qty: 1 }, 
-                    { kode: "LIN-SLM-001", qty: 1 } 
-                ] 
-            },
-            { 
-                id: "SET-002", 
-                nama: "Set Operasi Mayor", 
-                items: [ 
-                    { kode: "LIN-JDK-001", qty: 3 }, 
-                    { kode: "LIN-DKN-001", qty: 5 },
-                    { kode: "LIN-LKN-001", qty: 2 }
-                ] 
-            }
+            { id: "SET-001", nama: "Set Bed Rawat Inap", items: [{ kode: "LIN-SPR-001", qty: 1 }, { kode: "LIN-SB-001", qty: 1 }] },
+            { id: "SET-002", nama: "Set Operasi Mayor", items: [{ kode: "LIN-JDK-001", qty: 3 }, { kode: "LIN-DKN-001", qty: 5 }] }
         ];
 
-        const defaultRoomConfig = {
-            beds: 100,
-            bor: 70, // 70%
-            ops: 20, // per hari
-            buffer: 3 // cycles
+        const defaultConfig = { beds: 100, bor: 70, ops: 20, buffer: 3 };
+
+        // Global State
+        let appData = {
+            masterItems: [],
+            masterSets: [],
+            roomConfig: {}
         };
 
         // ==========================================
-        // 3. STATE MANAGEMENT
+        // 2. LOCAL STORAGE (DATA PERSISTENCE)
         // ==========================================
-        let masterItems = [];
-        let masterSets = [];
-        let roomConfig = {};
-        let opnameResults = {};
+        
+        function loadData() {
+            // Coba ambil dari LocalStorage dulu
+            const storedData = localStorage.getItem('linenRS_Data');
+            if (storedData) {
+                appData = JSON.parse(storedData);
+                initUI();
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast("✅ Data dimuat dari Lokal (Tersimpan)");
+                return;
+            }
+
+            // Jika tidak ada, coba ambil dari Cloud
+            loadFromCloud();
+        }
+
+        function saveData(mode = 'local') {
+            // Selalu simpan ke LocalStorage (Cepat & Anti-Hilang)
+            localStorage.setItem('linenRS_Data', JSON.stringify(appData));
+            console.log("Data tersimpan ke LocalStorage.");
+
+            // Jika mode cloud, kirim ke server (Async)
+            if (mode === 'cloud') {
+                saveToCloud();
+            } else {
+                showToast("💾 Data tersimpan (Lokal)");
+            }
+        }
 
         // ==========================================
-        // 4. CLOUD FUNCTIONS (FIXED VERSION - JSONP)
+        // 3. CLOUD SYNC (OPTIONAL)
         // ==========================================
         
         function loadFromCloud() {
-            console.log("Menghubungkan ke Google Sheets...");
             const callbackName = 'cb_' + Math.floor(Math.random() * 1000000);
             const url = `${BASE_URL}?action=getData&callback=${callbackName}`;
-
             const script = document.createElement('script');
             script.src = url;
             
-            // Fallback jika script gagal dimuat (misal internet mati)
             script.onerror = function() {
-                console.error("Script gagal dimuat.");
-                handleConnectionError(true);
+                // Jika gagal koneksi ke cloud, pakai default
+                console.error("Cloud connection failed. Using defaults.");
+                appData.masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
+                appData.masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
+                appData.roomConfig = JSON.parse(JSON.stringify(defaultConfig));
+                initUI();
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast("⚠️ Offline: Menggunakan Data Default");
             };
 
             document.body.appendChild(script);
@@ -534,89 +460,60 @@
             window[callbackName] = function(response) {
                 document.body.removeChild(script);
                 delete window[callbackName];
-
                 try {
                     if (response && response.status === 'success') {
                         const d = response.data;
-                        if (d.masterItems) masterItems = d.masterItems;
-                        if (d.masterSets) masterSets = d.masterSets;
-                        if (d.roomConfig) roomConfig = d.roomConfig;
-                        if (d.opnameResults) opnameResults = d.opnameResults;
-
-                        // Fallback jika kosong
-                        if (!masterItems || masterItems.length === 0) masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
-                        if (!masterSets || masterSets.length === 0) masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
-                        if (!roomConfig || !roomConfig.beds) roomConfig = defaultRoomConfig;
-
+                        if (d.masterItems && d.masterItems.length > 0) appData.masterItems = d.masterItems;
+                        if (d.masterSets && d.masterSets.length > 0) appData.masterSets = d.masterSets;
+                        if (d.roomConfig && d.roomConfig.beds) appData.roomConfig = d.roomConfig;
+                        
+                        // Sinkronkan ke LocalStorage agar next load cepat
+                        localStorage.setItem('linenRS_Data', JSON.stringify(appData));
+                        
                         initUI();
-                        hideLoading();
-                        showToast("✅ Data Berhasil Dimuat!");
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        showToast("✅ Data dimuat dari Google Sheets!");
                     } else {
-                        throw new Error("Format data salah.");
+                        throw new Error("Format salah");
                     }
                 } catch (e) {
-                    console.error(e);
-                    handleConnectionError(false);
+                    appData.masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
+                    appData.masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
+                    appData.roomConfig = JSON.parse(JSON.stringify(defaultConfig));
+                    initUI();
+                    document.getElementById('loadingOverlay').style.display = 'none';
                 }
             };
         }
 
         function saveToCloud() {
-            const payload = { 
-                action: "saveData",
-                masterItems: masterItems,
-                masterSets: masterSets,
-                roomConfig: roomConfig,
-                opnameResults: opnameResults
-            };
-
             fetch(BASE_URL, {
-                method: 'POST',
-                mode: 'no-cors',
+                method: 'POST', mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(() => showToast("💾 Perubahan tersimpan di Cloud."))
-            .catch(err => {
-                console.error(err);
-                showToast("⚠️ Gagal menyimpan ke Cloud.");
-            });
+                body: JSON.stringify({
+                    action: "saveData",
+                    masterItems: appData.masterItems,
+                    masterSets: appData.masterSets,
+                    roomConfig: appData.roomConfig
+                })
+            }).then(() => {
+                // Sukses tanpa response body (no-cors)
+                console.log("Synced to cloud");
+            }).catch(e => console.error("Sync error", e));
         }
 
-        function handleConnectionError(isNetworkError) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            // Jika error jaringan parah, gunakan default
-            if (isNetworkError) {
-                masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
-                masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
-                roomConfig = defaultRoomConfig;
-                initUI();
-                showToast("⚠️ Mode Offline: Menggunakan Data Default");
-            } else {
-                alert("Terjadi kesalahan saat membaca data dari server.");
-            }
-        }
-
-        function hideLoading() {
-            const loader = document.getElementById('loadingOverlay');
-            loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; }, 300);
-        }
-
-        // Init
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('opnameDate').valueAsDate = new Date();
-            // Timeout sedikit untuk memastikan UI siap
-            setTimeout(() => loadFromCloud(), 500);
+            loadData();
         });
 
         // ==========================================
-        // 5. CORE LOGIC: AUTO CODE & SETS
+        // 4. CORE LOGIC
         // ==========================================
-
+        
         function generateAutoCode(category) {
             const catPrefix = category.toUpperCase();
-            const itemsInCat = masterItems.filter(i => i.kode.startsWith(`LIN-${catPrefix}-`));
+            const itemsInCat = appData.masterItems.filter(i => i.kode.startsWith(`LIN-${catPrefix}-`));
             let maxNum = 0;
             itemsInCat.forEach(i => {
                 const parts = i.kode.split('-');
@@ -631,17 +528,23 @@
         }
 
         // ==========================================
-        // 6. UI HANDLERS
+        // 5. UI FUNCTIONS
         // ==========================================
+
         function switchTab(tabId) {
             document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + tabId).classList.add('active');
             event.target.classList.add('active');
 
-            if (tabId === 'opname') renderOpnameTable();
             if (tabId === 'item') renderMasterItemTable();
             if (tabId === 'set') renderMasterSetTable();
+        }
+
+        function initUI() {
+            renderRoomConfig();
+            renderMasterItemTable();
+            renderMasterSetTable();
         }
 
         function openModal(type, id = null) {
@@ -651,19 +554,15 @@
                 document.getElementById('itemForm').reset();
                 
                 if (id) {
-                    const item = masterItems.find(i => i.kode === id);
-                    if (!item) return;
+                    const item = appData.masterItems.find(i => i.kode === id);
                     title.textContent = "Edit Item Satuan";
                     document.getElementById('editIndex').value = id;
                     document.getElementById('inpKode').value = item.kode;
                     document.getElementById('inpKategori').value = item.kategori;
                     document.getElementById('inpNama').value = item.nama;
-                    document.getElementById('inpUkuran').value = item.ukuran;
-                    document.getElementById('inpWarna').value = item.warna;
                     document.getElementById('inpStokAwal').value = item.stokAwal;
+                    document.getElementById('inpStokRusak').value = item.stokRusak || 0;
                     document.getElementById('inpHarga').value = item.harga;
-                    document.getElementById('inpBatch').value = item.batch || "";
-                    document.getElementById('inpKondisi').value = item.kondisi || "Baik";
                     document.getElementById('inpRotasi').value = item.rotasi || 1.0;
                 } else {
                     title.textContent = "Tambah Item Baru (Auto Code)";
@@ -680,8 +579,7 @@
                 currentSetComposition = [];
 
                 if (id) {
-                    const set = masterSets.find(s => s.id === id);
-                    if (!set) return;
+                    const set = appData.masterSets.find(s => s.id === id);
                     title.textContent = "Edit Set Komposisi";
                     document.getElementById('editSetIndex').value = id;
                     document.getElementById('inpSetNama').value = set.nama;
@@ -701,22 +599,16 @@
             document.getElementById(modalId).classList.remove('open');
         }
 
-        function initUI() {
-            renderRoomConfig();
-            renderMasterItemTable();
-            renderMasterSetTable();
-            renderOpnameTable();
-        }
+        // ==========================================
+        // 6. MASTER ITEM & SET
+        // ==========================================
 
-        // ==========================================
-        // 7. MASTER ITEM LOGIC
-        // ==========================================
         function renderMasterItemTable() {
             const key = document.getElementById('masterSearch').value.toLowerCase();
             const tbody = document.getElementById('masterBody');
             tbody.innerHTML = '';
 
-            masterItems.forEach(item => {
+            appData.masterItems.forEach(item => {
                 if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key)) return;
 
                 const tr = document.createElement('tr');
@@ -724,12 +616,9 @@
                     <td class="text-mono" style="color:var(--primary); font-weight:600">${item.kode}</td>
                     <td style="font-weight:500">${item.nama}</td>
                     <td><span class="badge status-info">${item.kategori}</span></td>
-                    <td class="col-center" style="font-weight:700">${item.stokAwal}</td>
-                    <td style="font-size:0.85rem; color:var(--text-secondary)">${item.ukuran} / ${item.warna}</td>
-                    <td style="font-size:0.85rem">
-                        <div><strong>${item.batch || '-'}</strong></div>
-                        <div style="color:var(--text-tertiary)">${item.kondisi || 'Baik'}</div>
-                    </td>
+                    <td class="col-center" style="font-weight:700; color:var(--success)">${item.stokAwal}</td>
+                    <td class="col-center" style="font-weight:700; color:var(--danger)">${item.stokRusak || 0}</td>
+                    <td class="col-center">${(item.stokAwal + (item.stokRusak||0))}</td>
                     <td class="col-right">${formatRupiah(item.harga)}</td>
                     <td>
                         <button class="btn btn-sm btn-secondary" onclick="openModal('item', '${item.kode}')">✏️</button>
@@ -744,7 +633,6 @@
             e.preventDefault();
             const editCode = document.getElementById('editIndex').value;
             const kategori = document.getElementById('inpKategori').value.trim().toUpperCase();
-            const nama = document.getElementById('inpNama').value.trim();
             
             let kode;
             if (editCode) {
@@ -756,51 +644,44 @@
             const newItem = {
                 kode,
                 kategori,
-                nama,
-                ukuran: document.getElementById('inpUkuran').value,
-                warna: document.getElementById('inpWarna').value,
+                nama: document.getElementById('inpNama').value,
                 stokAwal: parseInt(document.getElementById('inpStokAwal').value) || 0,
+                stokRusak: parseInt(document.getElementById('inpStokRusak').value) || 0,
                 harga: parseInt(document.getElementById('inpHarga').value) || 0,
-                batch: document.getElementById('inpBatch').value,
-                kondisi: document.getElementById('inpKondisi').value,
-                rotasi: parseFloat(document.getElementById('inpRotasi').value) || 1.0,
-                catatan: document.getElementById('inpCatatan') ? document.getElementById('inpCatatan').value : "" 
+                rotasi: parseFloat(document.getElementById('inpRotasi').value) || 1.0
             };
 
             if (editCode) {
-                const idx = masterItems.findIndex(i => i.kode === editCode);
-                if (idx !== -1) masterItems[idx] = newItem;
-                showToast("Item diperbarui.");
+                const idx = appData.masterItems.findIndex(i => i.kode === editCode);
+                if (idx !== -1) appData.masterItems[idx] = newItem;
             } else {
-                masterItems.push(newItem);
-                showToast(`Item baru ditambahkan: ${kode}`);
+                appData.masterItems.push(newItem);
             }
 
-            saveToCloud();
+            // Cek mode simpan
+            const mode = document.getElementById('saveMode').value;
+            saveData(mode);
+            
             renderMasterItemTable();
-            renderOpnameTable();
             closeModal('itemModal');
+            showToast("Item tersimpan.");
         }
 
         function deleteItem(kode) {
             if(confirm(`Hapus item ${kode}?`)) {
-                masterItems = masterItems.filter(i => i.kode !== kode);
-                delete opnameResults[kode];
-                saveToCloud();
+                appData.masterItems = appData.masterItems.filter(i => i.kode !== kode);
+                saveData(document.getElementById('saveMode').value);
                 renderMasterItemTable();
-                showToast("Item dihapus.");
             }
         }
 
-        // ==========================================
-        // 8. MASTER SET LOGIC
-        // ==========================================
+        // --- Master Set Logic ---
         let currentSetComposition = [];
 
         function populateSetSelectOptions() {
             const sel = document.getElementById('setCompositionSelect');
             sel.innerHTML = '<option value="">Pilih Item...</option>';
-            masterItems.forEach(i => {
+            appData.masterItems.forEach(i => {
                 const opt = document.createElement('option');
                 opt.value = i.kode;
                 opt.textContent = `${i.kode} - ${i.nama}`;
@@ -811,7 +692,6 @@
         function addItemToSetComposition() {
             const kode = document.getElementById('setCompositionSelect').value;
             const qty = parseInt(document.getElementById('setCompositionQty').value);
-            
             if (!kode || !qty) return alert("Pilih item dan jumlah.");
             
             const existing = currentSetComposition.find(i => i.kode === kode);
@@ -836,9 +716,8 @@
             }
 
             currentSetComposition.forEach((comp, index) => {
-                const item = masterItems.find(i => i.kode === comp.kode);
+                const item = appData.masterItems.find(i => i.kode === comp.kode);
                 const itemName = item ? item.nama : comp.kode;
-                
                 const div = document.createElement('div');
                 div.className = 'set-item-row';
                 div.innerHTML = `
@@ -859,11 +738,10 @@
             const tbody = document.getElementById('setBody');
             tbody.innerHTML = '';
             
-            masterSets.forEach(set => {
+            appData.masterSets.forEach(set => {
                 const tr = document.createElement('tr');
-                
                 const summary = set.items.map(i => {
-                    const item = masterItems.find(x => x.kode === i.kode);
+                    const item = appData.masterItems.find(x => x.kode === i.kode);
                     return `${item ? item.nama : i.kode} (${i.qty})`;
                 }).join(', ');
 
@@ -894,212 +772,121 @@
             };
 
             if (editId) {
-                const idx = masterSets.findIndex(s => s.id === editId);
-                if (idx !== -1) masterSets[idx] = newSet;
+                const idx = appData.masterSets.findIndex(s => s.id === editId);
+                if (idx !== -1) appData.masterSets[idx] = newSet;
             } else {
-                masterSets.push(newSet);
+                appData.masterSets.push(newSet);
             }
 
-            saveToCloud();
+            saveData(document.getElementById('saveMode').value);
             renderMasterSetTable();
             closeModal('setModal');
-            showToast("Master Set disimpan.");
+            showToast("Master Set tersimpan.");
         }
 
         function deleteSet(id) {
             if(confirm("Hapus set ini?")) {
-                masterSets = masterSets.filter(s => s.id !== id);
-                saveToCloud();
+                appData.masterSets = appData.masterSets.filter(s => s.id !== id);
+                saveData(document.getElementById('saveMode').value);
                 renderMasterSetTable();
             }
         }
 
         // ==========================================
-        // 9. ROOM CONFIG
+        // 7. CONFIG & ANALISA
         // ==========================================
         function renderRoomConfig() {
-            document.getElementById('configBeds').value = roomConfig.beds;
-            document.getElementById('configBOR').value = roomConfig.bor;
-            document.getElementById('configOps').value = roomConfig.ops;
-            document.getElementById('configBuffer').value = roomConfig.buffer;
+            if (!appData.roomConfig.beds) appData.roomConfig = JSON.parse(JSON.stringify(defaultConfig));
+            document.getElementById('configBeds').value = appData.roomConfig.beds;
+            document.getElementById('configBOR').value = appData.roomConfig.bor;
+            document.getElementById('configOps').value = appData.roomConfig.ops;
+            document.getElementById('configBuffer').value = appData.roomConfig.buffer;
         }
 
         function saveRoomConfig() {
-            roomConfig.beds = parseInt(document.getElementById('configBeds').value);
-            roomConfig.bor = parseInt(document.getElementById('configBOR').value);
-            roomConfig.ops = parseInt(document.getElementById('configOps').value);
-            roomConfig.buffer = parseInt(document.getElementById('configBuffer').value);
-            saveToCloud();
-            showToast("Konfigurasi ruangan disimpan.");
+            appData.roomConfig.beds = parseInt(document.getElementById('configBeds').value);
+            appData.roomConfig.bor = parseInt(document.getElementById('configBOR').value);
+            appData.roomConfig.ops = parseInt(document.getElementById('configOps').value);
+            appData.roomConfig.buffer = parseInt(document.getElementById('configBuffer').value);
+            saveData(document.getElementById('saveMode').value);
+            showToast("Konfigurasi disimpan.");
         }
 
-        // ==========================================
-        // 10. OPNAME & FINALIZE LOGIC
-        // ==========================================
-        
-        function renderOpnameTable() {
-            const key = document.getElementById('opSearch').value.toLowerCase();
-            const tbody = document.getElementById('opBody');
-            tbody.innerHTML = '';
-
-            masterItems.forEach(item => {
-                if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key)) return;
-
-                const fisik = opnameResults[item.kode] !== undefined ? opnameResults[item.kode] : "";
-                const selisih = (fisik !== "" ? parseInt(fisik) : 0) - item.stokAwal;
-                
-                let badge = '', color = '';
-                if(selisih === 0 && fisik !== "") { badge = 'Sesuai'; color='status-ok'; }
-                else if(selisih > 0) { badge = 'Lebih'; color='status-warning'; }
-                else if (fisik === "") { badge = '-'; color='status-info'; }
-                else { badge = 'Kurang'; color='status-danger'; }
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="text-mono">${item.kode}</td>
-                    <td style="font-weight:500">${item.nama}</td>
-                    <td class="col-center"><b>${item.stokAwal}</b></td>
-                    <td class="col-center" style="background:var(--primary-light)">
-                        <input type="number" placeholder="-" value="${fisik}" onchange="updateOpname('${item.kode}', this.value)">
-                    </td>
-                    <td class="col-center" style="font-weight:700; color:${selisih < 0 ? 'var(--danger)' : 'var(--text-secondary)'}">${fisik !== "" ? selisih : "-"}</td>
-                    <td><span class="badge ${color}">${badge}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function updateOpname(kode, val) {
-            if (val === "") delete opnameResults[kode];
-            else opnameResults[kode] = parseInt(val);
-            saveToCloud(); 
-            renderOpnameTable(); 
-        }
-
-        function resetOpname() {
-            if(confirm("Reset semua input fisik?")) {
-                opnameResults = {};
-                saveToCloud();
-                renderOpnameTable();
-            }
-        }
-
-        function finalizeOpname() {
-            const hasInput = Object.keys(opnameResults).length > 0;
-            if (!hasInput) {
-                alert("Belum ada input stok fisik yang diisi.");
-                return;
-            }
-
-            if(confirm("Apakah Anda yakin ingin memperbarui Stok Master berdasarkan hasil hitungan fisik ini?\n\nStok Lama akan ditimpa dengan Stok Fisik yang Anda input.")) {
-                let updatedCount = 0;
-                
-                masterItems.forEach(item => {
-                    const fisik = opnameResults[item.kode];
-                    if (fisik !== undefined && fisik !== "") {
-                        item.stokAwal = parseInt(fisik);
-                        updatedCount++;
-                    }
-                });
-
-                opnameResults = {};
-                
-                saveToCloud();
-                renderMasterItemTable();
-                renderOpnameTable();
-                showToast(`Berhasil! ${updatedCount} item stoknya diperbarui.`);
-            }
-        }
-
-        // ==========================================
-        // 11. ANALISA KEBUTUHAN
-        // ==========================================
         function runAnalysis() {
             const tbody = document.getElementById('anBody');
             tbody.innerHTML = '';
             
             const needsMap = {}; 
-
-            const activeBeds = Math.floor(roomConfig.beds * (roomConfig.bor / 100));
-            const buffer = roomConfig.buffer;
+            const activeBeds = Math.floor(appData.roomConfig.beds * (appData.roomConfig.bor / 100));
+            const buffer = appData.roomConfig.buffer;
             
-            masterItems.forEach(item => {
+            // 1. Hitung kebutuhan dari Rawat Inap (Berdasarkan Item)
+            appData.masterItems.forEach(item => {
                 const rotation = item.rotasi || 1.0;
                 const neededPerCycle = activeBeds * rotation;
                 const totalNeeded = Math.ceil(neededPerCycle * buffer);
                 needsMap[item.kode] = totalNeeded;
             });
 
-            const opsDaily = roomConfig.ops;
-            masterSets.forEach(set => {
+            // 2. Hitung kebutuhan dari Operasi (Berdasarkan SET)
+            // INI BAGIAN YANG DIKOREKSI: Set Composition sekarang dihitung!
+            const opsDaily = appData.roomConfig.ops;
+            appData.masterSets.forEach(set => {
                 set.items.forEach(comp => {
                     const totalOpsNeed = opsDaily * buffer * comp.qty;
-                    if (needsMap[comp.kode]) needsMap[comp.kode] += totalOpsNeed;
-                    else needsMap[comp.kode] = totalOpsNeed;
+                    if (needsMap[comp.kode]) {
+                        needsMap[comp.kode] += totalOpsNeed; // Tambah ke kebutuhan item existing
+                    } else {
+                        needsMap[comp.kode] = totalOpsNeed; // Buat baru jika belum ada
+                    }
                 });
             });
 
-            let deficitCount = 0;
-            let deficitCost = 0;
-            let surplusCount = 0;
+            let totalDamaged = 0;
+            let replacementCost = 0;
 
-            masterItems.forEach(item => {
-                const currentStock = item.stokAwal;
+            appData.masterItems.forEach(item => {
+                const goodStock = item.stokAwal;
+                const damagedStock = item.stokRusak || 0;
                 const needed = needsMap[item.kode] || 0;
-                const diff = currentStock - needed;
+                
+                // Selisih berdasarkan stok BAIK saja
+                const diff = goodStock - needed;
 
-                if (diff < 0) {
-                    deficitCount++;
-                    deficitCost += (Math.abs(diff) * item.harga);
-                } else if (diff > 0) {
-                    surplusCount++;
-                }
+                totalDamaged += damagedStock;
+                replacementCost += (damagedStock * item.harga);
 
                 const tr = document.createElement('tr');
                 let statusBadge = '', statusColor = '';
+                
+                // Logika Status
                 if (diff < 0) { statusBadge = 'DEFISIT'; statusColor = 'status-danger'; }
                 else if (diff > 0) { statusBadge = 'SURPLUS'; statusColor = 'status-ok'; }
                 else { statusBadge = 'AMAN'; statusColor = 'status-info'; }
+
+                // Highlight jika ada barang rusak
+                const damagedStyle = damagedStock > 0 ? 'color:var(--danger); font-weight:bold;' : 'color:var(--text-secondary)';
 
                 tr.innerHTML = `
                     <td><span class="badge ${statusColor}">${statusBadge}</span></td>
                     <td class="text-mono">${item.kode}</td>
                     <td>${item.nama}</td>
-                    <td class="col-center"><b>${currentStock}</b></td>
+                    <td class="col-center"><b>${goodStock}</b></td>
+                    <td class="col-center" style="${damagedStyle}">${damagedStock}</td>
                     <td class="col-center" style="color:var(--primary-dark); font-weight:700">${needed}</td>
                     <td class="col-center" style="font-weight:700; color:${diff < 0 ? 'var(--danger)' : 'var(--success)'}">${diff}</td>
-                    <td class="col-right">${diff < 0 ? formatRupiah(Math.abs(diff)*item.harga) : '-'}</td>
+                    <td class="col-right">${damagedStock > 0 ? formatRupiah(damagedStock*item.harga) : '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('an-deficitCount').innerText = deficitCount;
-            document.getElementById('an-surplusCount').innerText = surplusCount;
-            document.getElementById('an-deficitCost').innerText = formatRupiah(deficitCost);
+            document.getElementById('an-damagedCount').innerText = totalDamaged;
+            document.getElementById('an-replacementCost').innerText = formatRupiah(replacementCost);
         }
 
-        function exportOpnameExcel() {
-            const ws = XLSX.utils.json_to_sheet(masterItems.map(i => ({
-                Kode: i.kode, Nama: i.nama, Kategori: i.kategori, StokSistem: i.stokAwal
-            })));
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Master");
-            XLSX.writeFile(wb, "Linen_Master.xlsx");
-        }
-
-        function exportAnalysisExcel() {
-            // Simple implementation for export analysis
-            const data = [];
-            document.querySelectorAll('#anBody tr').forEach(tr => {
-                const row = [];
-                tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
-                if(row.length > 0) data.push(row);
-            });
-            const ws = XLSX.utils.aoa_to_sheet([['Status','Kode','Nama','Stok','Kebutuhan','Selisih','Biaya'], ...data]);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Analisa");
-            XLSX.writeFile(wb, "Analisa_Linen.xlsx");
-        }
-
-        // Utils
+        // ==========================================
+        // 8. UTILS & EXPORT
+        // ==========================================
         function formatRupiah(num) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         }
@@ -1111,9 +898,22 @@
         }
 
         function downloadExcel() {
-            const ws = XLSX.utils.json_to_sheet(masterItems);
+            const ws = XLSX.utils.json_to_sheet(appData.masterItems);
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Linen");
             XLSX.writeFile(wb, "LinenData.xlsx");
+        }
+
+        function exportAnalysisExcel() {
+            runAnalysis(); // Ensure data is fresh
+            const data = [];
+            document.querySelectorAll('#anBody tr').forEach(tr => {
+                const row = [];
+                tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
+                if(row.length > 0) data.push(row);
+            });
+            const ws = XLSX.utils.aoa_to_sheet([['Status','Kode','Nama','Stok Baik','Stok Rusak','Kebutuhan','Selisih','Biaya'], ...data]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Analisa");
+            XLSX.writeFile(wb, "Analisa_Linen.xlsx");
         }
     </script>
 </body>
