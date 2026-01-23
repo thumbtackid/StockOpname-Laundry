@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V2.3 Final)</title>
+    <title>Sistem Linen RS Charlie (V3.0 Manual Set)</title>
     
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -112,11 +112,6 @@
         .form-group small { font-size: 0.75rem; color: var(--text-tertiary); }
         .readonly-field { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
 
-        /* Set Composition Style */
-        .set-item-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px; background: #f8fafc; max-height: 200px; overflow-y: auto; }
-        .set-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 6px; border: 1px solid var(--border-light); }
-        .set-item-row span { font-size: 0.85rem; }
-
         /* Toast */
         #toast { visibility: hidden; min-width: 300px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 8px; padding: 12px 20px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
         #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -136,7 +131,7 @@
     <!-- Loading Screen -->
     <div id="loadingOverlay">
         <div class="spinner"></div>
-        <h3 style="color:var(--primary);">Memuat Data Sistem...</h3>
+        <h3 style="color:var(--primary);">Memuat Sistem...</h3>
     </div>
 
     <div class="app-container">
@@ -173,7 +168,7 @@
                             
                             <div class="form-group">
                                 <label>Tipe</label>
-                                <select id="inpTipe" onchange="toggleCompositionInput()">
+                                <select id="inpTipe" onchange="toggleSetInput()">
                                     <option value="item">Item Satuan</option>
                                     <option value="set">Set (Paket)</option>
                                 </select>
@@ -181,7 +176,7 @@
                             <div class="form-group">
                                 <label>Harga Satuan (Rp)</label>
                                 <input type="number" id="inpHarga" min="0" required>
-                                <small>Untuk Set: Ini adalah harga per KOMPONEN utamanya (estimasi).</small>
+                                <small>Harga per unit (untuk Set ini estimasi rata-rata).</small>
                             </div>
 
                             <div class="form-group full-width" id="sectionRotasi">
@@ -190,19 +185,11 @@
                                 <small>Default 1.0. Gunakan ini untuk analisa kebutuhan harian.</small>
                             </div>
 
-                            <!-- Bagian Komposisi Set (Muncul jika Tipe = Set) -->
-                            <div class="form-group full-width" id="sectionComposition" style="display:none; border: 1px solid var(--border-light); padding:15px; border-radius:8px; background:#f8fafc;">
-                                <label style="color:var(--primary-dark); margin-bottom:10px; display:block;">Komposisi Set</label>
-                                <div style="display:flex; gap:10px; margin-bottom:10px;">
-                                    <select id="setCompositionSelect" style="flex-grow:1;">
-                                        <option value="">Pilih Item Komponen...</option>
-                                    </select>
-                                    <input type="number" id="setCompositionQty" placeholder="Jml" style="width:80px;" min="1">
-                                    <button type="button" class="btn btn-sm btn-secondary" onclick="addItemToSetComposition()">+ Tambah</button>
-                                </div>
-                                <div id="setCompositionList" class="set-item-list">
-                                    <div style="text-align:center; color:#94a3b8; font-size:0.8rem;">Belum ada item di dalam set.</div>
-                                </div>
+                            <!-- Bagian Komposisi Set (Input Manual) -->
+                            <div class="form-group full-width" id="sectionSetInput" style="display:none; border: 1px solid var(--border-light); padding:15px; border-radius:8px; background:#f8fafc;">
+                                <label style="color:var(--primary-dark); margin-bottom:5px; display:block;">Isi Komposisi Set (Manual)</label>
+                                <textarea id="inpSetKomposisi" rows="3" placeholder="Tulis nama item, pisahkan dengan koma.&#10;Contoh: Sprei 180, Sarung Bantal, Selimut"></textarea>
+                                <small style="display:block; margin-top:5px;">*Sistem akan otomatis mencari stok item berdasarkan nama yang Anda tulis.</small>
                             </div>
                         </div>
                     </form>
@@ -214,27 +201,11 @@
             </div>
         </div>
 
-        <!-- Modal Lihat Komposisi (Read Only) -->
-        <div id="viewSetModal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="viewSetTitle">Detail Komposisi Set</h2>
-                    <button class="close-modal" onclick="closeModal('viewSetModal')">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div id="viewSetContent" style="display: flex; flex-direction: column; gap: 10px;"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="closeModal('viewSetModal')">Tutup</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Header -->
         <header>
             <div class="brand">
                 <h1>Sistem Linen RS Charlie</h1>
-                <p>Integrated Item & Set Management V2.3</p>
+                <p>Integrated Item & Set Management V3.0 (Manual Input)</p>
             </div>
             <div class="meta-info">
                 <label>
@@ -282,8 +253,7 @@
                 <h3 style="font-size:1rem; color:var(--warning-text);">Input Kondisi Fisik (Rusak/Hilang)</h3>
                 <p style="font-size:0.85rem; color:var(--text-secondary);">
                     1. Input jumlah barang yang <strong>RUSAK, HILANG, atau AFKIR</strong>.<br>
-                    2. Input ini akan otomatis mengurangi Stok Baik saat difinalisasi.<br>
-                    3. <strong>Catatan:</strong> Input fisik (Total Baik) tidak diperlukan jika fokus pada kerugian.
+                    2. Input ini akan otomatis mengurangi Stok Baik saat difinalisasi.
                 </p>
             </div>
 
@@ -291,7 +261,7 @@
                 <div class="search-box"><input type="text" id="opSearch" placeholder="🔍 Cari item..." oninput="renderOpnameTable()"></div>
                 <button class="btn btn-secondary" onclick="resetOpname()">↺ Reset Input</button>
                 <button class="btn btn-success" onclick="finalizeOpname()">✅ Finalisasi & Update Stok</button>
-                <button class="btn btn-primary" onclick="exportOpnameExcel()">📥 Export Laporan Kerugian</button>
+                <button class="btn btn-primary" onclick="exportOpnameExcel()">📥 Export Laporan</button>
             </div>
 
             <div class="table-container">
@@ -363,7 +333,7 @@
                 </div>
             </div>
             <div style="margin-top:12px; font-size:0.8rem; color:var(--text-tertiary);">
-                *Harga untuk Set dihitung otomatis berdasarkan jumlah komponennya.
+                *Harga untuk Set dihitung otomatis berdasarkan komponennya.
             </div>
         </section>
 
@@ -371,18 +341,16 @@
 
     <script>
         // ==========================================
-        // 1. CONFIG & STATE
+        // 1. CONFIG & DEFAULT DATA
         // ==========================================
-        const SCRIPT_ID = "AKfycbzMZr-e8m_2edwCsf1J-gGccCZaTNoYqZspI1o8gKrYa8IdFk_1p9CnbGpPs22xaQSUIw"; 
-        const BASE_URL = `https://script.google.com/macros/s/${SCRIPT_ID}/exec`;
-
         const defaultItems = [
-            { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", tipe: "item", stokAwal: 100, stokRusak: 0, harga: 85000, rotasi: 1.0, items: [] },
-            { kode: "LIN-SB-001", nama: "Sarung Bantal", kategori: "SB", tipe: "item", stokAwal: 120, stokRusak: 0, harga: 25000, rotasi: 1.0, items: [] },
-            { kode: "LIN-DKN-001", nama: "Duk Kecil", kategori: "DKN", tipe: "item", stokAwal: 200, stokRusak: 5, harga: 30000, rotasi: 2.0, items: [] },
-            { kode: "LIN-JDK-001", nama: "Jas Dokter", kategori: "JDK", tipe: "item", stokAwal: 30, stokRusak: 0, harga: 150000, rotasi: 3.0, items: [] },
-            { kode: "SET-001", nama: "Set Bed Rawat Inap", kategori: "SET", tipe: "set", stokAwal: 10, stokRusak: 0, harga: 0, rotasi: 1.0, items: [{ kode: "LIN-SPR-001", qty: 1 }, { kode: "LIN-SB-001", qty: 1 }] },
-            { kode: "SET-002", nama: "Set Operasi Mayor", kategori: "SET", tipe: "set", stokAwal: 5, stokRusak: 0, harga: 0, rotasi: 1.0, items: [{ kode: "LIN-JDK-001", qty: 3 }, { kode: "LIN-DKN-001", qty: 5 }] }
+            { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", tipe: "item", stokAwal: 100, stokRusak: 0, harga: 85000, rotasi: 1.0, komposisi: "" },
+            { kode: "LIN-SB-001", nama: "Sarung Bantal", kategori: "SB", tipe: "item", stokAwal: 120, stokRusak: 0, harga: 25000, rotasi: 1.0, komposisi: "" },
+            { kode: "LIN-DKN-001", nama: "Duk Kecil", kategori: "DKN", tipe: "item", stokAwal: 200, stokRusak: 5, harga: 30000, rotasi: 2.0, komposisi: "" },
+            { kode: "LIN-JDK-001", nama: "Jas Dokter", kategori: "JDK", tipe: "item", stokAwal: 30, stokRusak: 0, harga: 150000, rotasi: 3.0, komposisi: "" },
+            // Contoh Set dengan Input Manual
+            { kode: "SET-001", nama: "Set Bed Rawat Inap", kategori: "SET", tipe: "set", stokAwal: 10, stokRusak: 0, harga: 110000, rotasi: 1.0, komposisi: "Sprei Polos 180, Sarung Bantal" },
+            { kode: "SET-002", nama: "Set Operasi Mayor", kategori: "SET", tipe: "set", stokAwal: 5, stokRusak: 0, harga: 0, rotasi: 1.0, komposisi: "Jas Dokter, Duk Kecil" }
         ];
 
         const defaultConfig = { beds: 100, bor: 70, ops: 20, buffer: 3 };
@@ -392,8 +360,7 @@
             config: {}
         };
 
-        let opnameResults = {}; // { kode: { rusak: 0, keterangan: '' } }
-        let currentSetComposition = [];
+        let opnameResults = {}; // { kode: { rusak: 0, ket: '' } }
 
         // ==========================================
         // 2. LOCAL STORAGE (PERSISTENCE)
@@ -401,24 +368,25 @@
         
         function loadData() {
             const storedData = localStorage.getItem('linenRS_Data');
+            
             if (storedData) {
-                appData = JSON.parse(storedData);
-                initUI();
-                document.getElementById('loadingOverlay').style.display = 'none';
-                showToast("✅ Data dimuat dari Lokal");
-                return;
+                const parsed = JSON.parse(storedData);
+                appData.items = parsed.items || [];
+                appData.config = parsed.config || JSON.parse(JSON.stringify(defaultConfig));
+            } else {
+                // Fallback Default jika pertama kali buka
+                appData.items = JSON.parse(JSON.stringify(defaultItems));
+                appData.config = JSON.parse(JSON.stringify(defaultConfig));
             }
-            // Fallback Default
-            appData.items = JSON.parse(JSON.stringify(defaultItems));
-            appData.config = JSON.parse(JSON.stringify(defaultConfig));
+
             initUI();
             document.getElementById('loadingOverlay').style.display = 'none';
-            showToast("✅ Menggunakan Data Default");
+            showToast("✅ Sistem Siap Digunakan");
         }
 
         function saveDataLocally() {
             localStorage.setItem('linenRS_Data', JSON.stringify(appData));
-            console.log("Data saved locally");
+            console.log("Data tersimpan ke LocalStorage");
         }
 
         function saveDataLocallyWithToast() {
@@ -469,7 +437,6 @@
             const modal = document.getElementById('itemModal');
             const title = document.getElementById('modalTitle');
             document.getElementById('itemForm').reset();
-            currentSetComposition = [];
             
             if (id) {
                 const item = appData.items.find(i => i.kode === id);
@@ -481,10 +448,7 @@
                 document.getElementById('inpTipe').value = item.tipe;
                 document.getElementById('inpHarga').value = item.harga || 0;
                 document.getElementById('inpRotasi').value = item.rotasi || 1.0;
-                
-                if (item.tipe === 'set') {
-                    currentSetComposition = JSON.parse(JSON.stringify(item.items || []));
-                }
+                document.getElementById('inpSetKomposisi').value = item.komposisi || "";
             } else {
                 title.textContent = "Tambah Baru";
                 document.getElementById('editIndex').value = "";
@@ -493,35 +457,31 @@
                 document.getElementById('inpTipe').value = "item";
             }
 
-            toggleCompositionInput();
-            if(document.getElementById('inpTipe').value === 'set') {
-                 populateSetSelectOptions();
-                 renderSetCompositionList();
-            }
+            toggleSetInput();
             modal.classList.add('open');
         }
 
-        function toggleCompositionInput() {
+        function toggleSetInput() {
             const tipe = document.getElementById('inpTipe').value;
-            const compSection = document.getElementById('sectionComposition');
+            const setInput = document.getElementById('sectionSetInput');
             const rotasiSection = document.getElementById('sectionRotasi');
             
             if (tipe === 'set') {
-                compSection.style.display = 'block';
+                setInput.style.display = 'block';
                 rotasiSection.style.display = 'none';
-                populateSetSelectOptions();
             } else {
-                compSection.style.display = 'none';
+                setInput.style.display = 'none';
                 rotasiSection.style.display = 'block';
             }
         }
 
         function closeModal(modalId) {
+            document.getElementById(modalId).classList.reduce
             document.getElementById(modalId).classList.remove('open');
         }
 
         // ==========================================
-        // 5. MASTER DATA (GABUNGAN ITEM & SET)
+        // 5. MASTER DATA (GABUNGAN)
         // ==========================================
 
         function renderMasterTable() {
@@ -537,23 +497,16 @@
                 // Badge Tipe
                 const tipeBadge = item.tipe === 'set' ? '<span class="badge status-warning">SET</span>' : '<span class="badge status-info">SATUAN</span>';
                 
-                // Tombol Aksi Khusus untuk SET
-                let actionButtons = `
+                // Tombol Aksi
+                const actionButtons = `
                     <button class="btn btn-sm btn-secondary" onclick="openModal('item', '${item.kode}')">✏️</button>
                     <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.kode}')">🗑️</button>
                 `;
-                if (item.tipe === 'set') {
-                    actionButtons = `
-                        <button class="btn btn-sm btn-info" onclick="viewSetComposition('${item.kode}')" style="background:#e0f2fe; color:#0369a1;">👁️ Isi</button>
-                        ${actionButtons}
-                    `;
-                }
 
-                // Harga Set dihitung real-time berdasarkan komponennya
+                // Harga (Jika Set, hitung manual jika komposisi ada, atau pakai harga input)
                 let displayPrice = formatRupiah(item.harga);
-                if(item.tipe === 'set' && item.items) {
-                    const setPrice = calculateSetPrice(item);
-                    displayPrice = formatRupiah(setPrice);
+                if(item.tipe === 'set') {
+                   displayPrice = formatRupiah(item.harga); // Harga satuan (estimasi)
                 }
 
                 tr.innerHTML = `
@@ -569,79 +522,6 @@
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function calculateSetPrice(setItem) {
-            let total = 0;
-            if(setItem.items) {
-                setItem.items.forEach(comp => {
-                    const compItem = appData.items.find(i => i.kode === comp.kode);
-                    if (compItem) {
-                        total += (compItem.harga * comp.qty);
-                    }
-                });
-            }
-            return total;
-        }
-
-        // --- Composition Logic ---
-        function populateSetSelectOptions() {
-            const sel = document.getElementById('setCompositionSelect');
-            sel.innerHTML = '<option value="">Pilih Item Komponen...</option>';
-            appData.items.forEach(i => {
-                // Hanya bisa memilih item satuan, bukan set lain (mencegah rekursi)
-                if (i.tipe !== 'set') {
-                    const opt = document.createElement('option');
-                    opt.value = i.kode;
-                    opt.textContent = `${i.kode} - ${i.nama}`;
-                    sel.appendChild(opt);
-                }
-            });
-        }
-
-        function addItemToSetComposition() {
-            const kode = document.getElementById('setCompositionSelect').value;
-            const qty = parseInt(document.getElementById('setCompositionQty').value);
-            if (!kode || !qty) return alert("Pilih item dan jumlah.");
-            
-            const existing = currentSetComposition.find(i => i.kode === kode);
-            if (existing) {
-                existing.qty += qty;
-            } else {
-                currentSetComposition.push({ kode, qty });
-            }
-            
-            renderSetCompositionList();
-            document.getElementById('setCompositionSelect').value = "";
-            document.getElementById('setCompositionQty').value = "";
-        }
-
-        function renderSetCompositionList() {
-            const container = document.getElementById('setCompositionList');
-            container.innerHTML = '';
-            
-            if (currentSetComposition.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem;">Belum ada item di dalam set.</div>';
-                return;
-            }
-
-            currentSetComposition.forEach((comp, index) => {
-                const item = appData.items.find(i => i.kode === comp.kode);
-                const itemName = item ? item.nama : comp.kode;
-                const div = document.createElement('div');
-                div.className = 'set-item-row';
-                div.innerHTML = `
-                    <span><strong>${itemName}</strong> <small>(${comp.kode})</small></span>
-                    <span style="font-weight:700; margin:0 10px;">x ${comp.qty}</span>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeFromSet(${index})">✕</button>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function removeFromSet(index) {
-            currentSetComposition.splice(index, 1);
-            renderSetCompositionList();
         }
 
         function saveDataItem(e) {
@@ -662,23 +542,19 @@
                 kategori,
                 nama: document.getElementById('inpNama').value,
                 tipe,
-                stokAwal: parseInt(document.getElementById('inpStokAwal')) || 0, // Tidak ada di form edit ini, ambil dari lama jika edit, else 0
-                stokRusak: parseInt(document.getElementById('inpStokRusak')) || 0,
+                stokAwal: 0, // Default 0 jika baru, akan diisi manual jika perlu
+                stokRusak: 0,
                 harga: parseInt(document.getElementById('inpHarga').value) || 0,
                 rotasi: parseFloat(document.getElementById('inpRotasi').value) || 1.0,
-                items: tipe === 'set' ? JSON.parse(JSON.stringify(currentSetComposition)) : []
+                komposisi: tipe === 'set' ? document.getElementById('inpSetKomposisi').value : ""
             };
-            
-            // Jika edit, pertahankan stok lama jika tidak ada input
-            if(editCode) {
+
+            if (editCode) {
                 const oldItem = appData.items.find(i => i.kode === editCode);
                 if(oldItem) {
                     newItem.stokAwal = oldItem.stokAwal;
                     newItem.stokRusak = oldItem.stokRusak;
                 }
-            }
-
-            if (editCode) {
                 const idx = appData.items.findIndex(i => i.kode === editCode);
                 if (idx !== -1) appData.items[idx] = newItem;
             } else {
@@ -698,39 +574,6 @@
             }
         }
 
-        function viewSetComposition(kode) {
-            const item = appData.items.find(i => i.kode === kode);
-            if(!item || item.tipe !== 'set') return;
-
-            const modal = document.getElementById('viewSetModal');
-            document.getElementById('viewSetTitle').textContent = `Isi Set: ${item.nama}`;
-            const content = document.getElementById('viewSetContent');
-            content.innerHTML = '';
-
-            let totalVal = 0;
-            item.items.forEach(comp => {
-                const compItem = appData.items.find(i => i.kode === comp.kode);
-                const name = compItem ? compItem.nama : comp.kode;
-                const price = compItem ? compItem.harga * comp.qty : 0;
-                totalVal += price;
-
-                const div = document.createElement('div');
-                div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.padding = '10px'; div.style.background = '#fff'; div.style.border = '1px solid #e2e8f0'; div.style.borderRadius = '6px';
-                div.innerHTML = `
-                    <span><strong>${name}</strong> <small>x${comp.qty}</small></span>
-                    <span style="color:var(--text-secondary)">${formatRupiah(price)}</span>
-                `;
-                content.appendChild(div);
-            });
-            
-            const totalDiv = document.createElement('div');
-            totalDiv.style.marginTop = '10px'; totalDiv.style.textAlign = 'right'; totalDiv.style.fontWeight = 'bold'; totalDiv.style.color = 'var(--primary-dark)';
-            totalDiv.innerText = `Total Estimasi: ${formatRupiah(totalVal)}`;
-            content.appendChild(totalDiv);
-
-            modal.classList.add('open');
-        }
-
         // ==========================================
         // 6. STOCK OPNAME (RUSAK/HILANG)
         // ==========================================
@@ -743,12 +586,8 @@
             appData.items.forEach(item => {
                 if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key)) return;
 
-                // Ambil data opname sementara
                 const opData = opnameResults[item.kode] || { rusak: 0, ket: '' };
-                
-                // Hitung Stok Akhir Sementara
                 const stokAkhir = item.stokAwal - opData.rusak;
-                const selisih = stokAkhir - item.stokAwal; // Selalu negatif atau nol jika input rusak
                 
                 let badge = '', color = '';
                 if (opData.rusak > 0) { badge = 'BERKURANG'; color='status-danger'; }
@@ -772,7 +611,6 @@
 
         function updateOpnameInput(kode, field, val) {
             if (!opnameResults[kode]) opnameResults[kode] = { rusak: 0, ket: '' };
-            
             if (field === 'rusak') {
                 opnameResults[kode].rusak = parseInt(val) || 0;
             } else {
@@ -801,9 +639,6 @@
                     const opData = opnameResults[item.kode];
                     if (opData && opData.rusak > 0) {
                         item.stokAwal -= opData.rusak;
-                        // Tambah ke stok rusak lama atau buat log terpisah (disini sederhana: kurangi stok baik)
-                        // Jika ingin menumpuk stokRusak, uncomment baris bawah:
-                        // item.stokRusak = (item.stokRusak || 0) + opData.rusak;
                         affectedCount++;
                     }
                 });
@@ -811,7 +646,7 @@
                 opnameResults = {};
                 saveDataLocallyWithToast();
                 renderOpnameTable();
-                renderMasterTable(); // Update master table juga
+                renderMasterTable(); 
                 showToast(`✅ Selesai! ${affectedCount} item stoknya diperbarui.`);
             }
         }
@@ -820,7 +655,10 @@
         // 7. CONFIG & ANALISA
         // ==========================================
         function renderRoomConfig() {
-            if (!appData.config.beds) appData.config = JSON.parse(JSON.stringify(defaultConfig));
+            // PASTIKAN CONFIG TERISI SEBELUM DIBACA
+            if (!appData.config || !appData.config.beds) {
+                appData.config = JSON.parse(JSON.stringify(defaultConfig));
+            }
             document.getElementById('configBeds').value = appData.config.beds;
             document.getElementById('configBOR').value = appData.config.bor;
             document.getElementById('configOps').value = appData.config.ops;
@@ -843,29 +681,37 @@
             const activeBeds = Math.floor(appData.config.beds * (appData.config.bor / 100));
             const buffer = appData.config.buffer;
             
-            // 1. Hitung kebutuhan dari Rawat Inap & Rotasi Item
-            appData.items.forEach(item => {
+            // 1. Hitung kebutuhan dasar dari Item Rawat Inap
+            appData.items.filter(i => i.tipe === 'item').forEach(item => {
                 const rotation = item.rotasi || 1.0;
                 const neededPerCycle = activeBeds * rotation;
                 const totalNeeded = Math.ceil(neededPerCycle * buffer);
                 needsMap[item.kode] = totalNeeded;
             });
 
-            // 2. Tambahkan kebutuhan dari Config Operasi (Untuk SET Operasi)
-            // Diasumsikan SET dengan kategori 'SET' atau nama 'Operasi' dihitung disini
-            // Secara default kita ambil semua SET kecuali Bed Rawat Inap untuk dihitung manual atau otomatis
-            // Disini kita hitung SEMUA item yang tipe = 'set'
-            
-            const opsDaily = appData.config.ops;
+            // 2. Hitung kebutuhan dari SET (Manual Text Parsing)
             appData.items.filter(i => i.tipe === 'set').forEach(setItem => {
-                setItem.items.forEach(comp => {
-                    const totalOpsNeed = opsDaily * buffer * comp.qty;
-                    if (needsMap[comp.kode]) {
-                        needsMap[comp.kode] += totalOpsNeed; 
-                    } else {
-                        needsMap[comp.kode] = totalOpsNeed;
-                    }
-                });
+                if (setItem.komposisi) {
+                    // Pecah string manual berdasarkan koma
+                    const comps = setItem.komposisi.split(',').map(s => s.trim()).filter(s => s !== "");
+                    
+                    comps.forEach(compName => {
+                        // Cari item yang namanya MIRIP dengan input manual
+                        const foundItem = appData.items.find(i => i.tipe === 'item' && i.nama.toLowerCase().includes(compName.toLowerCase()));
+                        
+                        if (foundItem) {
+                            // Tambahkan kebutuhan berdasarkan operasi harian
+                            // Asumsi: Set digunakan untuk operasi/kebutuhan khusus sesuai config.ops
+                            const totalOpsNeed = appData.config.ops * buffer;
+                            
+                            if (needsMap[foundItem.kode]) {
+                                needsMap[foundItem.kode] += totalOpsNeed;
+                            } else {
+                                needsMap[foundItem.kode] = totalOpsNeed;
+                            }
+                        }
+                    });
+                }
             });
 
             let totalDamaged = 0;
@@ -882,7 +728,7 @@
                 // Hitung Harga Total
                 let itemTotalPrice = item.harga;
                 if(item.tipe === 'set') {
-                    itemTotalPrice = calculateSetPrice(item);
+                    itemTotalPrice = item.harga; // Gunakan harga inputan
                 }
                 replacementCost += (damagedStock * itemTotalPrice);
 
@@ -926,7 +772,7 @@
 
         function downloadExcel() {
             const data = appData.items.map(i => ({
-                Kode: i.kode, Nama: i.nama, Tipe: i.tipe.toUpperCase(), Stok_Baik: i.stokAwal, Stok_Rusak: i.stokRusak, Harga_Satuan: i.harga
+                Kode: i.kode, Nama: i.nama, Tipe: i.tipe.toUpperCase(), Stok_Baik: i.stokAwal, Stok_Rusak: i.stokRusak, Harga: i.harga, Komposisi: i.komposisi
             }));
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "MasterLinen");
