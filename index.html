@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V2.0 Smart Set)</title>
+    <title>Sistem Linen RS Charlie (V2.0 Cloud Connected)</title>
     
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -124,11 +124,23 @@
         .set-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 4px; border: 1px solid var(--border-light); }
         .set-item-row span { font-size: 0.9rem; }
 
+        /* Loading Overlay */
+        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         @media (max-width: 1024px) { .app-container { max-width: 100%; } header { flex-direction: column; align-items: flex-start; } .meta-info { width: 100%; justify-content: space-between; } }
         @media (max-width: 768px) { body { padding: 12px; } .toolbar { flex-direction: column; align-items: stretch; } .form-grid { grid-template-columns: 1fr; } .btn { width: 100%; justify-content: center; } }
     </style>
 </head>
 <body>
+
+    <!-- Loading Screen -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <h3 style="color:var(--primary);">Menghubungkan ke Google Sheets...</h3>
+        <p style="color:var(--text-secondary); font-size:0.9rem;">Mohon tunggu sebentar</p>
+    </div>
 
     <div class="app-container">
         <!-- Notification Toast -->
@@ -259,7 +271,7 @@
         <header>
             <div class="brand">
                 <h1>Sistem Linen RS Charlie</h1>
-                <p>Smart Set Management & Auto-Code System V2.0</p>
+                <p>Smart Set Management & Auto-Code System V2.0 (Cloud)</p>
             </div>
             <div class="meta-info">
                 <label>
@@ -292,8 +304,7 @@
             <div class="toolbar">
                 <div class="search-box"><input type="text" id="masterSearch" placeholder="Cari kode atau nama..." oninput="renderMasterItemTable()"></div>
                 <button class="btn btn-primary" onclick="openModal('item')">➕ Tambah Item (Auto Code)</button>
-                <button class="btn btn-secondary" onclick="downloadBackup()">💾 Backup</button>
-                <label class="btn btn-secondary" style="cursor:pointer">📂 Restore <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreBackup(this)"></label>
+                <button class="btn btn-secondary" onclick="downloadExcel()">📥 Download Excel</button>
             </div>
 
             <div class="table-container">
@@ -438,7 +449,12 @@
 
     <script>
         // ==========================================
-        // 1. INITIAL DATA (NEW FORMAT)
+        // 1. SERVER URL CONFIGURATION
+        // ==========================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxYdyfrtex-6IphPyOzRAt-FjGKlQd2auGLsHmV2HIvkYOA1KsBaVbpNRfO0mk59zb-lg/exec"; 
+
+        // ==========================================
+        // 2. INITIAL DATA (NEW FORMAT)
         // ==========================================
         const defaultMasterItems = [
             { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", ukuran: "180x200", warna: "Putih", stokAwal: 150, harga: 85000, batch: "2023-A", rotasi: 1.0, kondisi: "Baik" },
@@ -478,53 +494,89 @@
         };
 
         // ==========================================
-        // 2. STATE MANAGEMENT
+        // 3. STATE MANAGEMENT
         // ==========================================
         let masterItems = [];
         let masterSets = [];
         let roomConfig = {};
         let opnameResults = {}; // { kode: stokFisik }
 
-        // LocalStorage
-        function saveToLocal() {
-            const data = { masterItems, masterSets, roomConfig, opnameResults };
-            localStorage.setItem('rs_charlie_linen_v2', JSON.stringify(data));
+        // ==========================================
+        // 4. CLOUD FUNCTIONS (LOAD & SAVE)
+        // ==========================================
+        
+        // --- LOAD DATA FROM CLOUD ---
+        async function loadFromCloud() {
+            try {
+                console.log("Memulai sinkronisasi data...");
+                
+                const [items, sets, config, opname] = await Promise.all([
+                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=masterItems`).then(r => r.json()),
+                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=masterSets`).then(r => r.json()),
+                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=config`).then(r => r.json()),
+                    fetch(`${GOOGLE_SCRIPT_URL}?sheet=opname`).then(r => r.json())
+                ]);
+
+                // Jika data cloud ada, pakai data cloud. Jika kosong, pakai default.
+                if (Array.isArray(items) && items.length > 0) masterItems = items;
+                else masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
+
+                if (Array.isArray(sets)) masterSets = sets;
+                else masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
+                
+                if (config && config.beds) roomConfig = config;
+                else roomConfig = JSON.parse(JSON.stringify(defaultRoomConfig));
+                
+                if (typeof opname === 'object') opnameResults = opname;
+
+                // Update UI
+                initUI();
+                
+                // Hide Loading
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast("Data berhasil dimuat dari Cloud!");
+
+            } catch (error) {
+                console.error("Gagal load data:", error);
+                // Fallback to default jika error
+                masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
+                masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
+                roomConfig = JSON.parse(JSON.stringify(defaultRoomConfig));
+                initUI();
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast("Gagal koneksi ke Cloud. Menggunakan data default.");
+            }
         }
 
-        function loadFromLocal() {
-            const saved = localStorage.getItem('rs_charlie_linen_v2');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    // Simple validation to prevent crashes if schema changes
-                    if (parsed.masterItems) masterItems = parsed.masterItems;
-                    if (parsed.masterSets) masterSets = parsed.masterSets;
-                    if (parsed.roomConfig) roomConfig = parsed.roomConfig;
-                    if (parsed.opnameResults) opnameResults = parsed.opnameResults;
-                    return true;
-                } catch (e) { console.error(e); return false; }
-            }
-            return false;
+        // --- SAVE DATA TO CLOUD ---
+        function saveToCloud() {
+            const payload = { masterItems, masterSets, roomConfig, opnameResults };
+            
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Penting untuk GAS
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                console.log("Data tersimpan ke Cloud.");
+                showToast("Tersimpan di Cloud!");
+            })
+            .catch(err => {
+                console.error("Gagal simpan:", err);
+                showToast("Gagal menyimpan ke Cloud!");
+            });
         }
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('opnameDate').valueAsDate = new Date();
-            const hasData = loadFromLocal();
-            if (!hasData) {
-                masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
-                masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
-                roomConfig = JSON.parse(JSON.stringify(defaultRoomConfig));
-            }
-
-            renderRoomConfig();
-            renderMasterItemTable();
-            renderMasterSetTable();
-            renderOpnameTable();
+            // Load from cloud instead of local storage
+            loadFromCloud();
         });
 
         // ==========================================
-        // 3. CORE LOGIC: AUTO CODE & SETS
+        // 5. CORE LOGIC: AUTO CODE & SETS
         // ==========================================
 
         function generateAutoCode(category) {
@@ -549,7 +601,7 @@
         }
 
         // ==========================================
-        // 4. UI HANDLERS
+        // 6. UI HANDLERS
         // ==========================================
         function switchTab(tabId) {
             document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
@@ -624,7 +676,7 @@
         }
 
         // ==========================================
-        // 5. MASTER ITEM LOGIC
+        // 7. MASTER ITEM LOGIC
         // ==========================================
         function renderMasterItemTable() {
             const key = document.getElementById('masterSearch').value.toLowerCase();
@@ -648,7 +700,7 @@
                     <td class="col-right">${formatRupiah(item.harga)}</td>
                     <td>
                         <button class="btn btn-sm btn-secondary" onclick="openModal('item', '${item.kode}')">✏️</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.keyCode}')">🗑️</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.kode}')">🗑️</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -691,7 +743,7 @@
                 showToast(`Item baru ditambahkan: ${kode}`);
             }
 
-            saveToLocal();
+            saveToCloud(); // CLOUD SAVE
             renderMasterItemTable();
             renderOpnameTable(); // Refresh opname if needed
             closeModal('itemModal');
@@ -701,14 +753,14 @@
             if(confirm(`Hapus item ${kode}?`)) {
                 masterItems = masterItems.filter(i => i.kode !== kode);
                 delete opnameResults[kode];
-                saveToLocal();
+                saveToCloud(); // CLOUD SAVE
                 renderMasterItemTable();
                 showToast("Item dihapus.");
             }
         }
 
         // ==========================================
-        // 6. MASTER SET LOGIC
+        // 8. MASTER SET LOGIC
         // ==========================================
         let currentSetComposition = [];
 
@@ -817,7 +869,7 @@
                 masterSets.push(newSet);
             }
 
-            saveToLocal();
+            saveToCloud(); // CLOUD SAVE
             renderMasterSetTable();
             closeModal('setModal');
             showToast("Master Set disimpan.");
@@ -826,13 +878,13 @@
         function deleteSet(id) {
             if(confirm("Hapus set ini?")) {
                 masterSets = masterSets.filter(s => s.id !== id);
-                saveToLocal();
+                saveToCloud(); // CLOUD SAVE
                 renderMasterSetTable();
             }
         }
 
         // ==========================================
-        // 7. ROOM CONFIG
+        // 9. ROOM CONFIG
         // ==========================================
         function renderRoomConfig() {
             document.getElementById('configBeds').value = roomConfig.beds;
@@ -846,12 +898,12 @@
             roomConfig.bor = parseInt(document.getElementById('configBOR').value);
             roomConfig.ops = parseInt(document.getElementById('configOps').value);
             roomConfig.buffer = parseInt(document.getElementById('configBuffer').value);
-            saveToLocal();
+            saveToCloud(); // CLOUD SAVE
             showToast("Konfigurasi ruangan disimpan.");
         }
 
         // ==========================================
-        // 8. OPNAME & ANALISA LOGIC
+        // 10. OPNAME & ANALISA LOGIC
         // ==========================================
         
         function renderOpnameTable() {
@@ -890,7 +942,7 @@
         function updateOpname(kode, val) {
             if (val === "") delete opnameResults[kode];
             else opnameResults[kode] = parseInt(val);
-            saveToLocal();
+            saveToCloud(); // CLOUD SAVE (Auto save saat input)
             renderOpnameTable(); 
         }
 
@@ -909,13 +961,13 @@
         function resetOpname() {
             if(confirm("Reset semua input fisik?")) {
                 opnameResults = {};
-                saveToLocal();
+                saveToCloud(); // CLOUD SAVE
                 renderOpnameTable();
             }
         }
 
         // ==========================================
-        // 9. ANALISA KEBUTUHAN (SMART)
+        // 11. ANALISA KEBUTUHAN (SMART)
         // ==========================================
         function runAnalysis() {
             const tbody = document.getElementById('anBody');
@@ -993,7 +1045,6 @@
         }
 
         function exportOpnameExcel() {
-            // Simplified export for brevity
             const ws = XLSX.utils.json_to_sheet(masterItems.map(i => ({
                 Kode: i.kode, Nama: i.nama, Kategori: i.kategori, StokSistem: i.stokAwal
             })));
@@ -1003,7 +1054,6 @@
 
         function exportAnalysisExcel() {
             runAnalysis(); // Ensure fresh calculation
-            // Re-implement logic to capture data for export (simplified)
             alert("Fitur export analisa segera hadir.");
         }
 
@@ -1012,42 +1062,23 @@
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
         }
 
+        function initUI() {
+            renderRoomConfig();
+            renderMasterItemTable();
+            renderMasterSetTable();
+            renderOpnameTable();
+        }
+
         function showToast(msg) {
             const x = document.getElementById("toast");
             x.innerText = msg; x.className = "show";
             setTimeout(() => x.className = x.className.replace("show", ""), 3000);
         }
 
-        // Backup / Restore
-        function downloadBackup() {
-            const data = { masterItems, masterSets, roomConfig, opnameResults };
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `LinenBackupV2_${new Date().toISOString().slice(0,10)}.json}`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        }
-
-        function restoreBackup(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if(parsed.masterItems && parsed.masterSets) {
-                        masterItems = parsed.masterItems;
-                        masterSets = parsed.masterSets;
-                        roomConfig = parsed.roomConfig || defaultRoomConfig;
-                        opnameResults = parsed.opnameResults || {};
-                        saveToLocal();
-                        location.reload();
-                    } else {
-                        alert("Format file tidak sesuai V2.");
-                    }
-                } catch (err) { alert("File error."); }
-            };
-            reader.readAsText(file);
+        function downloadExcel() {
+            const ws = XLSX.utils.json_to_sheet(masterItems);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Linen");
+            XLSX.writeFile(wb, "LinenData.xlsx");
         }
     </script>
 </body>
