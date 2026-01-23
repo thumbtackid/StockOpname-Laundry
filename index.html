@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie Hospital Kendal</title>
+    <title>Sistem Linen RS Charlie (V2.3 Final)</title>
     
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
 
     <style>
         /* =========================================
-           DESIGN TOKENS & VARIABLES
+           DESIGN TOKENS
            ========================================= */
         :root {
             --primary: #0284c7; --primary-dark: #0369a1; --primary-light: #e0f2fe;
@@ -49,9 +49,6 @@
         .brand { display: flex; flex-direction: column; gap: 4px; }
         .brand h1 { font-size: 1.35rem; font-weight: 800; color: var(--primary-dark); letter-spacing: -0.03em; }
         .brand p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
-        .meta-info { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-        .meta-info label { display: flex; flex-direction: column; gap: 4px; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-        .meta-info input { padding: 8px 12px; border: 1px solid var(--border-light); border-radius: 6px; font-size: 0.9rem; background: var(--bg-body); min-width: 140px; transition: border 0.2s; }
 
         /* Tabs */
         .tabs { display: flex; gap: 4px; background: #e2e8f0; padding: 4px; border-radius: 10px; width: 100%; overflow-x: auto; }
@@ -74,7 +71,6 @@
         .search-box { flex-grow: 1; min-width: 250px; position: relative; }
         .search-box input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-body); }
         .search-box::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 0.9rem; }
-        select { padding: 10px 16px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-surface); cursor: pointer; }
 
         /* Buttons */
         .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
@@ -131,7 +127,7 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @media (max-width: 1024px) { .app-container { max-width: 100%; } header { flex-direction: column; align-items: flex-start; } .meta-info { width: 100%; justify-content: space-between; } }
+        @media (max-width: 1024px) { .app-container { max-width: 100%; } header { flex-direction: column; align-items: flex-start; } }
         @media (max-width: 768px) { body { padding: 12px; } .toolbar { flex-direction: column; align-items: stretch; } .form-grid { grid-template-columns: 1fr; } .btn { width: 100%; } }
     </style>
 </head>
@@ -147,27 +143,27 @@
         <!-- Notification Toast -->
         <div id="toast">Notifikasi</div>
 
-        <!-- Modal Form (Item) -->
+        <!-- Modal Form (Item/Set) -->
         <div id="itemModal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="modalTitle">Kelola Item Satuan</h2>
+                    <h2 id="modalTitle">Kelola Data Linen</h2>
                     <button class="close-modal" onclick="closeModal('itemModal')">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="itemForm" onsubmit="saveItem(event)">
+                    <form id="itemForm" onsubmit="saveDataItem(event)">
                         <input type="hidden" id="editIndex">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Kategori</label>
                                 <input type="text" id="inpKategori" list="listKategori" required placeholder="Contoh: Sprei">
                                 <datalist id="listKategori">
-                                    <option value="SPR"> <option value="SLM"> <option value="SB"> <option value="DKN"> <option value="LKN"> <option value="JDK"> <option value="BED">
+                                    <option value="SPR"> <option value="SLM"> <option value="SB"> <option value="DKN"> <option value="JDK"> <option value="BED"> <option value="SET">
                                 </datalist>
                             </div>
                             <div class="form-group">
-                                <label>Nama Item</label>
-                                <input type="text" id="inpNama" required placeholder="Nama Lengkap Item">
+                                <label>Nama Item / Nama Set</label>
+                                <input type="text" id="inpNama" required placeholder="Nama Lengkap">
                             </div>
 
                             <div class="form-group full-width" style="background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
@@ -176,22 +172,37 @@
                             </div>
                             
                             <div class="form-group">
-                                <label>Stok Awal (Baik)</label>
-                                <input type="number" id="inpStokAwal" min="0" required placeholder="Jml Baik">
+                                <label>Tipe</label>
+                                <select id="inpTipe" onchange="toggleCompositionInput()">
+                                    <option value="item">Item Satuan</option>
+                                    <option value="set">Set (Paket)</option>
+                                </select>
                             </div>
-                            <div class="form-group">
-                                <label>Stok Rusak / Afkir</label>
-                                <input type="number" id="inpStokRusak" min="0" value="0" placeholder="Jml Rusak">
-                            </div>
-
                             <div class="form-group">
                                 <label>Harga Satuan (Rp)</label>
                                 <input type="number" id="inpHarga" min="0" required>
+                                <small>Untuk Set: Ini adalah harga per KOMPONEN utamanya (estimasi).</small>
                             </div>
-                            <div class="form-group">
+
+                            <div class="form-group full-width" id="sectionRotasi">
                                 <label>Rasio Rotasi (Analisa)</label>
                                 <input type="number" id="inpRotasi" value="1.0" step="0.5" min="0.5">
-                                <small>Default 1.0</small>
+                                <small>Default 1.0. Gunakan ini untuk analisa kebutuhan harian.</small>
+                            </div>
+
+                            <!-- Bagian Komposisi Set (Muncul jika Tipe = Set) -->
+                            <div class="form-group full-width" id="sectionComposition" style="display:none; border: 1px solid var(--border-light); padding:15px; border-radius:8px; background:#f8fafc;">
+                                <label style="color:var(--primary-dark); margin-bottom:10px; display:block;">Komposisi Set</label>
+                                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                                    <select id="setCompositionSelect" style="flex-grow:1;">
+                                        <option value="">Pilih Item Komponen...</option>
+                                    </select>
+                                    <input type="number" id="setCompositionQty" placeholder="Jml" style="width:80px;" min="1">
+                                    <button type="button" class="btn btn-sm btn-secondary" onclick="addItemToSetComposition()">+ Tambah</button>
+                                </div>
+                                <div id="setCompositionList" class="set-item-list">
+                                    <div style="text-align:center; color:#94a3b8; font-size:0.8rem;">Belum ada item di dalam set.</div>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -203,40 +214,18 @@
             </div>
         </div>
 
-        <!-- Modal Form (SET) -->
-        <div id="setModal" class="modal-overlay">
+        <!-- Modal Lihat Komposisi (Read Only) -->
+        <div id="viewSetModal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="setModalTitle">Kelola Master Set</h2>
-                    <button class="close-modal" onclick="closeModal('setModal')">&times;</button>
+                    <h2 id="viewSetTitle">Detail Komposisi Set</h2>
+                    <button class="close-modal" onclick="closeModal('viewSetModal')">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <form id="setForm" onsubmit="saveSet(event)">
-                        <input type="hidden" id="editSetIndex">
-                        <div class="form-group" style="margin-bottom:20px;">
-                            <label>Nama Set (Template)</label>
-                            <input type="text" id="inpSetNama" required placeholder="Contoh: Set Bed Rawat Inap">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Komposisi Set</label>
-                            <div style="display:flex; gap:10px;">
-                                <select id="setCompositionSelect" style="flex-grow:1;">
-                                    <option value="">Pilih Item...</option>
-                                </select>
-                                <input type="number" id="setCompositionQty" placeholder="Jml" style="width:80px;" min="1">
-                                <button type="button" class="btn btn-secondary" onclick="addItemToSetComposition()">+ Tambah</button>
-                            </div>
-                        </div>
-
-                        <div id="setCompositionList" class="set-item-list">
-                            <div style="text-align:center; color:#94a3b8; padding:10px; font-size:0.85rem;">Belum ada item di dalam set.</div>
-                        </div>
-                    </form>
+                    <div id="viewSetContent" style="display: flex; flex-direction: column; gap: 10px;"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('setModal')">Batal</button>
-                    <button type="submit" class="btn btn-primary" onclick="document.getElementById('setForm').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))">Simpan Set</button>
+                    <button type="button" class="btn btn-primary" onclick="closeModal('viewSetModal')">Tutup</button>
                 </div>
             </div>
         </div>
@@ -244,37 +233,30 @@
         <!-- Header -->
         <header>
             <div class="brand">
-                <h1>Sistem Linen RS Charlie Hospital Kendal</h1>
-                <p>Smart Set Management & Auto-Code System </p>
+                <h1>Sistem Linen RS Charlie</h1>
+                <p>Integrated Item & Set Management V2.3</p>
             </div>
             <div class="meta-info">
                 <label>
                     Tanggal
                     <input type="date" id="opnameDate">
                 </label>
-                <label>
-                    Mode Simpan
-                    <select id="saveMode" style="width:140px;">
-                        <option value="local">Browser (Offline)</option>
-                        <option value="cloud">Google Sheets</option>
-                    </select>
-                </label>
             </div>
         </header>
 
         <!-- Navigation Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('item')">📦 Master Item</button>
-            <button class="tab-btn" onclick="switchTab('set')">🎁 Master Set</button>
+            <button class="tab-btn active" onclick="switchTab('master')">📦 Master Item & Set</button>
+            <button class="tab-btn" onclick="switchTab('opname')">📊 Stock Opname (Input Rusak/Hilang)</button>
             <button class="tab-btn" onclick="switchTab('ruangan')">🏥 Config Ruangan</button>
             <button class="tab-btn" onclick="switchTab('analisa')">📉 Analisa Kebutuhan</button>
         </div>
 
-        <!-- VIEW 1: MASTER ITEM -->
-        <section id="view-item" class="section-view active">
+        <!-- VIEW 1: MASTER DATA (GABUNGAN) -->
+        <section id="view-master" class="section-view active">
             <div class="toolbar">
-                <div class="search-box"><input type="text" id="masterSearch" placeholder="Cari kode atau nama..." oninput="renderMasterItemTable()"></div>
-                <button class="btn btn-primary" onclick="openModal('item')">➕ Tambah Item</button>
+                <div class="search-box"><input type="text" id="masterSearch" placeholder="Cari kode, nama, atau tipe..." oninput="renderMasterTable()"></div>
+                <button class="btn btn-primary" onclick="openModal('item')">➕ Tambah Baru</button>
                 <button class="btn btn-secondary" onclick="downloadExcel()">📥 Download Excel</button>
             </div>
 
@@ -283,9 +265,9 @@
                     <table id="masterTable">
                         <thead>
                             <tr>
-                                <th>Kode</th><th>Nama Item</th><th>Kategori</th>
-                                <th>Stok Baik</th><th>Stok Rusak</th><th>Total</th>
-                                <th>Harga</th><th>Aksi</th>
+                                <th>Kode</th><th>Nama</th><th>Kategori</th>
+                                <th>Tipe</th><th>Stok Baik</th><th>Stok Rusak</th>
+                                <th>Total</th><th>Harga</th><th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="masterBody"></tbody>
@@ -294,21 +276,36 @@
             </div>
         </section>
 
-        <!-- VIEW 2: MASTER SET -->
-        <section id="view-set" class="section-view">
+        <!-- VIEW 2: STOCK OPNAME -->
+        <section id="view-opname" class="section-view">
+            <div class="card" style="border-left:4px solid var(--warning);">
+                <h3 style="font-size:1rem; color:var(--warning-text);">Input Kondisi Fisik (Rusak/Hilang)</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">
+                    1. Input jumlah barang yang <strong>RUSAK, HILANG, atau AFKIR</strong>.<br>
+                    2. Input ini akan otomatis mengurangi Stok Baik saat difinalisasi.<br>
+                    3. <strong>Catatan:</strong> Input fisik (Total Baik) tidak diperlukan jika fokus pada kerugian.
+                </p>
+            </div>
+
             <div class="toolbar">
-                <button class="btn btn-primary" onclick="openModal('set')">➕ Buat Set Baru</button>
+                <div class="search-box"><input type="text" id="opSearch" placeholder="🔍 Cari item..." oninput="renderOpnameTable()"></div>
+                <button class="btn btn-secondary" onclick="resetOpname()">↺ Reset Input</button>
+                <button class="btn btn-success" onclick="finalizeOpname()">✅ Finalisasi & Update Stok</button>
+                <button class="btn btn-primary" onclick="exportOpnameExcel()">📥 Export Laporan Kerugian</button>
             </div>
 
             <div class="table-container">
                 <div class="table-scroll-wrapper">
-                    <table id="setTable">
+                    <table id="opTable">
                         <thead>
                             <tr>
-                                <th>Nama Set</th><th>Jml Item</th><th>Komposisi</th><th>Aksi</th>
+                                <th>Kode</th><th>Nama</th>
+                                <th>Stok Awal (Baik)</th>
+                                <th style="background:var(--warning-bg)">Input Rusak/Hilang</th>
+                                <th>Stok Akhir (Baik)</th><th>Selisih</th><th>Keterangan</th>
                             </tr>
                         </thead>
-                        <tbody id="setBody"></tbody>
+                        <tbody id="opBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -356,9 +353,9 @@
                     <table id="anTable">
                         <thead>
                             <tr>
-                                <th>Status</th><th>Kode</th><th>Nama Item</th>
+                                <th>Status</th><th>Kode</th><th>Nama Item / Set</th>
                                 <th>Stok Baik</th><th>Stok Rusak</th>
-                                <th>Kebutuhan</th><th>Selisih</th><th>Biaya</th>
+                                <th>Kebutuhan</th><th>Selisih</th><th>Total Harga</th>
                             </tr>
                         </thead>
                         <tbody id="anBody"></tbody>
@@ -366,7 +363,7 @@
                 </div>
             </div>
             <div style="margin-top:12px; font-size:0.8rem; color:var(--text-tertiary);">
-                *Kebutuhan dihitung berdasarkan konfigurasi Ruangan (Bed Active) + Kebutuhan Set Operasi.
+                *Harga untuk Set dihitung otomatis berdasarkan jumlah komponennya.
             </div>
         </section>
 
@@ -376,144 +373,66 @@
         // ==========================================
         // 1. CONFIG & STATE
         // ==========================================
-        // Ganti ID Script Anda di sini jika ingin menggunakan Cloud
         const SCRIPT_ID = "AKfycbzMZr-e8m_2edwCsf1J-gGccCZaTNoYqZspI1o8gKrYa8IdFk_1p9CnbGpPs22xaQSUIw"; 
         const BASE_URL = `https://script.google.com/macros/s/${SCRIPT_ID}/exec`;
 
-        // Initial Default Data
-        const defaultMasterItems = [
-            { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", stokAwal: 100, stokRusak: 5, harga: 85000, rotasi: 1.0 },
-            { kode: "LIN-SB-001", nama: "Sarung Bantal", kategori: "SB", stokAwal: 120, stokRusak: 2, harga: 25000, rotasi: 1.0 },
-            { kode: "LIN-DKN-001", nama: "Duk Kecil", kategori: "DKN", stokAwal: 200, stokRusak: 10, harga: 30000, rotasi: 2.0 },
-            { kode: "LIN-JDK-001", nama: "Jas Dokter", kategori: "JDK", stokAwal: 30, stokRusak: 0, harga: 150000, rotasi: 3.0 }
-        ];
-
-        const defaultMasterSets = [
-            { id: "SET-001", nama: "Set Bed Rawat Inap", items: [{ kode: "LIN-SPR-001", qty: 1 }, { kode: "LIN-SB-001", qty: 1 }] },
-            { id: "SET-002", nama: "Set Operasi Mayor", items: [{ kode: "LIN-JDK-001", qty: 3 }, { kode: "LIN-DKN-001", qty: 5 }] }
+        const defaultItems = [
+            { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", tipe: "item", stokAwal: 100, stokRusak: 0, harga: 85000, rotasi: 1.0, items: [] },
+            { kode: "LIN-SB-001", nama: "Sarung Bantal", kategori: "SB", tipe: "item", stokAwal: 120, stokRusak: 0, harga: 25000, rotasi: 1.0, items: [] },
+            { kode: "LIN-DKN-001", nama: "Duk Kecil", kategori: "DKN", tipe: "item", stokAwal: 200, stokRusak: 5, harga: 30000, rotasi: 2.0, items: [] },
+            { kode: "LIN-JDK-001", nama: "Jas Dokter", kategori: "JDK", tipe: "item", stokAwal: 30, stokRusak: 0, harga: 150000, rotasi: 3.0, items: [] },
+            { kode: "SET-001", nama: "Set Bed Rawat Inap", kategori: "SET", tipe: "set", stokAwal: 10, stokRusak: 0, harga: 0, rotasi: 1.0, items: [{ kode: "LIN-SPR-001", qty: 1 }, { kode: "LIN-SB-001", qty: 1 }] },
+            { kode: "SET-002", nama: "Set Operasi Mayor", kategori: "SET", tipe: "set", stokAwal: 5, stokRusak: 0, harga: 0, rotasi: 1.0, items: [{ kode: "LIN-JDK-001", qty: 3 }, { kode: "LIN-DKN-001", qty: 5 }] }
         ];
 
         const defaultConfig = { beds: 100, bor: 70, ops: 20, buffer: 3 };
 
-        // Global State
         let appData = {
-            masterItems: [],
-            masterSets: [],
-            roomConfig: {}
+            items: [],
+            config: {}
         };
 
+        let opnameResults = {}; // { kode: { rusak: 0, keterangan: '' } }
+        let currentSetComposition = [];
+
         // ==========================================
-        // 2. LOCAL STORAGE (DATA PERSISTENCE)
+        // 2. LOCAL STORAGE (PERSISTENCE)
         // ==========================================
         
         function loadData() {
-            // Coba ambil dari LocalStorage dulu
             const storedData = localStorage.getItem('linenRS_Data');
             if (storedData) {
                 appData = JSON.parse(storedData);
                 initUI();
                 document.getElementById('loadingOverlay').style.display = 'none';
-                showToast("✅ Data dimuat dari Lokal (Tersimpan)");
+                showToast("✅ Data dimuat dari Lokal");
                 return;
             }
-
-            // Jika tidak ada, coba ambil dari Cloud
-            loadFromCloud();
+            // Fallback Default
+            appData.items = JSON.parse(JSON.stringify(defaultItems));
+            appData.config = JSON.parse(JSON.stringify(defaultConfig));
+            initUI();
+            document.getElementById('loadingOverlay').style.display = 'none';
+            showToast("✅ Menggunakan Data Default");
         }
 
-        function saveData(mode = 'local') {
-            // Selalu simpan ke LocalStorage (Cepat & Anti-Hilang)
+        function saveDataLocally() {
             localStorage.setItem('linenRS_Data', JSON.stringify(appData));
-            console.log("Data tersimpan ke LocalStorage.");
+            console.log("Data saved locally");
+        }
 
-            // Jika mode cloud, kirim ke server (Async)
-            if (mode === 'cloud') {
-                saveToCloud();
-            } else {
-                showToast("💾 Data tersimpan (Lokal)");
-            }
+        function saveDataLocallyWithToast() {
+            saveDataLocally();
+            showToast("💾 Data tersimpan.");
         }
 
         // ==========================================
-        // 3. CLOUD SYNC (OPTIONAL)
-        // ==========================================
-        
-        function loadFromCloud() {
-            const callbackName = 'cb_' + Math.floor(Math.random() * 1000000);
-            const url = `${BASE_URL}?action=getData&callback=${callbackName}`;
-            const script = document.createElement('script');
-            script.src = url;
-            
-            script.onerror = function() {
-                // Jika gagal koneksi ke cloud, pakai default
-                console.error("Cloud connection failed. Using defaults.");
-                appData.masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
-                appData.masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
-                appData.roomConfig = JSON.parse(JSON.stringify(defaultConfig));
-                initUI();
-                document.getElementById('loadingOverlay').style.display = 'none';
-                showToast("⚠️ Offline: Menggunakan Data Default");
-            };
-
-            document.body.appendChild(script);
-
-            window[callbackName] = function(response) {
-                document.body.removeChild(script);
-                delete window[callbackName];
-                try {
-                    if (response && response.status === 'success') {
-                        const d = response.data;
-                        if (d.masterItems && d.masterItems.length > 0) appData.masterItems = d.masterItems;
-                        if (d.masterSets && d.masterSets.length > 0) appData.masterSets = d.masterSets;
-                        if (d.roomConfig && d.roomConfig.beds) appData.roomConfig = d.roomConfig;
-                        
-                        // Sinkronkan ke LocalStorage agar next load cepat
-                        localStorage.setItem('linenRS_Data', JSON.stringify(appData));
-                        
-                        initUI();
-                        document.getElementById('loadingOverlay').style.display = 'none';
-                        showToast("✅ Data dimuat dari Google Sheets!");
-                    } else {
-                        throw new Error("Format salah");
-                    }
-                } catch (e) {
-                    appData.masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
-                    appData.masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
-                    appData.roomConfig = JSON.parse(JSON.stringify(defaultConfig));
-                    initUI();
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                }
-            };
-        }
-
-        function saveToCloud() {
-            fetch(BASE_URL, {
-                method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: "saveData",
-                    masterItems: appData.masterItems,
-                    masterSets: appData.masterSets,
-                    roomConfig: appData.roomConfig
-                })
-            }).then(() => {
-                // Sukses tanpa response body (no-cors)
-                console.log("Synced to cloud");
-            }).catch(e => console.error("Sync error", e));
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('opnameDate').valueAsDate = new Date();
-            loadData();
-        });
-
-        // ==========================================
-        // 4. CORE LOGIC
+        // 3. CORE LOGIC
         // ==========================================
         
         function generateAutoCode(category) {
             const catPrefix = category.toUpperCase();
-            const itemsInCat = appData.masterItems.filter(i => i.kode.startsWith(`LIN-${catPrefix}-`));
+            const itemsInCat = appData.items.filter(i => i.kode.startsWith(`LIN-${catPrefix}-`));
             let maxNum = 0;
             itemsInCat.forEach(i => {
                 const parts = i.kode.split('-');
@@ -528,7 +447,7 @@
         }
 
         // ==========================================
-        // 5. UI FUNCTIONS
+        // 4. UI FUNCTIONS
         // ==========================================
 
         function switchTab(tabId) {
@@ -537,61 +456,63 @@
             document.getElementById('view-' + tabId).classList.add('active');
             event.target.classList.add('active');
 
-            if (tabId === 'item') renderMasterItemTable();
-            if (tabId === 'set') renderMasterSetTable();
+            if (tabId === 'master') renderMasterTable();
+            if (tabId === 'opname') renderOpnameTable();
         }
 
         function initUI() {
             renderRoomConfig();
-            renderMasterItemTable();
-            renderMasterSetTable();
+            renderMasterTable();
         }
 
         function openModal(type, id = null) {
-            if (type === 'item') {
-                const modal = document.getElementById('itemModal');
-                const title = document.getElementById('modalTitle');
-                document.getElementById('itemForm').reset();
+            const modal = document.getElementById('itemModal');
+            const title = document.getElementById('modalTitle');
+            document.getElementById('itemForm').reset();
+            currentSetComposition = [];
+            
+            if (id) {
+                const item = appData.items.find(i => i.kode === id);
+                title.textContent = "Edit Data Linen";
+                document.getElementById('editIndex').value = id;
+                document.getElementById('inpKode').value = item.kode;
+                document.getElementById('inpKategori').value = item.kategori;
+                document.getElementById('inpNama').value = item.nama;
+                document.getElementById('inpTipe').value = item.tipe;
+                document.getElementById('inpHarga').value = item.harga || 0;
+                document.getElementById('inpRotasi').value = item.rotasi || 1.0;
                 
-                if (id) {
-                    const item = appData.masterItems.find(i => i.kode === id);
-                    title.textContent = "Edit Item Satuan";
-                    document.getElementById('editIndex').value = id;
-                    document.getElementById('inpKode').value = item.kode;
-                    document.getElementById('inpKategori').value = item.kategori;
-                    document.getElementById('inpNama').value = item.nama;
-                    document.getElementById('inpStokAwal').value = item.stokAwal;
-                    document.getElementById('inpStokRusak').value = item.stokRusak || 0;
-                    document.getElementById('inpHarga').value = item.harga;
-                    document.getElementById('inpRotasi').value = item.rotasi || 1.0;
-                } else {
-                    title.textContent = "Tambah Item Baru (Auto Code)";
-                    document.getElementById('editIndex').value = "";
-                    document.getElementById('inpKode').value = "";
-                    document.getElementById('inpKategori').value = "";
+                if (item.tipe === 'set') {
+                    currentSetComposition = JSON.parse(JSON.stringify(item.items || []));
                 }
-                modal.classList.add('open');
-            } 
-            else if (type === 'set') {
-                const modal = document.getElementById('setModal');
-                const title = document.getElementById('setModalTitle');
-                document.getElementById('setForm').reset();
-                currentSetComposition = [];
+            } else {
+                title.textContent = "Tambah Baru";
+                document.getElementById('editIndex').value = "";
+                document.getElementById('inpKode').value = "";
+                document.getElementById('inpKategori').value = "";
+                document.getElementById('inpTipe').value = "item";
+            }
 
-                if (id) {
-                    const set = appData.masterSets.find(s => s.id === id);
-                    title.textContent = "Edit Set Komposisi";
-                    document.getElementById('editSetIndex').value = id;
-                    document.getElementById('inpSetNama').value = set.nama;
-                    currentSetComposition = JSON.parse(JSON.stringify(set.items));
-                } else {
-                    title.textContent = "Buat Set Baru";
-                    document.getElementById('editSetIndex').value = "";
-                    document.getElementById('inpSetNama').value = "";
-                }
+            toggleCompositionInput();
+            if(document.getElementById('inpTipe').value === 'set') {
+                 populateSetSelectOptions();
+                 renderSetCompositionList();
+            }
+            modal.classList.add('open');
+        }
+
+        function toggleCompositionInput() {
+            const tipe = document.getElementById('inpTipe').value;
+            const compSection = document.getElementById('sectionComposition');
+            const rotasiSection = document.getElementById('sectionRotasi');
+            
+            if (tipe === 'set') {
+                compSection.style.display = 'block';
+                rotasiSection.style.display = 'none';
                 populateSetSelectOptions();
-                renderSetCompositionList();
-                modal.classList.add('open');
+            } else {
+                compSection.style.display = 'none';
+                rotasiSection.style.display = 'block';
             }
         }
 
@@ -600,92 +521,81 @@
         }
 
         // ==========================================
-        // 6. MASTER ITEM & SET
+        // 5. MASTER DATA (GABUNGAN ITEM & SET)
         // ==========================================
 
-        function renderMasterItemTable() {
+        function renderMasterTable() {
             const key = document.getElementById('masterSearch').value.toLowerCase();
             const tbody = document.getElementById('masterBody');
             tbody.innerHTML = '';
 
-            appData.masterItems.forEach(item => {
-                if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key)) return;
+            appData.items.forEach(item => {
+                if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key) && !item.tipe.includes(key)) return;
 
                 const tr = document.createElement('tr');
+                
+                // Badge Tipe
+                const tipeBadge = item.tipe === 'set' ? '<span class="badge status-warning">SET</span>' : '<span class="badge status-info">SATUAN</span>';
+                
+                // Tombol Aksi Khusus untuk SET
+                let actionButtons = `
+                    <button class="btn btn-sm btn-secondary" onclick="openModal('item', '${item.kode}')">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.kode}')">🗑️</button>
+                `;
+                if (item.tipe === 'set') {
+                    actionButtons = `
+                        <button class="btn btn-sm btn-info" onclick="viewSetComposition('${item.kode}')" style="background:#e0f2fe; color:#0369a1;">👁️ Isi</button>
+                        ${actionButtons}
+                    `;
+                }
+
+                // Harga Set dihitung real-time berdasarkan komponennya
+                let displayPrice = formatRupiah(item.harga);
+                if(item.tipe === 'set' && item.items) {
+                    const setPrice = calculateSetPrice(item);
+                    displayPrice = formatRupiah(setPrice);
+                }
+
                 tr.innerHTML = `
                     <td class="text-mono" style="color:var(--primary); font-weight:600">${item.kode}</td>
                     <td style="font-weight:500">${item.nama}</td>
                     <td><span class="badge status-info">${item.kategori}</span></td>
+                    <td>${tipeBadge}</td>
                     <td class="col-center" style="font-weight:700; color:var(--success)">${item.stokAwal}</td>
                     <td class="col-center" style="font-weight:700; color:var(--danger)">${item.stokRusak || 0}</td>
                     <td class="col-center">${(item.stokAwal + (item.stokRusak||0))}</td>
-                    <td class="col-right">${formatRupiah(item.harga)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary" onclick="openModal('item', '${item.kode}')">✏️</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.kode}')">🗑️</button>
-                    </td>
+                    <td class="col-right">${displayPrice}</td>
+                    <td>${actionButtons}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function saveItem(e) {
-            e.preventDefault();
-            const editCode = document.getElementById('editIndex').value;
-            const kategori = document.getElementById('inpKategori').value.trim().toUpperCase();
-            
-            let kode;
-            if (editCode) {
-                kode = editCode;
-            } else {
-                kode = generateAutoCode(kategori);
+        function calculateSetPrice(setItem) {
+            let total = 0;
+            if(setItem.items) {
+                setItem.items.forEach(comp => {
+                    const compItem = appData.items.find(i => i.kode === comp.kode);
+                    if (compItem) {
+                        total += (compItem.harga * comp.qty);
+                    }
+                });
             }
-
-            const newItem = {
-                kode,
-                kategori,
-                nama: document.getElementById('inpNama').value,
-                stokAwal: parseInt(document.getElementById('inpStokAwal').value) || 0,
-                stokRusak: parseInt(document.getElementById('inpStokRusak').value) || 0,
-                harga: parseInt(document.getElementById('inpHarga').value) || 0,
-                rotasi: parseFloat(document.getElementById('inpRotasi').value) || 1.0
-            };
-
-            if (editCode) {
-                const idx = appData.masterItems.findIndex(i => i.kode === editCode);
-                if (idx !== -1) appData.masterItems[idx] = newItem;
-            } else {
-                appData.masterItems.push(newItem);
-            }
-
-            // Cek mode simpan
-            const mode = document.getElementById('saveMode').value;
-            saveData(mode);
-            
-            renderMasterItemTable();
-            closeModal('itemModal');
-            showToast("Item tersimpan.");
+            return total;
         }
 
-        function deleteItem(kode) {
-            if(confirm(`Hapus item ${kode}?`)) {
-                appData.masterItems = appData.masterItems.filter(i => i.kode !== kode);
-                saveData(document.getElementById('saveMode').value);
-                renderMasterItemTable();
-            }
-        }
-
-        // --- Master Set Logic ---
-        let currentSetComposition = [];
-
+        // --- Composition Logic ---
         function populateSetSelectOptions() {
             const sel = document.getElementById('setCompositionSelect');
-            sel.innerHTML = '<option value="">Pilih Item...</option>';
-            appData.masterItems.forEach(i => {
-                const opt = document.createElement('option');
-                opt.value = i.kode;
-                opt.textContent = `${i.kode} - ${i.nama}`;
-                sel.appendChild(opt);
+            sel.innerHTML = '<option value="">Pilih Item Komponen...</option>';
+            appData.items.forEach(i => {
+                // Hanya bisa memilih item satuan, bukan set lain (mencegah rekursi)
+                if (i.tipe !== 'set') {
+                    const opt = document.createElement('option');
+                    opt.value = i.kode;
+                    opt.textContent = `${i.kode} - ${i.nama}`;
+                    sel.appendChild(opt);
+                }
             });
         }
 
@@ -711,12 +621,12 @@
             container.innerHTML = '';
             
             if (currentSetComposition.length === 0) {
-                container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:10px; font-size:0.85rem;">Belum ada item di dalam set.</div>';
+                container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.8rem;">Belum ada item di dalam set.</div>';
                 return;
             }
 
             currentSetComposition.forEach((comp, index) => {
-                const item = appData.masterItems.find(i => i.kode === comp.kode);
+                const item = appData.items.find(i => i.kode === comp.kode);
                 const itemName = item ? item.nama : comp.kode;
                 const div = document.createElement('div');
                 div.className = 'set-item-row';
@@ -734,61 +644,175 @@
             renderSetCompositionList();
         }
 
-        function renderMasterSetTable() {
-            const tbody = document.getElementById('setBody');
-            tbody.innerHTML = '';
+        function saveDataItem(e) {
+            e.preventDefault();
+            const editCode = document.getElementById('editIndex').value;
+            const kategori = document.getElementById('inpKategori').value.trim().toUpperCase();
+            const tipe = document.getElementById('inpTipe').value;
             
-            appData.masterSets.forEach(set => {
-                const tr = document.createElement('tr');
-                const summary = set.items.map(i => {
-                    const item = appData.masterItems.find(x => x.kode === i.kode);
-                    return `${item ? item.nama : i.kode} (${i.qty})`;
-                }).join(', ');
+            let kode;
+            if (editCode) {
+                kode = editCode;
+            } else {
+                kode = generateAutoCode(kategori);
+            }
 
+            const newItem = {
+                kode,
+                kategori,
+                nama: document.getElementById('inpNama').value,
+                tipe,
+                stokAwal: parseInt(document.getElementById('inpStokAwal')) || 0, // Tidak ada di form edit ini, ambil dari lama jika edit, else 0
+                stokRusak: parseInt(document.getElementById('inpStokRusak')) || 0,
+                harga: parseInt(document.getElementById('inpHarga').value) || 0,
+                rotasi: parseFloat(document.getElementById('inpRotasi').value) || 1.0,
+                items: tipe === 'set' ? JSON.parse(JSON.stringify(currentSetComposition)) : []
+            };
+            
+            // Jika edit, pertahankan stok lama jika tidak ada input
+            if(editCode) {
+                const oldItem = appData.items.find(i => i.kode === editCode);
+                if(oldItem) {
+                    newItem.stokAwal = oldItem.stokAwal;
+                    newItem.stokRusak = oldItem.stokRusak;
+                }
+            }
+
+            if (editCode) {
+                const idx = appData.items.findIndex(i => i.kode === editCode);
+                if (idx !== -1) appData.items[idx] = newItem;
+            } else {
+                appData.items.push(newItem);
+            }
+
+            saveDataLocallyWithToast();
+            renderMasterTable();
+            closeModal('itemModal');
+        }
+
+        function deleteItem(kode) {
+            if(confirm(`Hapus ${kode}?`)) {
+                appData.items = appData.items.filter(i => i.kode !== kode);
+                saveDataLocallyWithToast();
+                renderMasterTable();
+            }
+        }
+
+        function viewSetComposition(kode) {
+            const item = appData.items.find(i => i.kode === kode);
+            if(!item || item.tipe !== 'set') return;
+
+            const modal = document.getElementById('viewSetModal');
+            document.getElementById('viewSetTitle').textContent = `Isi Set: ${item.nama}`;
+            const content = document.getElementById('viewSetContent');
+            content.innerHTML = '';
+
+            let totalVal = 0;
+            item.items.forEach(comp => {
+                const compItem = appData.items.find(i => i.kode === comp.kode);
+                const name = compItem ? compItem.nama : comp.kode;
+                const price = compItem ? compItem.harga * comp.qty : 0;
+                totalVal += price;
+
+                const div = document.createElement('div');
+                div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.padding = '10px'; div.style.background = '#fff'; div.style.border = '1px solid #e2e8f0'; div.style.borderRadius = '6px';
+                div.innerHTML = `
+                    <span><strong>${name}</strong> <small>x${comp.qty}</small></span>
+                    <span style="color:var(--text-secondary)">${formatRupiah(price)}</span>
+                `;
+                content.appendChild(div);
+            });
+            
+            const totalDiv = document.createElement('div');
+            totalDiv.style.marginTop = '10px'; totalDiv.style.textAlign = 'right'; totalDiv.style.fontWeight = 'bold'; totalDiv.style.color = 'var(--primary-dark)';
+            totalDiv.innerText = `Total Estimasi: ${formatRupiah(totalVal)}`;
+            content.appendChild(totalDiv);
+
+            modal.classList.add('open');
+        }
+
+        // ==========================================
+        // 6. STOCK OPNAME (RUSAK/HILANG)
+        // ==========================================
+        
+        function renderOpnameTable() {
+            const key = document.getElementById('opSearch').value.toLowerCase();
+            const tbody = document.getElementById('opBody');
+            tbody.innerHTML = '';
+
+            appData.items.forEach(item => {
+                if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key)) return;
+
+                // Ambil data opname sementara
+                const opData = opnameResults[item.kode] || { rusak: 0, ket: '' };
+                
+                // Hitung Stok Akhir Sementara
+                const stokAkhir = item.stokAwal - opData.rusak;
+                const selisih = stokAkhir - item.stokAwal; // Selalu negatif atau nol jika input rusak
+                
+                let badge = '', color = '';
+                if (opData.rusak > 0) { badge = 'BERKURANG'; color='status-danger'; }
+                else { badge = 'AMAN'; color='status-ok'; }
+
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="font-weight:700; color:var(--primary-dark)">${set.nama}</td>
-                    <td class="col-center"><span class="badge status-warning">${set.items.length} Item</span></td>
-                    <td style="font-size:0.85rem; color:var(--text-secondary); max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${summary}</td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary" onclick="openModal('set', '${set.id}')">✏️ Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteSet('${set.id}')">🗑️</button>
+                    <td class="text-mono">${item.kode}</td>
+                    <td style="font-weight:500">${item.nama}</td>
+                    <td class="col-center"><b>${item.stokAwal}</b></td>
+                    <td class="col-center" style="background:var(--warning-bg)">
+                        <input type="number" min="0" value="${opData.rusak}" placeholder="0" onchange="updateOpnameInput('${item.kode}', 'rusak', this.value)">
                     </td>
+                    <td class="col-center" style="font-weight:700; color:var(--primary-dark)">${stokAkhir}</td>
+                    <td class="col-center" style="color:var(--danger); font-weight:bold;">${opData.rusak > 0 ? '-' + opData.rusak : 0}</td>
+                    <td><input type="text" placeholder="Keterangan..." value="${opData.ket}" onchange="updateOpnameInput('${item.kode}', 'ket', this.value)" style="width:100%; border:1px solid #ddd; padding:5px; border-radius:4px;"></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function saveSet(e) {
-            e.preventDefault();
-            const editId = document.getElementById('editSetIndex').value;
-            const nama = document.getElementById('inpSetNama').value;
-
-            if (currentSetComposition.length === 0) return alert("Set harus memiliki minimal 1 item.");
-
-            const newSet = {
-                id: editId || `SET-${Date.now()}`,
-                nama,
-                items: JSON.parse(JSON.stringify(currentSetComposition))
-            };
-
-            if (editId) {
-                const idx = appData.masterSets.findIndex(s => s.id === editId);
-                if (idx !== -1) appData.masterSets[idx] = newSet;
+        function updateOpnameInput(kode, field, val) {
+            if (!opnameResults[kode]) opnameResults[kode] = { rusak: 0, ket: '' };
+            
+            if (field === 'rusak') {
+                opnameResults[kode].rusak = parseInt(val) || 0;
             } else {
-                appData.masterSets.push(newSet);
+                opnameResults[kode].ket = val;
             }
-
-            saveData(document.getElementById('saveMode').value);
-            renderMasterSetTable();
-            closeModal('setModal');
-            showToast("Master Set tersimpan.");
+            renderOpnameTable(); 
         }
 
-        function deleteSet(id) {
-            if(confirm("Hapus set ini?")) {
-                appData.masterSets = appData.masterSets.filter(s => s.id !== id);
-                saveData(document.getElementById('saveMode').value);
-                renderMasterSetTable();
+        function resetOpname() {
+            if(confirm("Reset semua input?")) {
+                opnameResults = {};
+                renderOpnameTable();
+            }
+        }
+
+        function finalizeOpname() {
+            if (Object.keys(opnameResults).length === 0) {
+                alert("Belum ada input rusak/hilang.");
+                return;
+            }
+
+            if(confirm("Finalisasi akan mengurangi Stok Baik sesuai input Rusak/Hilang. Lanjutkan?")) {
+                let affectedCount = 0;
+                
+                appData.items.forEach(item => {
+                    const opData = opnameResults[item.kode];
+                    if (opData && opData.rusak > 0) {
+                        item.stokAwal -= opData.rusak;
+                        // Tambah ke stok rusak lama atau buat log terpisah (disini sederhana: kurangi stok baik)
+                        // Jika ingin menumpuk stokRusak, uncomment baris bawah:
+                        // item.stokRusak = (item.stokRusak || 0) + opData.rusak;
+                        affectedCount++;
+                    }
+                });
+
+                opnameResults = {};
+                saveDataLocallyWithToast();
+                renderOpnameTable();
+                renderMasterTable(); // Update master table juga
+                showToast(`✅ Selesai! ${affectedCount} item stoknya diperbarui.`);
             }
         }
 
@@ -796,20 +820,19 @@
         // 7. CONFIG & ANALISA
         // ==========================================
         function renderRoomConfig() {
-            if (!appData.roomConfig.beds) appData.roomConfig = JSON.parse(JSON.stringify(defaultConfig));
-            document.getElementById('configBeds').value = appData.roomConfig.beds;
-            document.getElementById('configBOR').value = appData.roomConfig.bor;
-            document.getElementById('configOps').value = appData.roomConfig.ops;
-            document.getElementById('configBuffer').value = appData.roomConfig.buffer;
+            if (!appData.config.beds) appData.config = JSON.parse(JSON.stringify(defaultConfig));
+            document.getElementById('configBeds').value = appData.config.beds;
+            document.getElementById('configBOR').value = appData.config.bor;
+            document.getElementById('configOps').value = appData.config.ops;
+            document.getElementById('configBuffer').value = appData.config.buffer;
         }
 
         function saveRoomConfig() {
-            appData.roomConfig.beds = parseInt(document.getElementById('configBeds').value);
-            appData.roomConfig.bor = parseInt(document.getElementById('configBOR').value);
-            appData.roomConfig.ops = parseInt(document.getElementById('configOps').value);
-            appData.roomConfig.buffer = parseInt(document.getElementById('configBuffer').value);
-            saveData(document.getElementById('saveMode').value);
-            showToast("Konfigurasi disimpan.");
+            appData.config.beds = parseInt(document.getElementById('configBeds').value);
+            appData.config.bor = parseInt(document.getElementById('configBOR').value);
+            appData.config.ops = parseInt(document.getElementById('configOps').value);
+            appData.config.buffer = parseInt(document.getElementById('configBuffer').value);
+            saveDataLocallyWithToast();
         }
 
         function runAnalysis() {
@@ -817,27 +840,30 @@
             tbody.innerHTML = '';
             
             const needsMap = {}; 
-            const activeBeds = Math.floor(appData.roomConfig.beds * (appData.roomConfig.bor / 100));
-            const buffer = appData.roomConfig.buffer;
+            const activeBeds = Math.floor(appData.config.beds * (appData.config.bor / 100));
+            const buffer = appData.config.buffer;
             
-            // 1. Hitung kebutuhan dari Rawat Inap (Berdasarkan Item)
-            appData.masterItems.forEach(item => {
+            // 1. Hitung kebutuhan dari Rawat Inap & Rotasi Item
+            appData.items.forEach(item => {
                 const rotation = item.rotasi || 1.0;
                 const neededPerCycle = activeBeds * rotation;
                 const totalNeeded = Math.ceil(neededPerCycle * buffer);
                 needsMap[item.kode] = totalNeeded;
             });
 
-            // 2. Hitung kebutuhan dari Operasi (Berdasarkan SET)
-            // INI BAGIAN YANG DIKOREKSI: Set Composition sekarang dihitung!
-            const opsDaily = appData.roomConfig.ops;
-            appData.masterSets.forEach(set => {
-                set.items.forEach(comp => {
+            // 2. Tambahkan kebutuhan dari Config Operasi (Untuk SET Operasi)
+            // Diasumsikan SET dengan kategori 'SET' atau nama 'Operasi' dihitung disini
+            // Secara default kita ambil semua SET kecuali Bed Rawat Inap untuk dihitung manual atau otomatis
+            // Disini kita hitung SEMUA item yang tipe = 'set'
+            
+            const opsDaily = appData.config.ops;
+            appData.items.filter(i => i.tipe === 'set').forEach(setItem => {
+                setItem.items.forEach(comp => {
                     const totalOpsNeed = opsDaily * buffer * comp.qty;
                     if (needsMap[comp.kode]) {
-                        needsMap[comp.kode] += totalOpsNeed; // Tambah ke kebutuhan item existing
+                        needsMap[comp.kode] += totalOpsNeed; 
                     } else {
-                        needsMap[comp.kode] = totalOpsNeed; // Buat baru jika belum ada
+                        needsMap[comp.kode] = totalOpsNeed;
                     }
                 });
             });
@@ -845,26 +871,27 @@
             let totalDamaged = 0;
             let replacementCost = 0;
 
-            appData.masterItems.forEach(item => {
+            appData.items.forEach(item => {
                 const goodStock = item.stokAwal;
                 const damagedStock = item.stokRusak || 0;
                 const needed = needsMap[item.kode] || 0;
-                
-                // Selisih berdasarkan stok BAIK saja
                 const diff = goodStock - needed;
 
                 totalDamaged += damagedStock;
-                replacementCost += (damagedStock * item.harga);
+                
+                // Hitung Harga Total
+                let itemTotalPrice = item.harga;
+                if(item.tipe === 'set') {
+                    itemTotalPrice = calculateSetPrice(item);
+                }
+                replacementCost += (damagedStock * itemTotalPrice);
 
                 const tr = document.createElement('tr');
                 let statusBadge = '', statusColor = '';
-                
-                // Logika Status
                 if (diff < 0) { statusBadge = 'DEFISIT'; statusColor = 'status-danger'; }
                 else if (diff > 0) { statusBadge = 'SURPLUS'; statusColor = 'status-ok'; }
                 else { statusBadge = 'AMAN'; statusColor = 'status-info'; }
 
-                // Highlight jika ada barang rusak
                 const damagedStyle = damagedStock > 0 ? 'color:var(--danger); font-weight:bold;' : 'color:var(--text-secondary)';
 
                 tr.innerHTML = `
@@ -875,7 +902,7 @@
                     <td class="col-center" style="${damagedStyle}">${damagedStock}</td>
                     <td class="col-center" style="color:var(--primary-dark); font-weight:700">${needed}</td>
                     <td class="col-center" style="font-weight:700; color:${diff < 0 ? 'var(--danger)' : 'var(--success)'}">${diff}</td>
-                    <td class="col-right">${damagedStock > 0 ? formatRupiah(damagedStock*item.harga) : '-'}</td>
+                    <td class="col-right">${formatRupiah(itemTotalPrice)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -898,24 +925,43 @@
         }
 
         function downloadExcel() {
-            const ws = XLSX.utils.json_to_sheet(appData.masterItems);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Linen");
-            XLSX.writeFile(wb, "LinenData.xlsx");
+            const data = appData.items.map(i => ({
+                Kode: i.kode, Nama: i.nama, Tipe: i.tipe.toUpperCase(), Stok_Baik: i.stokAwal, Stok_Rusak: i.stokRusak, Harga_Satuan: i.harga
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "MasterLinen");
+            XLSX.writeFile(wb, "Master_Linen_RS.xlsx");
+        }
+
+        function exportOpnameExcel() {
+            const data = [];
+            document.querySelectorAll('#opBody tr').forEach(tr => {
+                const row = [];
+                tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
+                if(row.length > 0) data.push(row);
+            });
+            const ws = XLSX.utils.aoa_to_sheet([['Kode','Nama','Stok Awal','Rusak/Hilang','Stok Akhir','Selisih','Keterangan'], ...data]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Laporan_Kerusakan");
+            XLSX.writeFile(wb, "Laporan_Opname_Linen.xlsx");
         }
 
         function exportAnalysisExcel() {
-            runAnalysis(); // Ensure data is fresh
+            runAnalysis();
             const data = [];
             document.querySelectorAll('#anBody tr').forEach(tr => {
                 const row = [];
                 tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
                 if(row.length > 0) data.push(row);
             });
-            const ws = XLSX.utils.aoa_to_sheet([['Status','Kode','Nama','Stok Baik','Stok Rusak','Kebutuhan','Selisih','Biaya'], ...data]);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Analisa");
+            const ws = XLSX.utils.aoa_to_sheet([['Status','Kode','Nama','Stok Baik','Stok Rusak','Kebutuhan','Selisih','Total Harga'], ...data]);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Analisa_Kebutuhan");
             XLSX.writeFile(wb, "Analisa_Linen.xlsx");
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('opnameDate').valueAsDate = new Date();
+            loadData();
+        });
     </script>
 </body>
 </html>
-
