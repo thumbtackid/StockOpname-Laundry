@@ -395,42 +395,39 @@
         let opnameResults = {}; // { kode: { rusak: 0, keterangan: '' } }
         let currentSetComposition = [];
 
-                // ==========================================
-        // 2. LOCAL STORAGE (PERBAIKAN UTAMA)
+        // ==========================================
+        // 2. LOCAL STORAGE (PERSISTENCE)
         // ==========================================
         
         function loadData() {
             const storedData = localStorage.getItem('linenRS_Data');
-            
-            // PASTIKAN CONFIG SELALU TERISI, BAIK DARI LOKAL MAUPUN DEFAULT
             if (storedData) {
-                const parsed = JSON.parse(storedData);
-                appData.items = parsed.items || []; // Ambil items, atau kosong jika tidak ada
-                appData.config = parsed.config || JSON.parse(JSON.stringify(defaultConfig)); // AMBIL CONFIG, atau PAKAI DEFAULT
-            } else {
-                // Jika belum ada data sama sekali di LocalStorage
-                appData.items = JSON.parse(JSON.stringify(defaultItems));
-                appData.config = JSON.parse(JSON.stringify(defaultConfig)); // Paksa pakai default config
+                appData = JSON.parse(storedData);
+                initUI();
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast("✅ Data dimuat dari Lokal");
+                return;
             }
-
-            // Setelah data pasti terisi, baru jalankan UI
+            // Fallback Default
+            appData.items = JSON.parse(JSON.stringify(defaultItems));
+            appData.config = JSON.parse(JSON.stringify(defaultConfig));
             initUI();
             document.getElementById('loadingOverlay').style.display = 'none';
-            showToast("✅ Sistem Siap Digunakan");
+            showToast("✅ Menggunakan Data Default");
         }
 
         function saveDataLocally() {
             localStorage.setItem('linenRS_Data', JSON.stringify(appData));
-            console.log("Data tersimpan ke LocalStorage");
+            console.log("Data saved locally");
         }
 
         function saveDataLocallyWithToast() {
             saveDataLocally();
-            showToast("💾 Data berhasil disimpan.");
+            showToast("💾 Data tersimpan.");
         }
 
         // ==========================================
-        // 3. CORE LOGIC (Tetap Sama)
+        // 3. CORE LOGIC
         // ==========================================
         
         function generateAutoCode(category) {
@@ -968,4 +965,3 @@
     </script>
 </body>
 </html>
-
