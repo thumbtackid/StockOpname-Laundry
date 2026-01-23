@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V2.0 Cloud Connected)</title>
+    <title>Sistem Linen RS Charlie (V2.0 Connected)</title>
     
     <!-- Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -77,6 +77,7 @@
         /* Buttons */
         .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background-color: var(--primary); color: white; box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2); } .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-1px); }
+        .btn-success { background-color: var(--success); color: white; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); } .btn-success:hover { background-color: #059669; }
         .btn-secondary { background-color: #fff; color: var(--text-secondary); border: 1px solid var(--border-light); } .btn-secondary:hover { background-color: #f8fafc; color: var(--text-primary); }
         .btn-danger { background-color: #fff; color: var(--danger); border: 1px solid #fecdd3; } .btn-danger:hover { background-color: var(--danger-bg); }
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
@@ -271,7 +272,7 @@
         <header>
             <div class="brand">
                 <h1>Sistem Linen RS Charlie</h1>
-                <p>Smart Set Management & Auto-Code System V2.0 (Cloud)</p>
+                <p>Smart Set Management & Auto-Code System V2.0</p>
             </div>
             <div class="meta-info">
                 <label>
@@ -384,15 +385,19 @@
 
         <!-- VIEW 4: STOCK OPNAME -->
         <section id="view-opname" class="section-view">
-            <div class="summary-cards">
-                <div class="card"><label>Total Item</label><div class="value" id="op-totalItems">0</div></div>
-                <div class="card text-warning"><label>Selisih Stok</label><div class="value" id="op-totalDiff">0</div></div>
-                <div class="card text-danger"><label>Nilai Selisih</label><div class="value" id="op-totalVal">0</div></div>
+            <div class="card" style="border-left:4px solid var(--success);">
+                <h3 style="font-size:1rem; color:var(--success-text);">Stock Opname (Penghitungan Fisik)</h3>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">
+                    1. Input jumlah barang fisik yang ditemukan.<br>
+                    2. Jika ada selisih (kurang/rusak/hilang), sistem akan menandainya.<br>
+                    3. Klik <strong>"Finalisasi & Update Stok"</strong> untuk menjadikan angka fisik ini sebagai stok master baru.
+                </p>
             </div>
 
             <div class="toolbar">
                 <div class="search-box"><input type="text" id="opSearch" placeholder="🔍 Cari item..." oninput="renderOpnameTable()"></div>
-                <button class="btn btn-danger" onclick="resetOpname()">↺ Reset Input Fisik</button>
+                <button class="btn btn-secondary" onclick="resetOpname()">↺ Reset Input</button>
+                <button class="btn btn-success" onclick="finalizeOpname()">✅ Finalisasi & Update Stok</button>
                 <button class="btn btn-primary" onclick="exportOpnameExcel()">📥 Export Excel</button>
             </div>
 
@@ -401,7 +406,7 @@
                     <table id="opTable">
                         <thead>
                             <tr>
-                                <th>Kode</th><th>Nama</th><th>Stok Awal</th>
+                                <th>Kode</th><th>Nama</th><th>Stok Sistem</th>
                                 <th style="background:var(--primary-light)">Stok Fisik</th>
                                 <th>Selisih</th><th>Status</th>
                             </tr>
@@ -508,8 +513,6 @@
         // --- LOAD DATA FROM CLOUD ---
         async function loadFromCloud() {
             try {
-                console.log("Memulai sinkronisasi data...");
-                
                 const [items, sets, config, opname] = await Promise.all([
                     fetch(`${GOOGLE_SCRIPT_URL}?sheet=masterItems`).then(r => r.json()),
                     fetch(`${GOOGLE_SCRIPT_URL}?sheet=masterSets`).then(r => r.json()),
@@ -517,61 +520,44 @@
                     fetch(`${GOOGLE_SCRIPT_URL}?sheet=opname`).then(r => r.json())
                 ]);
 
-                // Jika data cloud ada, pakai data cloud. Jika kosong, pakai default.
                 if (Array.isArray(items) && items.length > 0) masterItems = items;
                 else masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
 
                 if (Array.isArray(sets)) masterSets = sets;
-                else masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
-                
                 if (config && config.beds) roomConfig = config;
-                else roomConfig = JSON.parse(JSON.stringify(defaultRoomConfig));
-                
                 if (typeof opname === 'object') opnameResults = opname;
 
-                // Update UI
                 initUI();
-                
-                // Hide Loading
                 document.getElementById('loadingOverlay').style.display = 'none';
                 showToast("Data berhasil dimuat dari Cloud!");
-
+                
             } catch (error) {
                 console.error("Gagal load data:", error);
-                // Fallback to default jika error
-                masterItems = JSON.parse(JSON.stringify(defaultMasterItems));
-                masterSets = JSON.parse(JSON.stringify(defaultMasterSets));
-                roomConfig = JSON.parse(JSON.stringify(defaultRoomConfig));
-                initUI();
-                document.getElementById('loadingOverlay').style.display = 'none';
-                showToast("Gagal koneksi ke Cloud. Menggunakan data default.");
+                document.getElementById('loadingOverlay').innerHTML = `
+                    <div style="color:red; text-align:center;">
+                        <h3>Gagal Terhubung ke Server</h3>
+                        <p>Cek koneksi internet dan pastikan URL Script sudah benar.</p>
+                        <button onclick="location.reload()" class="btn btn-primary" style="margin-top:10px;">Coba Lagi</button>
+                    </div>`;
             }
         }
 
         // --- SAVE DATA TO CLOUD ---
         function saveToCloud() {
             const payload = { masterItems, masterSets, roomConfig, opnameResults };
-            
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors', // Penting untuk GAS
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-            .then(() => {
-                console.log("Data tersimpan ke Cloud.");
-                showToast("Tersimpan di Cloud!");
-            })
-            .catch(err => {
-                console.error("Gagal simpan:", err);
-                showToast("Gagal menyimpan ke Cloud!");
-            });
+            .then(() => console.log("Data tersimpan ke Cloud."))
+            .catch(err => console.error("Gagal simpan:", err));
         }
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('opnameDate').valueAsDate = new Date();
-            // Load from cloud instead of local storage
             loadFromCloud();
         });
 
@@ -580,11 +566,8 @@
         // ==========================================
 
         function generateAutoCode(category) {
-            // Normalize category to uppercase
             const catPrefix = category.toUpperCase();
-            // Find all items in this category
             const itemsInCat = masterItems.filter(i => i.kode.startsWith(`LIN-${catPrefix}-`));
-            
             let maxNum = 0;
             itemsInCat.forEach(i => {
                 const parts = i.kode.split('-');
@@ -593,8 +576,6 @@
                     if (!isNaN(num) && num > maxNum) maxNum = num;
                 }
             });
-            
-            // Increment and pad
             const nextNum = maxNum + 1;
             const paddedNum = nextNum.toString().padStart(3, '0');
             return `LIN-${catPrefix}-${paddedNum}`;
@@ -621,7 +602,6 @@
                 document.getElementById('itemForm').reset();
                 
                 if (id) {
-                    // Edit Mode
                     const item = masterItems.find(i => i.kode === id);
                     if (!item) return;
                     title.textContent = "Edit Item Satuan";
@@ -638,11 +618,9 @@
                     document.getElementById('inpRotasi').value = item.rotasi || 1.0;
                     document.getElementById('inpCatatan').value = item.catatan || "";
                 } else {
-                    // Add Mode
                     title.textContent = "Tambah Item Baru (Auto Code)";
                     document.getElementById('editIndex').value = "";
                     document.getElementById('inpKode').value = "";
-                    // Pre-fill or clear category
                     document.getElementById('inpKategori').value = "";
                 }
                 modal.classList.add('open');
@@ -673,6 +651,13 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('open');
+        }
+
+        function initUI() {
+            renderRoomConfig();
+            renderMasterItemTable();
+            renderMasterSetTable();
+            renderOpnameTable();
         }
 
         // ==========================================
@@ -743,7 +728,7 @@
                 showToast(`Item baru ditambahkan: ${kode}`);
             }
 
-            saveToCloud(); // CLOUD SAVE
+            saveToCloud();
             renderMasterItemTable();
             renderOpnameTable(); // Refresh opname if needed
             closeModal('itemModal');
@@ -753,7 +738,7 @@
             if(confirm(`Hapus item ${kode}?`)) {
                 masterItems = masterItems.filter(i => i.kode !== kode);
                 delete opnameResults[kode];
-                saveToCloud(); // CLOUD SAVE
+                saveToCloud();
                 renderMasterItemTable();
                 showToast("Item dihapus.");
             }
@@ -781,7 +766,6 @@
             
             if (!kode || !qty) return alert("Pilih item dan jumlah.");
             
-            // Check if exists, update qty if so
             const existing = currentSetComposition.find(i => i.kode === kode);
             if (existing) {
                 existing.qty += qty;
@@ -830,7 +814,6 @@
             masterSets.forEach(set => {
                 const tr = document.createElement('tr');
                 
-                // Build composition summary string
                 const summary = set.items.map(i => {
                     const item = masterItems.find(x => x.kode === i.kode);
                     return `${item ? item.nama : i.kode} (${i.qty})`;
@@ -869,7 +852,7 @@
                 masterSets.push(newSet);
             }
 
-            saveToCloud(); // CLOUD SAVE
+            saveToCloud();
             renderMasterSetTable();
             closeModal('setModal');
             showToast("Master Set disimpan.");
@@ -878,7 +861,7 @@
         function deleteSet(id) {
             if(confirm("Hapus set ini?")) {
                 masterSets = masterSets.filter(s => s.id !== id);
-                saveToCloud(); // CLOUD SAVE
+                saveToCloud();
                 renderMasterSetTable();
             }
         }
@@ -898,12 +881,12 @@
             roomConfig.bor = parseInt(document.getElementById('configBOR').value);
             roomConfig.ops = parseInt(document.getElementById('configOps').value);
             roomConfig.buffer = parseInt(document.getElementById('configBuffer').value);
-            saveToCloud(); // CLOUD SAVE
+            saveToCloud();
             showToast("Konfigurasi ruangan disimpan.");
         }
 
         // ==========================================
-        // 10. OPNAME & ANALISA LOGIC
+        // 10. OPNAME & FINALIZE LOGIC (UPDATED)
         // ==========================================
         
         function renderOpnameTable() {
@@ -942,7 +925,7 @@
         function updateOpname(kode, val) {
             if (val === "") delete opnameResults[kode];
             else opnameResults[kode] = parseInt(val);
-            saveToCloud(); // CLOUD SAVE (Auto save saat input)
+            saveToCloud(); // Auto save input sementara
             renderOpnameTable(); 
         }
 
@@ -961,8 +944,42 @@
         function resetOpname() {
             if(confirm("Reset semua input fisik?")) {
                 opnameResults = {};
-                saveToCloud(); // CLOUD SAVE
+                saveToCloud();
                 renderOpnameTable();
+            }
+        }
+
+        // --- FITUR BARU: FINALISASI OPNAME ---
+        function finalizeOpname() {
+            const hasInput = Object.keys(opnameResults).length > 0;
+            if (!hasInput) {
+                alert("Belum ada input stok fisik yang diisi.");
+                return;
+            }
+
+            const confirmMsg = "Apakah Anda yakin ingin memperbarui Stok Master berdasarkan hasil hitungan fisik ini?\n\n" +
+                                "Stok Lama akan ditimpa dengan Stok Fisik yang Anda input.\n\n" +
+                                "Stok yang berkurang akan dianggap HILANG/RUSAK/AFKIR.";
+
+            if(confirm(confirmMsg)) {
+                let updatedCount = 0;
+                
+                masterItems.forEach(item => {
+                    const fisik = opnameResults[item.kode];
+                    // Jika ada input fisik, update stokAwal master item
+                    if (fisik !== undefined && fisik !== "") {
+                        item.stokAwal = parseInt(fisik);
+                        updatedCount++;
+                    }
+                });
+
+                // Kosongkan temporary opname
+                opnameResults = {};
+                
+                saveToCloud();
+                renderMasterItemTable(); // Update tabel master stok baru
+                renderOpnameTable(); // Reset tabel opname
+                showToast(`Berhasil! ${updatedCount} item stoknya diperbarui.`);
             }
         }
 
@@ -973,11 +990,8 @@
             const tbody = document.getElementById('anBody');
             tbody.innerHTML = '';
             
-            // Calculate Needs Map
-            const needsMap = {}; // { kode: totalQtyNeeded }
+            const needsMap = {}; 
 
-            // A. Rawat Inap Needs (Per Item)
-            // Formula: Beds * BOR% * Buffer * Rotasi
             const activeBeds = Math.floor(roomConfig.beds * (roomConfig.bor / 100));
             const buffer = roomConfig.buffer;
             
@@ -985,17 +999,10 @@
                 const rotation = item.rotasi || 1.0;
                 const neededPerCycle = activeBeds * rotation;
                 const totalNeeded = Math.ceil(neededPerCycle * buffer);
-                
-                if (needsMap[item.kode]) needsMap[item.kode] += totalNeeded;
-                else needsMap[item.kode] = totalNeeded;
+                needsMap[item.kode] = totalNeeded;
             });
 
-            // B. Operation Needs (Based on Sets)
-            // Formula: Ops * Buffer * SetComposition
             const opsDaily = roomConfig.ops;
-            // Assuming 1 active set per operation for simplicity, or we sum all sets?
-            // Requirement says: "Operasi menggunakan MASTER SET OPERASI". Let's sum ALL sets for "Total Hospital Operation Needs".
-            
             masterSets.forEach(set => {
                 set.items.forEach(comp => {
                     const totalOpsNeed = opsDaily * buffer * comp.qty;
@@ -1004,13 +1011,12 @@
                 });
             });
 
-            // Render Analysis Table
             let deficitCount = 0;
             let deficitCost = 0;
             let surplusCount = 0;
 
             masterItems.forEach(item => {
-                const currentStock = item.stokAwal; // Using Master Stock as base
+                const currentStock = item.stokAwal;
                 const needed = needsMap[item.kode] || 0;
                 const diff = currentStock - needed;
 
@@ -1053,20 +1059,13 @@
         }
 
         function exportAnalysisExcel() {
-            runAnalysis(); // Ensure fresh calculation
+            runAnalysis(); 
             alert("Fitur export analisa segera hadir.");
         }
 
         // Utils
         function formatRupiah(num) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
-        }
-
-        function initUI() {
-            renderRoomConfig();
-            renderMasterItemTable();
-            renderMasterSetTable();
-            renderOpnameTable();
         }
 
         function showToast(msg) {
