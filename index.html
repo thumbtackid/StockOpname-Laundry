@@ -3,811 +3,972 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V3.0 Manual Set)</title>
+    <title>Sistem Linen RS Charlie (V4.0 Professional)</title>
     
-    <!-- Font: Inter -->
+    <!-- Assets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- SheetJS -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* =========================================
-           DESIGN TOKENS
-           ========================================= */
+        /* --- CSS VARIABLES & RESET --- */
         :root {
             --primary: #0284c7; --primary-dark: #0369a1; --primary-light: #e0f2fe;
             --success: #10b981; --success-bg: #dcfce7; --success-text: #166534;
             --warning: #f59e0b; --warning-bg: #fef3c7; --warning-text: #92400e;
             --danger: #ef4444; --danger-bg: #fee2e2; --danger-text: #991b1b;
             --info: #64748b; --info-bg: #f1f5f9; --info-text: #475569;
-            
-            --bg-body: #f1f5f9; --bg-surface: #ffffff; --bg-hover: #f8fafc;
-            --border-light: #e2e8f0; --border-focus: #0284c7;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
-            --text-primary: #0f172a; --text-secondary: #64748b; --text-tertiary: #94a3b8;
-            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+            --bg-body: #f8fafc; --bg-surface: #ffffff; --border: #e2e8f0;
+            --text-main: #0f172a; --text-muted: #64748b;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
-
-        /* =========================================
-           RESET & BASE
-           ========================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        body { font-family: var(--font-main); background-color: var(--bg-body); color: var(--text-primary); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; padding: 20px; }
-        ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary-light); outline-offset: 1px; border-color: var(--primary) !important; }
-        button { cursor: pointer; font-family: inherit; transition: all 0.2s; }
-        input, select, textarea { font-family: inherit; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; padding: 20px; }
 
-        /* =========================================
-           LAYOUT
-           ========================================= */
-        .app-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        /* --- LAYOUT COMPONENTS --- */
+        .app-container { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: 250px 1fr; gap: 24px; min-height: 90vh; }
         
-        /* Header */
-        header { background: var(--bg-surface); padding: 20px 24px; border-radius: 12px; border: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
-        header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary-dark), var(--primary)); }
-        .brand { display: flex; flex-direction: column; gap: 4px; }
-        .brand h1 { font-size: 1.35rem; font-weight: 800; color: var(--primary-dark); letter-spacing: -0.03em; }
-        .brand p { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
+        /* Sidebar Navigation */
+        .sidebar { background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; height: fit-content; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px; }
+        .nav-item { padding: 12px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-muted); transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover { background: var(--info-bg); color: var(--primary); }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2); }
 
-        /* Tabs */
-        .tabs { display: flex; gap: 4px; background: #e2e8f0; padding: 4px; border-radius: 10px; width: 100%; overflow-x: auto; }
-        .tab-btn { padding: 10px 20px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-secondary); font-size: 0.85rem; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .tab-btn:hover { background: rgba(255,255,255, 0.5); color: var(--text-primary); }
-        .tab-btn.active { background: var(--bg-surface); color: var(--primary-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-weight: 700; }
-
-        /* Views & Cards */
-        .section-view { display: none; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .section-view.active { display: block; }
-        @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
+        /* Main Content */
+        .main-content { display: flex; flex-direction: column; gap: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary-dark); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
         
-        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .card { background: var(--bg-surface); padding: 20px; border-radius: 10px; border: 1px solid var(--border-light); box-shadow: var(--shadow-sm); }
-        .card label { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
-        .card .value { font-size: 1.75rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
-        .card.text-danger .value { color: var(--danger); } .card.text-success .value { color: var(--success); } .card.text-primary .value { color: var(--primary-dark); }
+        /* Cards & Tables */
+        .card { background: var(--bg-surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px; box-shadow: var(--shadow-sm); }
+        .grid-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .stat-val { font-size: 2rem; font-weight: 800; color: var(--text-main); margin-top: 5px; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--info-bg); font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        tr:hover { background: #f8fafc; }
 
-        /* Toolbar */
-        .toolbar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; background: var(--bg-surface); padding: 16px; border-radius: 10px; border: 1px solid var(--border-light); align-items: center; }
-        .search-box { flex-grow: 1; min-width: 250px; position: relative; }
-        .search-box input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: var(--bg-body); }
-        .search-box::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; font-size: 0.9rem; }
-
+        /* Forms & Inputs */
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; transition: border 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .input-error { border-color: var(--danger) !important; background-color: var(--danger-bg); }
+        
         /* Buttons */
-        .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-primary { background-color: var(--primary); color: white; } .btn-primary:hover { background-color: var(--primary-dark); }
-        .btn-success { background-color: var(--success); color: white; } .btn-success:hover { background-color: #059669; }
-        .btn-secondary { background-color: #fff; color: var(--text-secondary); border: 1px solid var(--border-light); } .btn-secondary:hover { background-color: #f8fafc; }
-        .btn-danger { background-color: #fff; color: var(--danger); border: 1px solid #fecdd3; } .btn-danger:hover { background-color: var(--danger-bg); }
-        .btn-sm { padding: 6px 12px; font-size: 0.75rem; border-radius: 6px; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn:hover { filter: brightness(90%); transform: translateY(-1px); }
 
-        /* Table */
-        .table-container { background: var(--bg-surface); border-radius: 10px; border: 1px solid var(--border-light); overflow: hidden; box-shadow: var(--shadow-sm); }
-        .table-scroll-wrapper { overflow-x: auto; max-height: 65vh; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; text-align: left; }
-        thead { position: sticky; top: 0; background-color: #f8fafc; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        th { padding: 14px 16px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; border-bottom: 2px solid var(--border-light); white-space: nowrap; }
-        td { padding: 14px 16px; border-bottom: 1px solid var(--border-light); color: var(--text-primary); vertical-align: middle; font-size: 0.9rem; }
-        tr:last-child td { border-bottom: none; } tr:hover { background-color: #f8fafc; }
-        .col-center { text-align: center; } .col-right { text-align: right; } .text-mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; font-size: 0.8rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: var(--primary-dark); }
+        /* Utilities */
+        .hidden { display: none !important; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .text-success { color: var(--success); } .text-danger { color: var(--danger); } .text-warning { color: var(--warning); }
+        .tooltip { position: relative; cursor: help; border-bottom: 1px dotted var(--text-muted); }
         
-        .badge { display: inline-flex; align-items: center; justify-content: center; padding: 4px 10px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; min-width: 60px; letter-spacing: 0.025em; }
-        .status-ok { background: var(--success-bg); color: var(--success-text); border: 1px solid #bbf7d0; }
-        .status-warning { background: var(--warning-bg); color: var(--warning-text); border: 1px solid #fde68a; }
-        .status-danger { background: var(--danger-bg); color: var(--danger-text); border: 1px solid #fecaca; }
-        .status-info { background: var(--info-bg); color: var(--info-text); border: 1px solid #e2e8f0; }
+        /* Toast Notification */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { min-width: 300px; padding: 16px; background: white; border-left: 4px solid var(--primary); box-shadow: var(--shadow-md); border-radius: 4px; animation: slideIn 0.3s; display: flex; justify-content: space-between; align-items: center; }
+        .toast.error { border-left-color: var(--danger); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
-        .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
-        .modal-content { background: var(--bg-surface); width: 100%; max-width: 600px; border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-light); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; }
-        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
-        .modal-header h2 { font-size: 1.1rem; font-weight: 700; color: var(--primary-dark); }
-        .close-modal { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary); line-height: 1; }
-        .modal-body { padding: 24px; overflow-y: auto; } .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-light); background: #f8fafc; display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+        .modal-overlay.open { display: flex; }
+        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 12px; padding: 24px; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; }
         
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } .full-width { grid-column: span 2; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
-        .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 0.9rem; background: #fff; }
-        .form-group small { font-size: 0.75rem; color: var(--text-tertiary); }
-        .readonly-field { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; border-color: #e2e8f0; }
+        /* Tooltip Info */
+        .info-icon { font-size: 0.8rem; color: var(--info); margin-left: 5px; cursor: pointer; }
 
-        /* Toast */
-        #toast { visibility: hidden; min-width: 300px; background-color: #1e293b; color: #fff; text-align: center; border-radius: 8px; padding: 12px 20px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); font-size: 0.9rem; font-weight: 500; box-shadow: var(--shadow-lg); opacity: 0; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
-        #toast::before { content: '✓'; font-weight: 700; color: var(--success); }
-
-        /* Loading */
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        @media (max-width: 1024px) { .app-container { max-width: 100%; } header { flex-direction: column; align-items: flex-start; } }
-        @media (max-width: 768px) { body { padding: 12px; } .toolbar { flex-direction: column; align-items: stretch; } .form-grid { grid-template-columns: 1fr; } .btn { width: 100%; } }
+        @media (max-width: 768px) {
+            .app-container { grid-template-columns: 1fr; }
+            .sidebar { flex-direction: row; overflow-x: auto; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Loading Screen -->
-    <div id="loadingOverlay">
-        <div class="spinner"></div>
-        <h3 style="color:var(--primary);">Memuat Sistem...</h3>
-    </div>
-
     <div class="app-container">
-        <!-- Notification Toast -->
-        <div id="toast">Notifikasi</div>
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div style="padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 10px;">
+                <h3 style="color: var(--primary-dark);">Sistem Linen</h3>
+                <small style="color: var(--text-muted);">V4.0 Professional</small>
+            </div>
+            <div class="nav-item active" onclick="App.switchView('dashboard')">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </div>
+            <div class="nav-item" onclick="App.switchView('master')">
+                <i class="fas fa-box-open"></i> Master Linen
+            </div>
+            <div class="nav-item" onclick="App.switchView('opname')">
+                <i class="fas fa-clipboard-check"></i> Stock Opname
+            </div>
+            <div class="nav-item" onclick="App.switchView('analisa')">
+                <i class="fas fa-calculator"></i> Analisa Kebutuhan
+            </div>
+            <div class="nav-item" onclick="App.switchView('config')">
+                <i class="fas fa-cogs"></i> Konfigurasi RS
+            </div>
+            <div class="nav-item" onclick="App.switchView('audit')">
+                <i class="fas fa-history"></i> Riwayat Audit
+            </div>
+        </nav>
 
-        <!-- Modal Form (Item/Set) -->
-        <div id="itemModal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 id="modalTitle">Kelola Data Linen</h2>
-                    <button class="close-modal" onclick="closeModal('itemModal')">&times;</button>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div>
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p id="currentDate" class="text-muted"></p>
                 </div>
-                <div class="modal-body">
-                    <form id="itemForm" onsubmit="saveDataItem(event)">
-                        <input type="hidden" id="editIndex">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Kategori</label>
-                                <input type="text" id="inpKategori" list="listKategori" required placeholder="Contoh: Sprei">
-                                <datalist id="listKategori">
-                                    <option value="SPR"> <option value="SLM"> <option value="SB"> <option value="DKN"> <option value="JDK"> <option value="BED"> <option value="SET">
-                                </datalist>
-                            </div>
-                            <div class="form-group">
-                                <label>Nama Item / Nama Set</label>
-                                <input type="text" id="inpNama" required placeholder="Nama Lengkap">
-                            </div>
+                <div>
+                    <button class="btn btn-outline" onclick="App.backupData()"><i class="fas fa-download"></i> Backup Data</button>
+                </div>
+            </header>
 
-                            <div class="form-group full-width" style="background: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
-                                <label style="color:var(--primary-dark)">Kode Otomatis (Read-Only)</label>
-                                <input type="text" id="inpKode" class="readonly-field" placeholder="LIN-XXX-000" readonly>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Tipe</label>
-                                <select id="inpTipe" onchange="toggleSetInput()">
-                                    <option value="item">Item Satuan</option>
-                                    <option value="set">Set (Paket)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Harga Satuan (Rp)</label>
-                                <input type="number" id="inpHarga" min="0" required>
-                                <small>Harga per unit (untuk Set ini estimasi rata-rata).</small>
-                            </div>
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-section">
+                <div class="grid-dashboard">
+                    <div class="stat-card">
+                        <label>Total Item Linen</label>
+                        <div class="stat-val" id="dash-total-items">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Item Rusak/Afkir</label>
+                        <div class="stat-val text-danger" id="dash-damaged-items">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Set Ready</label>
+                        <div class="stat-val text-success" id="dash-sets-ready">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <label>Biaya Penggantian</label>
+                        <div class="stat-val text-warning" id="dash-replacement-cost">Rp 0</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-exclamation-triangle text-warning"></i> Peringatan Kritis</h3>
+                    <div id="dashboard-warnings" style="margin-top: 15px;">
+                        <!-- Javascript will populate this -->
+                    </div>
+                </div>
+            </section>
 
-                            <div class="form-group full-width" id="sectionRotasi">
-                                <label>Rasio Rotasi (Analisa)</label>
-                                <input type="number" id="inpRotasi" value="1.0" step="0.5" min="0.5">
-                                <small>Default 1.0. Gunakan ini untuk analisa kebutuhan harian.</small>
-                            </div>
+            <!-- VIEW: MASTER LINEN -->
+            <section id="view-master" class="view-section hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <input type="text" id="masterSearch" placeholder="Cari kode/nama..." style="width: 300px;" oninput="AppUI.renderMasterTable()">
+                        <button class="btn btn-primary" onclick="AppUI.openModal('add')"><i class="fas fa-plus"></i> Tambah Linen</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>Nama</th>
+                                <th>Tipe</th>
+                                <th>Stok Baik</th>
+                                <th>Stok Rusak</th>
+                                <th>Stok Fisik (Set)</th>
+                                <th>Harga</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
 
-                            <!-- Bagian Komposisi Set (Input Manual) -->
-                            <div class="form-group full-width" id="sectionSetInput" style="display:none; border: 1px solid var(--border-light); padding:15px; border-radius:8px; background:#f8fafc;">
-                                <label style="color:var(--primary-dark); margin-bottom:5px; display:block;">Isi Komposisi Set (Manual)</label>
-                                <textarea id="inpSetKomposisi" rows="3" placeholder="Tulis nama item, pisahkan dengan koma.&#10;Contoh: Sprei 180, Sarung Bantal, Selimut"></textarea>
-                                <small style="display:block; margin-top:5px;">*Sistem akan otomatis mencari stok item berdasarkan nama yang Anda tulis.</small>
-                            </div>
+            <!-- VIEW: STOCK OPNAME -->
+            <section id="view-opname" class="view-section hidden">
+                <div class="card">
+                    <div class="alert-box" style="background: #fffbeb; border: 1px solid #fcd34d; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <strong><i class="fas fa-info-circle"></i> Aturan:</strong> Input jumlah rusak/hilang. Stok Baik akan otomatis dikurangi.
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <input type="text" id="opnameSearch" placeholder="Cari item..." style="width: 300px;" oninput="AppUI.renderOpnameTable()">
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-outline" onclick="AppUI.resetOpname()">Reset</button>
+                            <button class="btn btn-success" onclick="AppUI.finalizeOpname()">Finalisasi</button>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('itemModal')">Batal</button>
-                    <button type="submit" class="btn btn-primary" onclick="document.getElementById('itemForm').dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}))">Simpan Data</button>
-                </div>
-            </div>
-        </div>
+                    </div>
 
-        <!-- Header -->
-        <header>
-            <div class="brand">
-                <h1>Sistem Linen RS Charlie</h1>
-                <p>Integrated Item & Set Management V3.0 (Manual Input)</p>
-            </div>
-            <div class="meta-info">
-                <label>
-                    Tanggal
-                    <input type="date" id="opnameDate">
-                </label>
-            </div>
-        </header>
-
-        <!-- Navigation Tabs -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('master')">📦 Master Item & Set</button>
-            <button class="tab-btn" onclick="switchTab('opname')">📊 Stock Opname (Input Rusak/Hilang)</button>
-            <button class="tab-btn" onclick="switchTab('ruangan')">🏥 Config Ruangan</button>
-            <button class="tab-btn" onclick="switchTab('analisa')">📉 Analisa Kebutuhan</button>
-        </div>
-
-        <!-- VIEW 1: MASTER DATA (GABUNGAN) -->
-        <section id="view-master" class="section-view active">
-            <div class="toolbar">
-                <div class="search-box"><input type="text" id="masterSearch" placeholder="Cari kode, nama, atau tipe..." oninput="renderMasterTable()"></div>
-                <button class="btn btn-primary" onclick="openModal('item')">➕ Tambah Baru</button>
-                <button class="btn btn-secondary" onclick="downloadExcel()">📥 Download Excel</button>
-            </div>
-
-            <div class="table-container">
-                <div class="table-scroll-wrapper">
-                    <table id="masterTable">
+                    <table>
                         <thead>
                             <tr>
-                                <th>Kode</th><th>Nama</th><th>Kategori</th>
-                                <th>Tipe</th><th>Stok Baik</th><th>Stok Rusak</th>
-                                <th>Total</th><th>Harga</th><th>Aksi</th>
+                                <th>Kode</th>
+                                <th>Nama</th>
+                                <th>Stok Baik (Awal)</th>
+                                <th>Input Rusak/Hilang</th>
+                                <th>Sisa Baik</th>
+                                <th>Catatan</th>
                             </tr>
                         </thead>
-                        <tbody id="masterBody"></tbody>
+                        <tbody id="opnameTableBody"></tbody>
                     </table>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- VIEW 2: STOCK OPNAME -->
-        <section id="view-opname" class="section-view">
-            <div class="card" style="border-left:4px solid var(--warning);">
-                <h3 style="font-size:1rem; color:var(--warning-text);">Input Kondisi Fisik (Rusak/Hilang)</h3>
-                <p style="font-size:0.85rem; color:var(--text-secondary);">
-                    1. Input jumlah barang yang <strong>RUSAK, HILANG, atau AFKIR</strong>.<br>
-                    2. Input ini akan otomatis mengurangi Stok Baik saat difinalisasi.
-                </p>
-            </div>
+            <!-- VIEW: ANALISA -->
+            <section id="view-analisa" class="view-section hidden">
+                <div class="card">
+                    <h3>Parameter Analisa</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;">
+                        <div>
+                            <label>Faktor Kehilangan (%)</label>
+                            <input type="number" id="param-loss-factor" value="5" min="0">
+                        </div>
+                        <div>
+                            <label>Umur Linen (Bulan)</label>
+                            <input type="number" id="param-linen-age" value="24" min="1">
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" onclick="App.runAnalysis()"><i class="fas fa-calculator"></i> Hitung Kebutuhan</button>
+                        </div>
+                    </div>
 
-            <div class="toolbar">
-                <div class="search-box"><input type="text" id="opSearch" placeholder="🔍 Cari item..." oninput="renderOpnameTable()"></div>
-                <button class="btn btn-secondary" onclick="resetOpname()">↺ Reset Input</button>
-                <button class="btn btn-success" onclick="finalizeOpname()">✅ Finalisasi & Update Stok</button>
-                <button class="btn btn-primary" onclick="exportOpnameExcel()">📥 Export Laporan</button>
-            </div>
-
-            <div class="table-container">
-                <div class="table-scroll-wrapper">
-                    <table id="opTable">
+                    <table id="analysisTable">
                         <thead>
                             <tr>
-                                <th>Kode</th><th>Nama</th>
-                                <th>Stok Awal (Baik)</th>
-                                <th style="background:var(--warning-bg)">Input Rusak/Hilang</th>
-                                <th>Stok Akhir (Baik)</th><th>Selisih</th><th>Keterangan</th>
+                                <th>Status</th>
+                                <th>Kode</th>
+                                <th>Nama</th>
+                                <th>Stok Saat Ini</th>
+                                <th>Kebutuhan (RI + OK)</th>
+                                <th>Selisih</th>
+                                <th>Rekomendasi</th>
                             </tr>
                         </thead>
-                        <tbody id="opBody"></tbody>
+                        <tbody id="analysisBody"></tbody>
                     </table>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- VIEW 3: RUANGAN & CONFIG -->
-        <section id="view-ruangan" class="section-view">
-            <div class="summary-cards">
+            <!-- VIEW: CONFIG -->
+            <section id="view-config" class="view-section hidden">
                 <div class="card">
-                    <label>Bed Rawat Inap</label>
-                    <input type="number" id="configBeds" value="100" style="font-size:1.5rem; border:none; background:transparent; font-weight:700; color:var(--primary-dark); width:100px;">
+                    <h3>Konfigurasi Rumah Sakit</h3>
+                    <div style="max-width: 500px; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Jumlah Bed Rawat Inap <i class="fas fa-info-circle info-icon" title="Total kapasitas bed aktif"></i></label>
+                            <input type="number" id="cfg-beds">
+                        </div>
+                        <div class="form-group">
+                            <label>BOR (Bed Occupancy Rate) % <i class="fas fa-info-circle info-icon" title="Rata-rata tingkat hunian bed"></i></label>
+                            <input type="number" id="cfg-bor">
+                        </div>
+                        <div class="form-group">
+                            <label>Rata-rata Operasi / Hari <i class="fas fa-info-circle info-icon" title="Estimasi operasi mayor per hari"></i></label>
+                            <input type="number" id="cfg-ops">
+                        </div>
+                        <div class="form-group">
+                            <label>Buffer Laundry (Siklus) <i class="fas fa-info-circle info-icon" title="Jumlah set cadangan untuk backup (Safety Stock)"></i></label>
+                            <input type="number" id="cfg-buffer">
+                        </div>
+                        <button class="btn btn-primary" onclick="App.saveConfig()">Simpan Konfigurasi</button>
+                    </div>
                 </div>
-                <div class="card">
-                    <label>BOR (%)</label>
-                    <input type="number" id="configBOR" value="70" style="font-size:1.5rem; border:none; background:transparent; font-weight:700; color:var(--primary-dark); width:80px;">
-                </div>
-                <div class="card">
-                    <label>Operasi / Hari</label>
-                    <input type="number" id="configOps" value="20" style="font-size:1.5rem; border:none; background:transparent; font-weight:700; color:var(--primary-dark); width:80px;">
-                </div>
-                <div class="card">
-                    <label>Buffer (Siklus)</label>
-                    <input type="number" id="configBuffer" value="3" style="font-size:1.5rem; border:none; background:transparent; font-weight:700; color:var(--warning-text); width:80px;">
-                </div>
-            </div>
-            <div style="text-align: right; margin-top: 20px;">
-                <button class="btn btn-primary" onclick="saveRoomConfig()">Simpan Konfigurasi</button>
-            </div>
-        </section>
+            </section>
 
-        <!-- VIEW 4: ANALISA KEBUTUHAN -->
-        <section id="view-analisa" class="section-view">
-            <div class="summary-cards">
-                <div class="card text-danger"><label>Total Rusak/Afkir</label><div class="value" id="an-damagedCount">0</div></div>
-                <div class="card text-danger"><label>Biaya Penggantian</label><div class="value" id="an-replacementCost">Rp 0</div></div>
-            </div>
-
-            <div class="toolbar">
-                <button class="btn btn-primary" onclick="runAnalysis()">🔄 Hitung Analisa Otomatis</button>
-                <button class="btn btn-secondary" onclick="exportAnalysisExcel()">📥 Download Laporan</button>
-            </div>
-
-            <div class="table-container">
-                <div class="table-scroll-wrapper">
-                    <table id="anTable">
+            <!-- VIEW: AUDIT -->
+            <section id="view-audit" class="view-section hidden">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Riwayat Aktivitas</h3>
+                        <button class="btn btn-outline" onclick="AuditLog.exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                    </div>
+                    <table style="font-size: 0.85rem;">
                         <thead>
                             <tr>
-                                <th>Status</th><th>Kode</th><th>Nama Item / Set</th>
-                                <th>Stok Baik</th><th>Stok Rusak</th>
-                                <th>Kebutuhan</th><th>Selisih</th><th>Total Harga</th>
+                                <th>Waktu</th>
+                                <th>Aksi</th>
+                                <th>Detail</th>
+                                <th>User</th>
                             </tr>
                         </thead>
-                        <tbody id="anBody"></tbody>
+                        <tbody id="auditTableBody"></tbody>
                     </table>
                 </div>
-            </div>
-            <div style="margin-top:12px; font-size:0.8rem; color:var(--text-tertiary);">
-                *Harga untuk Set dihitung otomatis berdasarkan komponennya.
-            </div>
-        </section>
+            </section>
 
+        </main>
     </div>
+
+    <!-- MODAL FORM -->
+    <div id="itemModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;" id="modalTitle">Tambah Linen</h2>
+            <form id="linenForm" onsubmit="AppUI.saveItem(event)">
+                <input type="hidden" id="inp-code">
+                <div class="form-group">
+                    <label>Tipe</label>
+                    <select id="inp-type" onchange="AppUI.toggleSetInput(this.value)">
+                        <option value="item">Item Satuan</option>
+                        <option value="set">Set (Paket)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nama Item / Set</label>
+                    <input type="text" id="inp-name" required placeholder="Contoh: Sprei 180">
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <input type="text" id="inp-category" list="listCategory" placeholder="Contoh: Sprei">
+                    <datalist id="listCategory"></datalist>
+                </div>
+                <div class="form-group">
+                    <label>Harga Satuan (Rp)</label>
+                    <input type="number" id="inp-price" min="0">
+                </div>
+                
+                <!-- Logic Set -->
+                <div id="set-logic-area" class="hidden" style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <label>Komposisi Set (Manual Input) <i class="fas fa-info-circle info-icon" title="Tulis nama item penyusun, pisahkan dengan koma."></i></label>
+                    <textarea id="inp-composition" rows="3" placeholder="Contoh: Sprei 180, Sarung Bantal, Selimut"></textarea>
+                    <small class="text-muted">Stok Set akan dihitung berdasarkan stok item terendah di dalamnya.</small>
+                </div>
+
+                <!-- Logic Item -->
+                <div id="item-logic-area">
+                    <div class="form-group">
+                        <label>Stok Awal (Baik)</label>
+                        <input type="number" id="inp-stock" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Rasio Rotasi <i class="fas fa-info-circle info-icon" title="Berapa kali linen ini diganti per siklus (1 Bed = 1 Sprei)"></i></label>
+                        <input type="number" id="inp-rotation" value="1.0" step="0.5" min="0.5">
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn btn-outline" onclick="AppUI.closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
 
     <script>
-        // ==========================================
-        // 1. CONFIG & DEFAULT DATA
-        // ==========================================
-        const defaultItems = [
-            { kode: "LIN-SPR-001", nama: "Sprei Polos 180", kategori: "SPR", tipe: "item", stokAwal: 100, stokRusak: 0, harga: 85000, rotasi: 1.0, komposisi: "" },
-            { kode: "LIN-SB-001", nama: "Sarung Bantal", kategori: "SB", tipe: "item", stokAwal: 120, stokRusak: 0, harga: 25000, rotasi: 1.0, komposisi: "" },
-            { kode: "LIN-DKN-001", nama: "Duk Kecil", kategori: "DKN", tipe: "item", stokAwal: 200, stokRusak: 5, harga: 30000, rotasi: 2.0, komposisi: "" },
-            { kode: "LIN-JDK-001", nama: "Jas Dokter", kategori: "JDK", tipe: "item", stokAwal: 30, stokRusak: 0, harga: 150000, rotasi: 3.0, komposisi: "" },
-            // Contoh Set dengan Input Manual
-            { kode: "SET-001", nama: "Set Bed Rawat Inap", kategori: "SET", tipe: "set", stokAwal: 10, stokRusak: 0, harga: 110000, rotasi: 1.0, komposisi: "Sprei Polos 180, Sarung Bantal" },
-            { kode: "SET-002", nama: "Set Operasi Mayor", kategori: "SET", tipe: "set", stokAwal: 5, stokRusak: 0, harga: 0, rotasi: 1.0, komposisi: "Jas Dokter, Duk Kecil" }
-        ];
+        /**
+         * ==========================================
+         * MODULE 1: AUDIT & LOGGING
+         * ==========================================
+         */
+        const AuditLog = {
+            KEY: 'linen_audit_logs',
+            
+            add: function(action, details) {
+                const logs = JSON.parse(localStorage.getItem(this.KEY) || '[]');
+                const newLog = {
+                    timestamp: new Date().toLocaleString('id-ID'),
+                    action: action,
+                    details: details,
+                    user: 'Admin' // Hardcoded for local app
+                };
+                logs.unshift(newLog); // Add to top
+                // Limit logs to last 500 to save space
+                if (logs.length > 500) logs.pop();
+                localStorage.setItem(this.KEY, JSON.stringify(logs));
+            },
 
-        const defaultConfig = { beds: 100, bor: 70, ops: 20, buffer: 3 };
+            getAll: function() {
+                return JSON.parse(localStorage.getItem(this.KEY) || '[]');
+            },
 
-        let appData = {
-            items: [],
-            config: {}
+            exportToExcel: function() {
+                const logs = this.getAll();
+                const ws = XLSX.utils.json_to_sheet(logs);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "AuditLog");
+                XLSX.writeFile(wb, "Audit_Linen.xlsx");
+            }
         };
 
-        let opnameResults = {}; // { kode: { rusak: 0, ket: '' } }
-
-        // ==========================================
-        // 2. LOCAL STORAGE (PERSISTENCE)
-        // ==========================================
-        
-        function loadData() {
-            const storedData = localStorage.getItem('linenRS_Data');
+        /**
+         * ==========================================
+         * MODULE 2: DATA STORE (CRUD & VALIDATION)
+         * ==========================================
+         */
+        const DataStore = {
+            KEY_ITEMS: 'linen_items_v4',
+            KEY_CONFIG: 'linen_config_v4',
             
-            if (storedData) {
-                const parsed = JSON.parse(storedData);
-                appData.items = parsed.items || [];
-                appData.config = parsed.config || JSON.parse(JSON.stringify(defaultConfig));
-            } else {
-                // Fallback Default jika pertama kali buka
-                appData.items = JSON.parse(JSON.stringify(defaultItems));
-                appData.config = JSON.parse(JSON.stringify(defaultConfig));
-            }
+            defaults: {
+                items: [
+                    { code: 'LIN-SPR-001', name: 'Sprei 180', type: 'item', category: 'Sprei', stock: 100, damaged: 0, price: 85000, rotation: 1.0, composition: '' },
+                    { code: 'LIN-SB-001', name: 'Sarung Bantal', type: 'item', category: 'Sarung', stock: 120, damaged: 0, price: 25000, rotation: 1.0, composition: '' },
+                    { code: 'SET-OP-001', name: 'Set Operasi Mayor', type: 'set', category: 'Set', stock: 0, damaged: 0, price: 0, rotation: 0, composition: 'Jas Dokter, Duk Kecil' }
+                ],
+                config: { beds: 100, bor: 70, ops: 20, buffer: 3 }
+            },
 
-            initUI();
-            document.getElementById('loadingOverlay').style.display = 'none';
-            showToast("✅ Sistem Siap Digunakan");
-        }
+            getData: function() {
+                const items = JSON.parse(localStorage.getItem(this.KEY_ITEMS)) || this.defaults.items;
+                const config = JSON.parse(localStorage.getItem(this.KEY_CONFIG)) || this.defaults.config;
+                return { items, config };
+            },
 
-        function saveDataLocally() {
-            localStorage.setItem('linenRS_Data', JSON.stringify(appData));
-            console.log("Data tersimpan ke LocalStorage");
-        }
+            saveData: function(items, config) {
+                localStorage.setItem(this.KEY_ITEMS, JSON.stringify(items));
+                if (config) localStorage.setItem(this.KEY_CONFIG, JSON.stringify(config));
+            },
 
-        function saveDataLocallyWithToast() {
-            saveDataLocally();
-            showToast("💾 Data tersimpan.");
-        }
+            // --- VALIDATION ENGINE ---
+            validateComposition: function(compositionText, currentItems) {
+                const errors = [];
+                if (!compositionText) return errors;
+                
+                const parts = compositionText.split(',').map(s => s.trim()).filter(s => s);
+                parts.forEach(part => {
+                    const found = currentItems.find(i => i.type === 'item' && i.name.toLowerCase().includes(part.toLowerCase()));
+                    if (!found) errors.push(`Item "${part}" tidak ditemukan di master item satuan.`);
+                });
+                return errors;
+            },
 
-        // ==========================================
-        // 3. CORE LOGIC
-        // ==========================================
-        
-        function generateAutoCode(category) {
-            const catPrefix = category.toUpperCase();
-            const itemsInCat = appData.items.filter(i => i.kode.startsWith(`LIN-${catPrefix}-`));
-            let maxNum = 0;
-            itemsInCat.forEach(i => {
-                const parts = i.kode.split('-');
-                if (parts.length === 3) {
-                    const num = parseInt(parts[2], 10);
-                    if (!isNaN(num) && num > maxNum) maxNum = num;
+            generateCode: function(category, type) {
+                const prefix = type === 'set' ? 'SET' : 'LIN';
+                const items = this.getData().items;
+                const filtered = items.filter(i => i.code.startsWith(prefix));
+                let max = 0;
+                filtered.forEach(i => {
+                    const num = parseInt(i.code.split('-').pop());
+                    if (!isNaN(num) && num > max) max = num;
+                });
+                const next = max + 1;
+                return `${prefix}-${category.substring(0,3).toUpperCase()}-${String(next).padStart(3, '0')}`;
+            },
+
+            addItem: function(newItem) {
+                const data = this.getData();
+                // Validasi Duplikat Nama
+                const dup = data.items.find(i => i.name.toLowerCase() === newItem.name.toLowerCase() && i.code !== newItem.code);
+                if (dup) throw new Error(`Item dengan nama "${newItem.name}" sudah ada!`);
+                
+                if (newItem.code) {
+                    // Edit
+                    const idx = data.items.findIndex(i => i.code === newItem.code);
+                    if(idx !== -1) {
+                        // Preserve stock if editing existing item
+                        newItem.stock = data.items[idx].stock;
+                        newItem.damaged = data.items[idx].damaged;
+                        data.items[idx] = newItem;
+                        AuditLog.add('EDIT', `Edit item ${newItem.code} - ${newItem.name}`);
+                    }
+                } else {
+                    // Add New
+                    newItem.code = this.generateCode(newItem.category, newItem.type);
+                    if (newItem.type === 'item') newItem.stock = newItem.stock || 0; // Default 0 if new
+                    data.items.push(newItem);
+                    AuditLog.add('CREATE', `Tambah item ${newItem.code} - ${newItem.name}`);
                 }
-            });
-            const nextNum = maxNum + 1;
-            const paddedNum = nextNum.toString().padStart(3, '0');
-            return `LIN-${catPrefix}-${paddedNum}`;
-        }
+                this.saveData(data.items);
+                return newItem.code;
+            },
 
-        // ==========================================
-        // 4. UI FUNCTIONS
-        // ==========================================
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-' + tabId).classList.add('active');
-            event.target.classList.add('active');
-
-            if (tabId === 'master') renderMasterTable();
-            if (tabId === 'opname') renderOpnameTable();
-        }
-
-        function initUI() {
-            renderRoomConfig();
-            renderMasterTable();
-        }
-
-        function openModal(type, id = null) {
-            const modal = document.getElementById('itemModal');
-            const title = document.getElementById('modalTitle');
-            document.getElementById('itemForm').reset();
-            
-            if (id) {
-                const item = appData.items.find(i => i.kode === id);
-                title.textContent = "Edit Data Linen";
-                document.getElementById('editIndex').value = id;
-                document.getElementById('inpKode').value = item.kode;
-                document.getElementById('inpKategori').value = item.kategori;
-                document.getElementById('inpNama').value = item.nama;
-                document.getElementById('inpTipe').value = item.tipe;
-                document.getElementById('inpHarga').value = item.harga || 0;
-                document.getElementById('inpRotasi').value = item.rotasi || 1.0;
-                document.getElementById('inpSetKomposisi').value = item.komposisi || "";
-            } else {
-                title.textContent = "Tambah Baru";
-                document.getElementById('editIndex').value = "";
-                document.getElementById('inpKode').value = "";
-                document.getElementById('inpKategori').value = "";
-                document.getElementById('inpTipe').value = "item";
-            }
-
-            toggleSetInput();
-            modal.classList.add('open');
-        }
-
-        function toggleSetInput() {
-            const tipe = document.getElementById('inpTipe').value;
-            const setInput = document.getElementById('sectionSetInput');
-            const rotasiSection = document.getElementById('sectionRotasi');
-            
-            if (tipe === 'set') {
-                setInput.style.display = 'block';
-                rotasiSection.style.display = 'none';
-            } else {
-                setInput.style.display = 'none';
-                rotasiSection.style.display = 'block';
-            }
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.reduce
-            document.getElementById(modalId).classList.remove('open');
-        }
-
-        // ==========================================
-        // 5. MASTER DATA (GABUNGAN)
-        // ==========================================
-
-        function renderMasterTable() {
-            const key = document.getElementById('masterSearch').value.toLowerCase();
-            const tbody = document.getElementById('masterBody');
-            tbody.innerHTML = '';
-
-            appData.items.forEach(item => {
-                if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key) && !item.tipe.includes(key)) return;
-
-                const tr = document.createElement('tr');
-                
-                // Badge Tipe
-                const tipeBadge = item.tipe === 'set' ? '<span class="badge status-warning">SET</span>' : '<span class="badge status-info">SATUAN</span>';
-                
-                // Tombol Aksi
-                const actionButtons = `
-                    <button class="btn btn-sm btn-secondary" onclick="openModal('item', '${item.kode}')">✏️</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.kode}')">🗑️</button>
-                `;
-
-                // Harga (Jika Set, hitung manual jika komposisi ada, atau pakai harga input)
-                let displayPrice = formatRupiah(item.harga);
-                if(item.tipe === 'set') {
-                   displayPrice = formatRupiah(item.harga); // Harga satuan (estimasi)
+            deleteItem: function(code) {
+                let data = this.getData();
+                const initialLen = data.items.length;
+                data.items = data.items.filter(i => i.code !== code);
+                if(data.items.length < initialLen) {
+                    this.saveData(data.items);
+                    AuditLog.add('DELETE', `Hapus item ${code}`);
+                    return true;
                 }
+                return false;
+            },
 
-                tr.innerHTML = `
-                    <td class="text-mono" style="color:var(--primary); font-weight:600">${item.kode}</td>
-                    <td style="font-weight:500">${item.nama}</td>
-                    <td><span class="badge status-info">${item.kategori}</span></td>
-                    <td>${tipeBadge}</td>
-                    <td class="col-center" style="font-weight:700; color:var(--success)">${item.stokAwal}</td>
-                    <td class="col-center" style="font-weight:700; color:var(--danger)">${item.stokRusak || 0}</td>
-                    <td class="col-center">${(item.stokAwal + (item.stokRusak||0))}</td>
-                    <td class="col-right">${displayPrice}</td>
-                    <td>${actionButtons}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function saveDataItem(e) {
-            e.preventDefault();
-            const editCode = document.getElementById('editIndex').value;
-            const kategori = document.getElementById('inpKategori').value.trim().toUpperCase();
-            const tipe = document.getElementById('inpTipe').value;
-            
-            let kode;
-            if (editCode) {
-                kode = editCode;
-            } else {
-                kode = generateAutoCode(kategori);
-            }
-
-            const newItem = {
-                kode,
-                kategori,
-                nama: document.getElementById('inpNama').value,
-                tipe,
-                stokAwal: 0, // Default 0 jika baru, akan diisi manual jika perlu
-                stokRusak: 0,
-                harga: parseInt(document.getElementById('inpHarga').value) || 0,
-                rotasi: parseFloat(document.getElementById('inpRotasi').value) || 1.0,
-                komposisi: tipe === 'set' ? document.getElementById('inpSetKomposisi').value : ""
-            };
-
-            if (editCode) {
-                const oldItem = appData.items.find(i => i.kode === editCode);
-                if(oldItem) {
-                    newItem.stokAwal = oldItem.stokAwal;
-                    newItem.stokRusak = oldItem.stokRusak;
+            // Opname Logic
+            processOpname: function(opnameData) { // opnameData: { 'LIN-001': { damaged: 5, note: '' } }
+                const data = this.getData();
+                let changedCount = 0;
+                
+                for (const code in opnameData) {
+                    const input = opnameData[code];
+                    const item = data.items.find(i => i.code === code);
+                    
+                    if (item && input.damaged > 0) {
+                        if (input.damaged > item.stock) {
+                            throw new Error(`Error: Input rusak (${input.damaged}) melebihi stok baik (${item.stock}) untuk item ${item.name}.`);
+                        }
+                        item.stock -= input.damaged;
+                        item.damaged = (item.damaged || 0) + input.damaged;
+                        AuditLog.add('OPNAME', `Opname ${item.code}: -${input.damaged} (Rusak/Hilang). Note: ${input.note}`);
+                        changedCount++;
+                    }
                 }
-                const idx = appData.items.findIndex(i => i.kode === editCode);
-                if (idx !== -1) appData.items[idx] = newItem;
-            } else {
-                appData.items.push(newItem);
-            }
-
-            saveDataLocallyWithToast();
-            renderMasterTable();
-            closeModal('itemModal');
-        }
-
-        function deleteItem(kode) {
-            if(confirm(`Hapus ${kode}?`)) {
-                appData.items = appData.items.filter(i => i.kode !== kode);
-                saveDataLocallyWithToast();
-                renderMasterTable();
-            }
-        }
-
-        // ==========================================
-        // 6. STOCK OPNAME (RUSAK/HILANG)
-        // ==========================================
-        
-        function renderOpnameTable() {
-            const key = document.getElementById('opSearch').value.toLowerCase();
-            const tbody = document.getElementById('opBody');
-            tbody.innerHTML = '';
-
-            appData.items.forEach(item => {
-                if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key)) return;
-
-                const opData = opnameResults[item.kode] || { rusak: 0, ket: '' };
-                const stokAkhir = item.stokAwal - opData.rusak;
                 
-                let badge = '', color = '';
-                if (opData.rusak > 0) { badge = 'BERKURANG'; color='status-danger'; }
-                else { badge = 'AMAN'; color='status-ok'; }
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="text-mono">${item.kode}</td>
-                    <td style="font-weight:500">${item.nama}</td>
-                    <td class="col-center"><b>${item.stokAwal}</b></td>
-                    <td class="col-center" style="background:var(--warning-bg)">
-                        <input type="number" min="0" value="${opData.rusak}" placeholder="0" onchange="updateOpnameInput('${item.kode}', 'rusak', this.value)">
-                    </td>
-                    <td class="col-center" style="font-weight:700; color:var(--primary-dark)">${stokAkhir}</td>
-                    <td class="col-center" style="color:var(--danger); font-weight:bold;">${opData.rusak > 0 ? '-' + opData.rusak : 0}</td>
-                    <td><input type="text" placeholder="Keterangan..." value="${opData.ket}" onchange="updateOpnameInput('${item.kode}', 'ket', this.value)" style="width:100%; border:1px solid #ddd; padding:5px; border-radius:4px;"></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function updateOpnameInput(kode, field, val) {
-            if (!opnameResults[kode]) opnameResults[kode] = { rusak: 0, ket: '' };
-            if (field === 'rusak') {
-                opnameResults[kode].rusak = parseInt(val) || 0;
-            } else {
-                opnameResults[kode].ket = val;
+                this.saveData(data.items);
+                return changedCount;
             }
-            renderOpnameTable(); 
-        }
+        };
 
-        function resetOpname() {
-            if(confirm("Reset semua input?")) {
-                opnameResults = {};
-                renderOpnameTable();
-            }
-        }
-
-        function finalizeOpname() {
-            if (Object.keys(opnameResults).length === 0) {
-                alert("Belum ada input rusak/hilang.");
-                return;
-            }
-
-            if(confirm("Finalisasi akan mengurangi Stok Baik sesuai input Rusak/Hilang. Lanjutkan?")) {
-                let affectedCount = 0;
+        /**
+         * ==========================================
+         * MODULE 3: LINEN LOGIC (CALCULATIONS)
+         * ==========================================
+         */
+        const LinenLogic = {
+            // Hitung Stok Fisik Set (Berdasarkan komposisi)
+            calculateSetStock: function(setItem, allItems) {
+                if (!setItem.composition) return 0;
                 
-                appData.items.forEach(item => {
-                    const opData = opnameResults[item.kode];
-                    if (opData && opData.rusak > 0) {
-                        item.stokAwal -= opData.rusak;
-                        affectedCount++;
+                const parts = setItem.composition.split(',').map(s => s.trim()).filter(s => s);
+                let minStock = Infinity;
+                
+                parts.forEach(part => {
+                    const componentItem = allItems.find(i => i.type === 'item' && i.name.toLowerCase().includes(part.toLowerCase()));
+                    // Jika komponen ditemukan, cek stoknya. Jika tidak ketemu, abaikan (atau bisa return 0 jika strict)
+                    if (componentItem) {
+                        // Ketersediaan set dibatasi oleh stok terendah komponennya
+                        const availableSets = Math.floor(componentItem.stock / 1); // Asumsi 1 unit per komponen dalam set
+                        if (availableSets < minStock) minStock = availableSets;
+                    } else {
+                        minStock = 0; // Komponen hilang/tidak ada, set tidak bisa dirakit
+                    }
+                });
+                
+                return minStock === Infinity ? 0 : minStock;
+            },
+
+            // Analisa Kebutuhan
+            runAnalysis: function(items, config, lossFactor, ageFactor) {
+                const results = [];
+                const activeBeds = Math.floor(config.beds * (config.bor / 100));
+                const buffer = config.buffer;
+
+                // 1. Hitung Kebutuhan Dasar Per Item
+                items.forEach(item => {
+                    if (item.type === 'set') return; // Lewati set di loop ini, hitung real-time nanti
+
+                    const neededPerCycle = activeBeds * (item.rotation || 1);
+                    const totalNeeded = Math.ceil(neededPerCycle * buffer);
+                    
+                    // Tambahkan faktor kehilangan (loss)
+                    const totalWithLoss = Math.ceil(totalNeeded * (1 + (lossFactor / 100)));
+
+                    const diff = item.stock - totalWithLoss;
+                    
+                    let status = 'AMAN';
+                    if (diff < 0) status = diff < -10 ? 'DEFISIT KRITIS' : 'DEFISIT RINGAN';
+                    else if (diff > 10) status = 'SURPLUS';
+
+                    results.push({
+                        code: item.code,
+                        name: item.name,
+                        stock: item.stock,
+                        needed: totalWithLoss,
+                        diff: diff,
+                        status: status
+                    });
+                });
+
+                // 2. Hitung Ulang Ketersediaan Set (Realtime)
+                items.filter(i => i.type === 'set').forEach(set => {
+                    const setStock = this.calculateSetStock(set, items);
+                    // Kebutuhan set berdasarkan operasi (ops) x buffer
+                    const setNeeded = config.ops * buffer;
+                    const diff = setStock - setNeeded;
+                    
+                    let status = 'AMAN';
+                    if (diff < 0) status = 'DEFISIT KRITIS';
+                    
+                    results.push({
+                        code: set.code,
+                        name: set.name + ' (SET)',
+                        stock: setStock,
+                        needed: setNeeded,
+                        diff: diff,
+                        status: status
+                    });
+                });
+
+                return results;
+            }
+        };
+
+        /**
+         * ==========================================
+         * MODULE 4: APP UI (RENDERER)
+         * ==========================================
+         */
+        const AppUI = {
+            currentEditCode: null,
+            tempOpnameData: {},
+
+            init: function() {
+                document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                this.renderDashboard();
+                this.populateCategoryDatalist();
+            },
+
+            populateCategoryDatalist: function() {
+                const data = DataStore.getData();
+                const categories = [...new Set(data.items.map(i => i.category))];
+                const dl = document.getElementById('listCategory');
+                dl.innerHTML = '';
+                categories.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    dl.appendChild(opt);
+                });
+            },
+
+            switchView: function(viewId) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById('view-' + viewId).classList.remove('hidden');
+                
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                
+                const titles = {
+                    'dashboard': 'Dashboard', 'master': 'Master Linen', 'opname': 'Stock Opname',
+                    'analisa': 'Analisa Kebutuhan', 'config': 'Konfigurasi', 'audit': 'Riwayat Audit'
+                };
+                document.getElementById('pageTitle').innerText = titles[viewId];
+
+                if(viewId === 'dashboard') this.renderDashboard();
+                if(viewId === 'master') this.renderMasterTable();
+                if(viewId === 'opname') this.renderOpnameTable();
+                if(viewId === 'audit') this.renderAuditTable();
+                if(viewId === 'config') this.loadConfigForm();
+            },
+
+            renderDashboard: function() {
+                const data = DataStore.getData();
+                let totalDamaged = 0;
+                let replacementCost = 0;
+                let setsReady = 0;
+                let warnings = [];
+
+                data.items.forEach(item => {
+                    totalDamaged += (item.damaged || 0);
+                    replacementCost += ((item.damaged || 0) * item.price);
+                    if (item.type === 'set') {
+                        const stock = LinenLogic.calculateSetStock(item, data.items);
+                        if (stock < 10) warnings.push(`<div class="text-danger">⚠️ Stok Set <b>${item.name}</b> menipis (${stock}).</div>`);
+                        else setsReady += stock;
                     }
                 });
 
-                opnameResults = {};
-                saveDataLocallyWithToast();
-                renderOpnameTable();
-                renderMasterTable(); 
-                showToast(`✅ Selesai! ${affectedCount} item stoknya diperbarui.`);
-            }
-        }
-
-        // ==========================================
-        // 7. CONFIG & ANALISA
-        // ==========================================
-        function renderRoomConfig() {
-            // PASTIKAN CONFIG TERISI SEBELUM DIBACA
-            if (!appData.config || !appData.config.beds) {
-                appData.config = JSON.parse(JSON.stringify(defaultConfig));
-            }
-            document.getElementById('configBeds').value = appData.config.beds;
-            document.getElementById('configBOR').value = appData.config.bor;
-            document.getElementById('configOps').value = appData.config.ops;
-            document.getElementById('configBuffer').value = appData.config.buffer;
-        }
-
-        function saveRoomConfig() {
-            appData.config.beds = parseInt(document.getElementById('configBeds').value);
-            appData.config.bor = parseInt(document.getElementById('configBOR').value);
-            appData.config.ops = parseInt(document.getElementById('configOps').value);
-            appData.config.buffer = parseInt(document.getElementById('configBuffer').value);
-            saveDataLocallyWithToast();
-        }
-
-        function runAnalysis() {
-            const tbody = document.getElementById('anBody');
-            tbody.innerHTML = '';
-            
-            const needsMap = {}; 
-            const activeBeds = Math.floor(appData.config.beds * (appData.config.bor / 100));
-            const buffer = appData.config.buffer;
-            
-            // 1. Hitung kebutuhan dasar dari Item Rawat Inap
-            appData.items.filter(i => i.tipe === 'item').forEach(item => {
-                const rotation = item.rotasi || 1.0;
-                const neededPerCycle = activeBeds * rotation;
-                const totalNeeded = Math.ceil(neededPerCycle * buffer);
-                needsMap[item.kode] = totalNeeded;
-            });
-
-            // 2. Hitung kebutuhan dari SET (Manual Text Parsing)
-            appData.items.filter(i => i.tipe === 'set').forEach(setItem => {
-                if (setItem.komposisi) {
-                    // Pecah string manual berdasarkan koma
-                    const comps = setItem.komposisi.split(',').map(s => s.trim()).filter(s => s !== "");
-                    
-                    comps.forEach(compName => {
-                        // Cari item yang namanya MIRIP dengan input manual
-                        const foundItem = appData.items.find(i => i.tipe === 'item' && i.nama.toLowerCase().includes(compName.toLowerCase()));
-                        
-                        if (foundItem) {
-                            // Tambahkan kebutuhan berdasarkan operasi harian
-                            // Asumsi: Set digunakan untuk operasi/kebutuhan khusus sesuai config.ops
-                            const totalOpsNeed = appData.config.ops * buffer;
-                            
-                            if (needsMap[foundItem.kode]) {
-                                needsMap[foundItem.kode] += totalOpsNeed;
-                            } else {
-                                needsMap[foundItem.kode] = totalOpsNeed;
-                            }
-                        }
-                    });
-                }
-            });
-
-            let totalDamaged = 0;
-            let replacementCost = 0;
-
-            appData.items.forEach(item => {
-                const goodStock = item.stokAwal;
-                const damagedStock = item.stokRusak || 0;
-                const needed = needsMap[item.kode] || 0;
-                const diff = goodStock - needed;
-
-                totalDamaged += damagedStock;
+                document.getElementById('dash-total-items').innerText = data.items.length;
+                document.getElementById('dash-damaged-items').innerText = totalDamaged;
+                document.getElementById('dash-sets-ready').innerText = setsReady;
+                document.getElementById('dash-replacement-cost').innerText = this.formatRupiah(replacementCost);
                 
-                // Hitung Harga Total
-                let itemTotalPrice = item.harga;
-                if(item.tipe === 'set') {
-                    itemTotalPrice = item.harga; // Gunakan harga inputan
+                const warnDiv = document.getElementById('dashboard-warnings');
+                warnDiv.innerHTML = warnings.length ? warnings.join('') : '<div class="text-success">✅ Semua sistem berjalan normal. Tidak ada peringatan kritis.</div>';
+            },
+
+            renderMasterTable: function() {
+                const search = document.getElementById('masterSearch').value.toLowerCase();
+                const data = DataStore.getData();
+                const tbody = document.getElementById('masterTableBody');
+                tbody.innerHTML = '';
+
+                data.items.forEach(item => {
+                    if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
+
+                    const setStock = item.type === 'set' ? LinenLogic.calculateSetStock(item, data.items) : '-';
+                    const typeBadge = item.type === 'set' 
+                        ? `<span class="badge" style="background:var(--warning-bg); color:var(--warning-text)">SET</span>` 
+                        : `<span class="badge" style="background:var(--info-bg); color:var(--info-text)">ITEM</span>`;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="font-mono">${item.code}</td>
+                        <td><b>${item.name}</b></td>
+                        <td>${typeBadge}</td>
+                        <td>${item.stock}</td>
+                        <td class="text-danger">${item.damaged || 0}</td>
+                        <td><b>${setStock}</b></td>
+                        <td>${this.formatRupiah(item.price)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline" onclick="AppUI.openModal('edit', '${item.code}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="AppUI.deleteItem('${item.code}')">Hapus</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            },
+
+            renderOpnameTable: function() {
+                const search = document.getElementById('opnameSearch').value.toLowerCase();
+                const data = DataStore.getData();
+                const tbody = document.getElementById('opnameTableBody');
+                tbody.innerHTML = '';
+
+                data.items.forEach(item => {
+                    // Skip SET di opname fisik (karena SET hanya logis)
+                    if (item.type === 'set') return; 
+
+                    if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
+
+                    const temp = this.tempOpnameData[item.code] || { damaged: 0, note: '' };
+                    const remaining = item.stock - temp.damaged;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="font-mono">${item.code}</td>
+                        <td>${item.name}</td>
+                        <td>${item.stock}</td>
+                        <td>
+                            <input type="number" min="0" style="width:100px" value="${temp.damaged}" 
+                                onchange="AppUI.updateOpnameInput('${item.code}', 'damaged', this.value)">
+                        </td>
+                        <td class="font-bold text-primary">${remaining}</td>
+                        <td><input type="text" value="${temp.note}" placeholder="Sebab..." 
+                                onchange="AppUI.updateOpnameInput('${item.code}', 'note', this.value)"></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            },
+
+            updateOpnameInput: function(code, field, value) {
+                if (!this.tempOpnameData[code]) this.tempOpnameData[code] = { damaged: 0, note: '' };
+                this.tempOpnameData[code][field] = field === 'damaged' ? parseInt(value) || 0 : value;
+                this.renderOpnameTable(); // Re-render to show updates
+            },
+
+            resetOpname: function() {
+                if(confirm('Reset semua input opname?')) {
+                    this.tempOpnameData = {};
+                    this.renderOpnameTable();
                 }
-                replacementCost += (damagedStock * itemTotalPrice);
+            },
 
-                const tr = document.createElement('tr');
-                let statusBadge = '', statusColor = '';
-                if (diff < 0) { statusBadge = 'DEFISIT'; statusColor = 'status-danger'; }
-                else if (diff > 0) { statusBadge = 'SURPLUS'; statusColor = 'status-ok'; }
-                else { statusBadge = 'AMAN'; statusColor = 'status-info'; }
+            finalizeOpname: function() {
+                if (confirm('Finalisasi Opname? Stok baik akan berkurang permanen.')) {
+                    try {
+                        const count = DataStore.processOpname(this.tempOpnameData);
+                        this.showToast(`Sukses! ${count} item diperbarui.`, 'success');
+                        this.tempOpnameData = {};
+                        this.renderOpnameTable();
+                        this.renderDashboard(); // Update stats
+                    } catch (e) {
+                        this.showToast(e.message, 'error');
+                    }
+                }
+            },
 
-                const damagedStyle = damagedStock > 0 ? 'color:var(--danger); font-weight:bold;' : 'color:var(--text-secondary)';
+            renderAuditTable: function() {
+                const logs = AuditLog.getAll();
+                const tbody = document.getElementById('auditTableBody');
+                tbody.innerHTML = logs.map(l => `
+                    <tr>
+                        <td>${l.timestamp}</td>
+                        <td><span class="badge">${l.action}</span></td>
+                        <td>${l.details}</td>
+                        <td>${l.user}</td>
+                    </tr>
+`).join('');
+            },
 
-                tr.innerHTML = `
-                    <td><span class="badge ${statusColor}">${statusBadge}</span></td>
-                    <td class="text-mono">${item.kode}</td>
-                    <td>${item.nama}</td>
-                    <td class="col-center"><b>${goodStock}</b></td>
-                    <td class="col-center" style="${damagedStyle}">${damagedStock}</td>
-                    <td class="col-center" style="color:var(--primary-dark); font-weight:700">${needed}</td>
-                    <td class="col-center" style="font-weight:700; color:${diff < 0 ? 'var(--danger)' : 'var(--success)'}">${diff}</td>
-                    <td class="col-right">${formatRupiah(itemTotalPrice)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+            // --- MODAL HANDLERS ---
+            openModal: function(mode, code = null) {
+                const modal = document.getElementById('itemModal');
+                const title = document.getElementById('modalTitle');
+                const form = document.getElementById('linenForm');
+                form.reset();
+                
+                this.currentEditCode = code;
+                
+                if (mode === 'edit' && code) {
+                    const item = DataStore.getData().items.find(i => i.code === code);
+                    title.innerText = 'Edit Linen';
+                    document.getElementById('inp-code').value = item.code;
+                    document.getElementById('inp-name').value = item.name;
+                    document.getElementById('inp-type').value = item.type;
+                    document.getElementById('inp-category').value = item.category;
+                    document.getElementById('inp-price').value = item.price;
+                    document.getElementById('inp-composition').value = item.composition || '';
+                    document.getElementById('inp-rotation').value = item.rotation || 1.0;
+                    document.getElementById('inp-code').disabled = true; // Lock code
+                } else {
+                    title.innerText = 'Tambah Linen Baru';
+                    document.getElementById('inp-code').disabled = false;
+                }
 
-            document.getElementById('an-damagedCount').innerText = totalDamaged;
-            document.getElementById('an-replacementCost').innerText = formatRupiah(replacementCost);
-        }
+                this.toggleSetInput(document.getElementById('inp-type').value);
+                modal.classList.add('open');
+            },
 
-        // ==========================================
-        // 8. UTILS & EXPORT
-        // ==========================================
-        function formatRupiah(num) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
-        }
+            closeModal: function() {
+                document.getElementById('itemModal').classList.remove('open');
+            },
 
-        function showToast(msg) {
-            const x = document.getElementById("toast");
-            x.innerText = msg; x.className = "show";
-            setTimeout(() => x.className = x.className.replace("show", ""), 3000);
-        }
+            toggleSetInput: function(type) {
+                const setArea = document.getElementById('set-logic-area');
+                const itemArea = document.getElementById('item-logic-area');
+                
+                if (type === 'set') {
+                    setArea.classList.remove('hidden');
+                    itemArea.classList.add('hidden');
+                } else {
+                    setArea.classList.add('hidden');
+                    itemArea.classList.remove('hidden');
+                }
+            },
 
-        function downloadExcel() {
-            const data = appData.items.map(i => ({
-                Kode: i.kode, Nama: i.nama, Tipe: i.tipe.toUpperCase(), Stok_Baik: i.stokAwal, Stok_Rusak: i.stokRusak, Harga: i.harga, Komposisi: i.komposisi
-            }));
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "MasterLinen");
-            XLSX.writeFile(wb, "Master_Linen_RS.xlsx");
-        }
+            saveItem: function(e) {
+                e.preventDefault();
+                const type = document.getElementById('inp-type').value;
+                const newItem = {
+                    code: this.currentEditCode,
+                    type: type,
+                    name: document.getElementById('inp-name').value,
+                    category: document.getElementById('inp-category').value,
+                    price: parseInt(document.getElementById('inp-price').value) || 0,
+                    rotation: parseFloat(document.getElementById('inp-rotation').value) || 1.0,
+                    composition: document.getElementById('inp-composition').value,
+                    stock: 0, // Set to 0 for new items
+                    damaged: 0
+                };
 
-        function exportOpnameExcel() {
-            const data = [];
-            document.querySelectorAll('#opBody tr').forEach(tr => {
-                const row = [];
-                tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
-                if(row.length > 0) data.push(row);
-            });
-            const ws = XLSX.utils.aoa_to_sheet([['Kode','Nama','Stok Awal','Rusak/Hilang','Stok Akhir','Selisih','Keterangan'], ...data]);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Laporan_Kerusakan");
-            XLSX.writeFile(wb, "Laporan_Opname_Linen.xlsx");
-        }
+                // Validasi Komposisi Set
+                if (type === 'set') {
+                    const currentItems = DataStore.getData().items;
+                    const errors = DataStore.validateComposition(newItem.composition, currentItems);
+                    if (errors.length > 0) {
+                        this.showToast(errors[0], 'error');
+                        return;
+                    }
+                }
 
-        function exportAnalysisExcel() {
-            runAnalysis();
-            const data = [];
-            document.querySelectorAll('#anBody tr').forEach(tr => {
-                const row = [];
-                tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
-                if(row.length > 0) data.push(row);
-            });
-            const ws = XLSX.utils.aoa_to_sheet([['Status','Kode','Nama','Stok Baik','Stok Rusak','Kebutuhan','Selisih','Total Harga'], ...data]);
-            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Analisa_Kebutuhan");
-            XLSX.writeFile(wb, "Analisa_Linen.xlsx");
-        }
+                try {
+                    DataStore.addItem(newItem);
+                    this.showToast('Data berhasil disimpan!', 'success');
+                    this.closeModal();
+                    this.renderMasterTable();
+                    this.renderDashboard();
+                    this.populateCategoryDatalist();
+                } catch (err) {
+                    this.showToast(err.message, 'error');
+                }
+            },
 
+            deleteItem: function(code) {
+                if(confirm('Yakin ingin menghapus data ini?')) {
+                    DataStore.deleteItem(code);
+                    this.renderMasterTable();
+                    this.renderDashboard();
+                    this.showToast('Data dihapus.', 'success');
+                }
+            },
+
+            loadConfigForm: function() {
+                const config = DataStore.getData().config;
+                document.getElementById('cfg-beds').value = config.beds;
+                document.getElementById('cfg-bor').value = config.bor;
+                document.getElementById('cfg-ops').value = config.ops;
+                document.getElementById('cfg-buffer').value = config.buffer;
+            },
+
+            // --- UTILS ---
+            formatRupiah: function(num) {
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(num);
+            },
+
+            showToast: function(msg, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `<span>${msg}</span> <i class="fas fa-times" style="cursor:pointer" onclick="this.parentElement.remove()"></i>`;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
+        };
+
+        /**
+         * ==========================================
+         * MAIN APP CONTROLLER
+         * ==========================================
+         */
+        const App = {
+            init: function() {
+                AppUI.init();
+            },
+
+            switchView: function(viewId) {
+                AppUI.switchView(viewId);
+            },
+
+            backupData: function() {
+                const data = DataStore.getData();
+                data.auditLogs = AuditLog.getAll();
+                const blob = new Blob([JSON.stringify(data, null, 2)], {type : 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_linen_rs_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                AppUI.showToast('Backup berhasil didownload!', 'success');
+            },
+
+            saveConfig: function() {
+                const config = {
+                    beds: parseInt(document.getElementById('cfg-beds').value),
+                    bor: parseInt(document.getElementById('cfg-bor').value),
+                    ops: parseInt(document.getElementById('cfg-ops').value),
+                    buffer: parseInt(document.getElementById('cfg-buffer').value)
+                };
+                DataStore.saveData(null, config);
+                AppUI.showToast('Konfigurasi tersimpan.', 'success');
+            },
+
+            runAnalysis: function() {
+                const data = DataStore.getData();
+                const loss = parseInt(document.getElementById('param-loss-factor').value) || 0;
+                const age = parseInt(document.getElementById('param-linen-age').value) || 24;
+                
+                const results = LinenLogic.runAnalysis(data.items, data.config, loss, age);
+                
+                const tbody = document.getElementById('analysisBody');
+                tbody.innerHTML = '';
+
+                results.forEach(r => {
+                    let colorClass = 'text-success';
+                    if(r.status.includes('DEFISIT')) colorClass = 'text-danger';
+                    if(r.status === 'SURPLUS') colorClass = 'text-warning';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><span class="badge" style="background:${colorClass === 'text-danger' ? '#fee2e2' : '#dcfce7'}; color:${colorClass === 'text-danger' ? '#991b1b' : '#166534'}">${r.status}</span></td>
+                        <td>${r.code}</td>
+                        <td>${r.name}</td>
+                        <td><b>${r.stock}</b></td>
+                        <td>${r.needed}</td>
+                        <td class="${colorClass}">${r.diff}</td>
+                        <td>${r.diff < 0 ? `<b class="text-danger">BELI ${Math.abs(r.diff)}</b>` : 'Cukup'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                AppUI.showToast('Analisa selesai.', 'success');
+            }
+        };
+
+        // Start App
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('opnameDate').valueAsDate = new Date();
-            loadData();
+            App.init();
         });
+
     </script>
 </body>
 </html>
