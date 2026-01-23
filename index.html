@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (Versi Final)</title>
+    <title>Sistem Linen RS Charlie (Versi Master Edit)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
@@ -14,6 +14,7 @@
             --bg-light: #f8fafc; --border: #e2e8f0;
             --text-main: #334155; --text-light: #64748b;
             --danger: #dc2626; --success: #16a34a;
+            --warning: #ca8a04;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-light); color: var(--text-main); font-size: 13px; line-height: 1.5; padding: 20px; }
@@ -24,10 +25,10 @@
         .brand p { color: var(--text-light); font-size: 0.9rem; }
         
         /* Tabs */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
         .tab-btn {
             padding: 10px 20px; background: none; border: none; border-bottom: 3px solid transparent;
-            cursor: pointer; font-weight: 600; color: var(--text-light); font-size: 14px; transition: 0.3s;
+            cursor: pointer; font-weight: 600; color: var(--text-light); font-size: 14px; transition: 0.3s; white-space: nowrap;
         }
         .tab-btn:hover { color: var(--primary); }
         .tab-btn.active { border-bottom-color: var(--primary); color: var(--primary); }
@@ -53,6 +54,7 @@
         .btn-success { background-color: var(--success); color: white; }
         .btn-secondary { background-color: #64748b; color: white; }
         .btn-danger { background-color: #fff1f2; color: var(--danger); border: 1px solid #fecdd3; }
+        .btn-danger:hover { background-color: #fee2e2; }
 
         /* Table */
         .table-container { background: white; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; max-height: 75vh; position: relative; }
@@ -61,8 +63,10 @@
         th { text-align: left; padding: 10px 8px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--text-main); border-bottom: 2px solid var(--border); white-space: nowrap; }
         td { padding: 8px; border-bottom: 1px solid var(--border); color: var(--text-main); vertical-align: middle; }
         tr:hover { background-color: #f8fafc; }
+        tr.selected-row { background-color: #f0f9ff; }
 
         td input[type="number"] { width: 60px; padding: 4px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: 600; color: var(--primary); }
+        
         .col-center { text-align: center; } .col-right { text-align: right; } .text-mono { font-family: monospace; }
 
         .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-align: center; min-width: 60px; }
@@ -71,20 +75,39 @@
         .status-danger { background: #fee2e2; color: #991b1b; }
         .status-info { background: #e0f2fe; color: #075985; }
 
-        /* Modal & Input */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
+        /* Checkbox Custom */
+        input[type="checkbox"] { transform: scale(1.2); cursor: pointer; accent-color: var(--primary); }
 
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            display: none; justify-content: center; align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-content {
+            background: white; width: 90%; max-width: 600px;
+            border-radius: 10px; padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .modal-header h2 { font-size: 1.2rem; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        
         /* Toast */
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
         @media (max-width: 768px) {
             .toolbar { flex-direction: column; align-items: stretch; }
-            .tabs { overflow-x: auto; }
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
         }
     </style>
 </head>
@@ -93,10 +116,84 @@
     <!-- Notification Toast -->
     <div id="toast">Notifikasi</div>
 
+    <!-- Modal Form (Add/Edit) -->
+    <div id="itemModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah / Edit Item</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="itemForm" onsubmit="saveItem(event)">
+                <input type="hidden" id="editIndex"> <!-- -1 for new item, >=0 for edit -->
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Kode Item (ID)</label>
+                        <input type="text" id="inpKode" required placeholder="Contoh: BJOP001">
+                        <small style="color:var(--text-light)">Kode unik untuk identifikasi.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <input type="text" id="inpKategori" list="listKategori" required placeholder="Contoh: Baju / Pakaian">
+                        <datalist id="listKategori">
+                            <option value="Baju / Pakaian">
+                            <option value="Perlengkapan Tidur">
+                            <option value="Pelindung">
+                            <option value="Selimut / Bed Cover">
+                            <option value="Sprei / Laken">
+                            <option value="LAINNYA">
+                        </datalist>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Nama Item</label>
+                        <input type="text" id="inpNama" required placeholder="Nama Lengkap Item">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ukuran</label>
+                        <input type="text" id="inpUkuran" placeholder="Contoh: Besar, 150x200">
+                    </div>
+                    <div class="form-group">
+                        <label>Warna</label>
+                        <input type="text" id="inpWarna" placeholder="Contoh: Biru, Putih">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Satuan</label>
+                        <select id="inpSatuan">
+                            <option value="Pcs">Pcs</option>
+                            <option value="Set">Set</option>
+                            <option value="Pak">Pak</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Harga Satuan (Rp)</label>
+                        <input type="number" id="inpHarga" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Stok Awal (Sistem)</label>
+                        <input type="number" id="inpStokAwal" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stok Standar (Min)</label>
+                        <input type="number" id="inpStdStok" min="0" required>
+                    </div>
+                </div>
+
+                <div style="margin-top:20px; text-align:right; border-top:1px solid var(--border); padding-top:15px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <header>
         <div class="brand">
             <h1>Sistem Linen RS Charlie</h1>
-            <p>Opname • Mutasi • Analisa • Backup</p>
+            <p>Opname • Mutasi • Analisa • Master Data</p>
         </div>
         <div class="meta-info">
             <label>Tanggal: <input type="date" id="opnameDate"></label>
@@ -106,9 +203,10 @@
 
     <!-- Navigation Tabs -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('opname')">📊 Stock Opname</button>
+        <button class="tab-btn" onclick="switchTab('opname')">📊 Stock Opname</button>
         <button class="tab-btn" onclick="switchTab('mutasi')">🔄 Manajemen Stok (Mutasi)</button>
         <button class="tab-btn" onclick="switchTab('analisa')">📉 Analisa Kebutuhan</button>
+        <button class="tab-btn" onclick="switchTab('master')">⚙️ Data Master (Edit)</button>
     </div>
 
     <!-- VIEW 1: STOCK OPNAME -->
@@ -231,6 +329,38 @@
         <p style="font-size:0.8rem; color:#666; margin-top:10px;">*Stok Aktual adalah hasil perhitungan: <b>Stok Fisik (Opname)</b> atau <b>Stok Awal (Sistem)</b> jika belum dihitung.</p>
     </section>
 
+    <!-- VIEW 4: DATA MASTER (MANAJEMEN ITEM) -->
+    <section id="view-master" class="section-view">
+        <div class="card" style="margin-bottom:20px; border-left: 5px solid var(--primary);">
+            <h3>⚙️ Manajemen Data Master</h3>
+            <p>Di sini Anda bisa menambah item baru, mengedit detail item, atau menghapus item yang sudah tidak terpakai.</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="masterSearch" placeholder="Cari kode atau nama item..." oninput="renderMasterTable()"></div>
+            <button class="btn btn-primary" onclick="openModal('add')">➕ Tambah Item Baru</button>
+            <button class="btn btn-danger" onclick="deleteSelectedItems()">🗑️ Hapus Terpilih</button>
+        </div>
+
+        <div class="table-container">
+            <table id="masterTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllMaster" onclick="toggleSelectAll(this)"></th>
+                        <th>Kode</th>
+                        <th>Nama Item</th>
+                        <th>Kategori</th>
+                        <th>Info</th>
+                        <th class="col-right">Harga</th>
+                        <th class="col-center">Std<br>Stok</th>
+                        <th style="width: 80px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="masterBody"></tbody>
+            </table>
+        </div>
+    </section>
+
     <!-- Scripts -->
     <script>
         // --- 1. DATA MASTER (Hardcoded) ---
@@ -309,15 +439,16 @@
         // --- STATE MANAGEMENT ---
         let masterData = [];
         let opnameResults = {}; // { kode: stokFisik }
-        let mutasiHistory = []; 
+        let mutasiHistory = [];
+        let selectedMasterItems = new Set(); // Set of codes currently selected in Master View
 
         // --- LOCAL STORAGE ---
         function saveToLocal() {
-            localStorage.setItem('rs_charlie_linen_v4', JSON.stringify({ master: masterData, opname: opnameResults }));
+            localStorage.setItem('rs_charlie_linen_v5', JSON.stringify({ master: masterData, opname: opnameResults }));
         }
 
         function loadFromLocal() {
-            const saved = localStorage.getItem('rs_charlie_linen_v4');
+            const saved = localStorage.getItem('rs_charlie_linen_v5');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
@@ -340,6 +471,7 @@
             renderOpnameTable();
             renderAnalysisTable();
             updateOpnameSummary();
+            renderMasterTable(); // Init Master Table
         });
 
         // --- TAB SWITCHING ---
@@ -352,9 +484,209 @@
 
             if(tabId === 'opname') renderOpnameTable();
             if(tabId === 'analisa') renderAnalysisTable();
+            if(tabId === 'master') renderMasterTable();
         }
 
-        // --- VIEW 1: OPNAME FUNCTIONS ---
+        // ==========================================
+        // VIEW 4: MASTER DATA MANAGEMENT (NEW)
+        // ==========================================
+        
+        function renderMasterTable() {
+            const key = document.getElementById('masterSearch').value.toLowerCase();
+            const tbody = document.getElementById('masterBody');
+            tbody.innerHTML = '';
+            
+            // Clear select all if search is active
+            if(key.length > 0) {
+                document.getElementById('selectAllMaster').checked = false;
+            }
+
+            masterData.forEach((item, index) => {
+                if (!item.nama.toLowerCase().includes(key) && !item.kode.toLowerCase().includes(key)) return;
+
+                const tr = document.createElement('tr');
+                if (selectedMasterItems.has(item.kode)) {
+                    tr.classList.add('selected-row');
+                }
+
+                tr.innerHTML = `
+                    <td style="text-align:center">
+                        <input type="checkbox" class="chk-item" value="${item.kode}" 
+                            onchange="toggleSelectItem('${item.keyCode}')" 
+                            ${selectedMasterItems.has(item.kode) ? 'checked' : ''}>
+                    </td>
+                    <td class="text-mono" style="font-size:0.9rem">${item.kode}</td>
+                    <td style="font-weight:500">${item.nama}</td>
+                    <td><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-size:0.8rem">${item.kategori}</span></td>
+                    <td style="font-size:0.85rem; color:#64748b">
+                        ${item.ukuran} <br> <span style="color:#94a3b8">${item.warna}</span>
+                    </td>
+                    <td class="col-right" style="font-weight:600">${formatRupiah(item.harga)}</td>
+                    <td class="col-center">${item.stdStok}</td>
+                    <td>
+                        <button class="btn btn-primary" style="padding:4px 8px; font-size:11px" onclick="openModal('edit', '${item.kode}')">✏️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // Check all checkbox state based on current filtered visible items
+            updateSelectAllState();
+        }
+
+        function toggleSelectItem(kode) {
+            if (selectedMasterItems.has(kode)) {
+                selectedMasterItems.delete(kode);
+            } else {
+                selectedMasterItems.add(kode);
+            }
+            renderMasterTable();
+        }
+
+        function toggleSelectAll(source) {
+            const key = document.getElementById('masterSearch').value.toLowerCase();
+            const isChecked = source.checked;
+            
+            masterData.forEach(item => {
+                // Only toggle items that match the search filter
+                if (key === "" || item.nama.toLowerCase().includes(key) || item.kode.toLowerCase().includes(key)) {
+                    if (isChecked) selectedMasterItems.add(item.kode);
+                    else selectedMasterItems.delete(item.kode);
+                }
+            });
+            renderMasterTable();
+        }
+
+        function updateSelectAllState() {
+            const key = document.getElementById('masterSearch').value.toLowerCase();
+            const visibleItems = masterData.filter(item => key === "" || item.nama.toLowerCase().includes(key) || item.kode.toLowerCase().includes(key));
+            
+            if (visibleItems.length === 0) {
+                document.getElementById('selectAllMaster').checked = false;
+                return;
+            }
+
+            const allSelected = visibleItems.every(item => selectedMasterItems.has(item.kode));
+            document.getElementById('selectAllMaster').checked = allSelected;
+        }
+
+        function deleteSelectedItems() {
+            if (selectedMasterItems.size === 0) {
+                return showToast("Pilih item terlebih dahulu!");
+            }
+            
+            if (confirm(`Yakin ingin menghapus ${selectedMasterItems.size} item terpilih? Data tidak bisa dikembalikan.`)) {
+                const codesToDelete = Array.from(selectedMasterItems);
+                
+                // Remove from masterData
+                masterData = masterData.filter(item => !selectedMasterItems.has(item.kode));
+                
+                // Cleanup opnameResults for deleted items
+                codesToDelete.forEach(code => delete opnameResults[code]);
+                
+                selectedMasterItems.clear();
+                saveToLocal();
+                renderMasterTable();
+                showToast("Item berhasil dihapus.");
+            }
+        }
+
+        // --- MODAL FUNCTIONS ---
+        function openModal(mode, kode = null) {
+            const modal = document.getElementById('itemModal');
+            const title = document.getElementById('modalTitle');
+            const idxField = document.getElementById('editIndex');
+            
+            // Reset Form
+            document.getElementById('itemForm').reset();
+
+            if (mode === 'edit' && kode) {
+                const item = masterData.find(i => i.kode === kode);
+                if (!item) return;
+                
+                title.textContent = "Edit Data Item";
+                idxField.value = kode; // Using kode as identifier
+                
+                document.getElementById('inpKode').value = item.kode;
+                document.getElementById('inpKode').readOnly = true; // Lock ID
+                document.getElementById('inpKode').style.backgroundColor = "#f1f5f9";
+                
+                document.getElementById('inpNama').value = item.nama;
+                document.getElementById('inpKategori').value = item.kategori;
+                document.getElementById('inpUkuran').value = item.ukuran;
+                document.getElementById('inpWarna').value = item.warna;
+                document.getElementById('inpSatuan').value = item.satuan;
+                document.getElementById('inpHarga').value = item.harga;
+                document.getElementById('inpStokAwal').value = item.stokAwal;
+                document.getElementById('inpStdStok').value = item.stdStok;
+            } else {
+                title.textContent = "Tambah Item Baru";
+                idxField.value = ""; 
+                document.getElementById('inpKode').readOnly = false;
+                document.getElementById('inpKode').style.backgroundColor = "white";
+            }
+            
+            modal.classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('itemModal').classList.remove('open');
+        }
+
+        function saveItem(e) {
+            e.preventDefault();
+            
+            const kode = document.getElementById('inpKode').value.trim();
+            const nama = document.getElementById('inpNama').value.trim();
+            const kategori = document.getElementById('inpKategori').value.trim();
+            const ukuran = document.getElementById('inpUkuran').value.trim();
+            const warna = document.getElementById('inpWarna').value.trim();
+            const satuan = document.getElementById('inpSatuan').value;
+            const harga = parseInt(document.getElementById('inpHarga').value) || 0;
+            const stokAwal = parseInt(document.getElementById('inpStokAwal').value) || 0;
+            const stdStok = parseInt(document.getElementById('inpStdStok').value) || 0;
+
+            // Check for duplicate code if new item
+            if (!document.getElementById('inpKode').readOnly) {
+                if (masterData.find(i => i.kode === kode)) {
+                    alert("Kode Item sudah ada! Gunakan kode yang unik.");
+                    return;
+                }
+            }
+
+            const newItem = {
+                kode, nama, kategori, ukuran, warna, satuan, harga, stokAwal, stdStok
+            };
+
+            const editCode = document.getElementById('editIndex').value;
+
+            if (editCode) {
+                // Update existing
+                const index = masterData.findIndex(i => i.kode === editCode);
+                if (index !== -1) {
+                    masterData[index] = { ...masterData[index], ...newItem, kode: editCode }; // Keep original code
+                }
+                showToast("Data item diperbarui.");
+            } else {
+                // Add new
+                masterData.push(newItem);
+                showToast("Item baru ditambahkan.");
+            }
+
+            saveToLocal();
+            renderMasterTable();
+            populateCategoryFilter();
+            populateMutasiDropdown();
+            closeModal();
+            
+            // If Opname is active view, refresh it too
+            if(document.getElementById('view-opname').classList.contains('active')) renderOpnameTable();
+        }
+
+
+        // ==========================================
+        // VIEW 1: STOCK OPNAME (EXISTING LOGIC)
+        // ==========================================
         function populateCategoryFilter() {
             const select = document.getElementById('opCategory');
             while (select.options.length > 1) select.remove(1);
@@ -375,13 +707,14 @@
                 (cat === "" || i.kategori === cat) && 
                 (i.nama.toLowerCase().includes(key) || i.kode.toLowerCase().includes(key))
             ).forEach(item => {
-                const fisik = opnameResults[item.kode] || 0;
-                const selisih = fisik - item.stokAwal;
+                const fisik = opnameResults[item.kode] !== undefined ? opnameResults[item.kode] : "";
+                const selisih = (fisik !== "" ? parseInt(fisik) : 0) - item.stokAwal;
                 const valSelisih = selisih * item.harga;
                 
                 let badge = '', color = '';
-                if(selisih === 0) { badge = 'Sesuai'; color='status-ok'; }
+                if(selisih === 0 && fisik !== "") { badge = 'Sesuai'; color='status-ok'; }
                 else if(selisih > 0) { badge = 'Lebih'; color='status-warning'; }
+                else if (fisik === "") { badge = '-'; color='status-info'; }
                 else { badge = 'Kurang'; color='status-danger'; }
 
                 const tr = document.createElement('tr');
@@ -391,11 +724,11 @@
                     <td>${item.ukuran} / ${item.warna}</td>
                     <td class="col-center"><b>${item.stokAwal}</b></td>
                     <td class="col-center" style="background:#e0f2fe">
-                        <input type="number" value="${fisik}" onchange="updateOpname('${item.kode}', this.value)" oninput="updateOpname('${item.kode}', this.value)">
+                        <input type="number" placeholder="-" value="${fisik}" onchange="updateOpname('${item.kode}', this.value)">
                     </td>
-                    <td class="col-center" class="${color === 'status-danger' ? 'text-danger' : (color==='status-warning'?'text-warning':'text-success')}">${selisih}</td>
+                    <td class="col-center" style="font-weight:${selisih !== 0 ? 'bold' : 'normal'}; color:${selisih < 0 ? 'red' : (selisih > 0 ? 'orange' : 'inherit')}">${fisik !== "" ? selisih : "-"}</td>
                     <td><span class="badge ${color}">${badge}</span></td>
-                    <td class="col-right">${formatRupiah(valSelisih)}</td>
+                    <td class="col-right">${fisik !== "" ? formatRupiah(valSelisih) : "-"}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -403,19 +736,22 @@
         }
 
         function updateOpname(kode, val) {
-            opnameResults[kode] = parseInt(val) || 0;
+            if (val === "") delete opnameResults[kode];
+            else opnameResults[kode] = parseInt(val);
             saveToLocal();
-            // No full re-render needed for perf, just update DOM logic can be added here
-            // But re-render ensures consistency easily in this scope
             renderOpnameTable(); 
         }
 
         function updateOpnameSummary() {
             let totalDiff = 0, totalVal = 0;
             masterData.forEach(item => {
-                const diff = (opnameResults[item.kode] || 0) - item.stokAwal;
-                totalDiff += diff;
-                totalVal += (diff * item.harga);
+                const fisik = opnameResults[item.kode] !== undefined ? parseInt(opnameResults[item.kode]) : 0;
+                // Only count if input exists
+                if (opnameResults[item.kode] !== undefined) {
+                    const diff = fisik - item.stokAwal;
+                    totalDiff += diff;
+                    totalVal += (diff * item.harga);
+                }
             });
             document.getElementById('op-totalItems').innerText = masterData.length;
             document.getElementById('op-totalDiff').innerText = totalDiff;
@@ -423,7 +759,7 @@
         }
 
         function resetOpname() {
-            if(confirm("Reset input stok fisik?")) {
+            if(confirm("Reset input stok fisik? Stok awal akan kembali ke angka sistem.")) {
                 opnameResults = {};
                 saveToLocal();
                 renderOpnameTable();
@@ -435,7 +771,7 @@
             const officer = document.getElementById('officerName').value || "-";
             
             const exportData = masterData.map(item => {
-                const fisik = opnameResults[item.kode] || 0;
+                const fisik = opnameResults[item.kode] !== undefined ? opnameResults[item.kode] : item.stokAwal; // Default to system stock if no opname
                 const selisih = fisik - item.stokAwal;
                 let status = "Sesuai";
                 if(selisih > 0) status = "Lebih";
@@ -459,7 +795,9 @@
             XLSX.writeFile(wb, `Laporan_Opname_RS_Charlie_${date}.xlsx`);
         }
 
-        // --- VIEW 2: MUTASI FUNCTIONS ---
+        // ==========================================
+        // VIEW 2: MUTASI (EXISTING LOGIC)
+        // ==========================================
         function populateMutasiDropdown() {
             const sel = document.getElementById('mutasiItem');
             sel.innerHTML = '';
@@ -481,7 +819,6 @@
 
             const item = masterData.find(i => i.kode === kode);
             
-            // Validasi stok
             if (type === 'out' && item.stokAwal < qty) {
                 return alert("Stok tidak mencukupi untuk pengurangan!");
             }
@@ -522,7 +859,9 @@
             });
         }
 
-        // --- VIEW 3: ANALISA FUNCTIONS ---
+        // ==========================================
+        // VIEW 3: ANALISA (EXISTING LOGIC)
+        // ==========================================
         function renderAnalysisTable() {
             const key = document.getElementById('anSearch').value.toLowerCase();
             const filter = document.getElementById('anFilter').value; 
@@ -536,17 +875,12 @@
             masterData.forEach(item => {
                 if (!item.nama.toLowerCase().includes(key)) return;
 
-                // LOGIC FIX: Get Current Stock
                 let stokAktual = getCurrentStock(item); 
-                // getCurrentStock checks opnameResults first, then stokAwal
-
                 const diff = stokAktual - item.stdStok; // Selisih Standar
                 
-                // Filter Logic
                 if (filter === 'deficit' && diff >= 0) return;
                 if (filter === 'surplus' && diff <= 0) return;
 
-                // Stats
                 if (diff < 0) {
                     deficitCount++;
                     deficitCost += (Math.abs(diff) * item.harga);
@@ -592,7 +926,6 @@
                 const diff = stokAktual - item.stdStok;
                 let status = (diff < 0) ? "KURANG" : ((diff > 0) ? "LEBIH" : "PAS");
                 
-                // Only include if filtered or show all? Let's export ALL for complete analysis
                 let costEst = (diff < 0) ? (Math.abs(diff) * item.harga) : 0;
                 if (diff < 0) totalDeficitCost += costEst;
 
@@ -611,17 +944,14 @@
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet([]);
             
-            // Headers
             XLSX.utils.sheet_add_aoa(ws, [
                 ["ANALISA KEBUTUHAN LINEN RS CHARLIE"],
                 [`Tanggal Analisa: ${new Date().toLocaleDateString()}`],
                 []
             ], { origin: "A1" });
             
-            // Data
             XLSX.utils.sheet_add_json(ws, exportData, { origin: "A4" });
 
-            // Add Footer Total
             const lastRow = exportData.length + 4;
             XLSX.utils.sheet_add_aoa(ws, [
                 ["", "", "", "", "", "TOTAL ESTIMASI BIAYA DEFISIT:", totalDeficitCost]
@@ -631,14 +961,11 @@
             XLSX.writeFile(wb, `Analisa_Kebutuhan_Linen_${new Date().toISOString().slice(0,10)}.xlsx`);
         }
 
-        // --- HELPER: Get Correct Stock ---
         function getCurrentStock(item) {
-            // Jika ada input stok fisik (Opname), gunakan itu. 
-            // Jika belum ada input (undefined), gunakan Stok Awal (Sistem).
             return (opnameResults[item.kode] !== undefined) ? opnameResults[item.kode] : item.stokAwal;
         }
 
-        // --- BACKUP & RESTORE (JSON) ---
+        // --- BACKUP & RESTORE ---
         function downloadBackup() {
             const data = { master: masterData, opname: opnameResults };
             const jsonStr = JSON.stringify(data, null, 2);
@@ -668,6 +995,7 @@
                         populateCategoryFilter();
                         populateMutasiDropdown();
                         renderOpnameTable();
+                        renderMasterTable();
                         updateOpnameSummary();
                         showToast("Data berhasil direstore!");
                     } else {
