@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V5.1 Fixed)</title>
+    <title>Sistem Linen RS Charlie (V5.2 Fixed Focus)</title>
     
     <!-- Assets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -104,7 +104,7 @@
             .app-container { grid-template-columns: 1fr; }
             .sidebar { flex-direction: row; overflow-x: auto; padding: 10px; }
             .nav-item { white-space: nowrap; }
-            .modal-content { max-width: 90%; } /* Perbaikan Tampilan Mobile */
+            .modal-content { max-width: 90%; }
         }
     </style>
 </head>
@@ -125,7 +125,7 @@
                     <i class="fas fa-hospital fa-lg"></i>
                     <h3 style="line-height:1;">Sistem Linen</h3>
                 </div>
-                <small style="color: var(--text-muted); font-weight:500;">V5.1 Fixed</small>
+                <small style="color: var(--text-muted); font-weight:500;">V5.2 Fixed</small>
             </div>
             <div class="nav-item active" data-view="dashboard">
                 <i class="fas fa-chart-pie" style="width:20px;"></i> Dashboard
@@ -371,6 +371,8 @@
                         <label>Stok Awal (Baik)</label>
                         <input type="number" id="inp-stock" name="inp-stock" min="0">
                     </div>
+                    
+                    <!-- PERBAIKAN: Input Rotation dipindah ke sini agar tidak ter-hidden saat mode Set -->
                     <div class="form-group">
                         <label>Rasio Rotasi (Per Bed/Per Hari)</label>
                         <input type="number" id="inp-rotation" name="inp-rotation" value="1.0" step="0.5" min="0.1">
@@ -396,7 +398,7 @@
          * ==========================================
          */
         const CONFIG = {
-            APP_VERSION: '5.1 Fixed',
+            APP_VERSION: '5.2 Fixed Focus',
             BASE_URL: `https://script.google.com/macros/s/AKfycbxLpyDCnfLXWXggQIiMYzOPiJxX6iHPPyQ1YAud0fKfIjmAuM8gvku_FuihRIMtDzUduw/exec`,
             STORAGE_KEY: 'linen_hybrid_v5'
         };
@@ -418,7 +420,7 @@
 
         /**
          * ==========================================
-         * MODULE: CLOUD MANAGER (V5.1)
+         * MODULE: CLOUD MANAGER
          * ==========================================
          */
         const CloudManager = {
@@ -539,7 +541,7 @@
 
         /**
          * ==========================================
-         * MODULE: DATA STORE (V5.1)
+         * MODULE: DATA STORE
          * ==========================================
          */
         const DataStore = {
@@ -576,7 +578,6 @@
                 if (newItem.code) {
                     const idx = appData.items.findIndex(i => i.code === newItem.code);
                     if(idx !== -1) {
-                        // Saat edit, kita pertahankan stock yang ada di database
                         newItem.stock = appData.items[idx].stock;
                         newItem.damaged = appData.items[idx].damaged;
                         appData.items[idx] = newItem;
@@ -610,7 +611,6 @@
                 this.saveData();
             },
 
-            // PERBAIKAN LOGIKA OPNAME (FIXED)
             processOpname: function(opnameData) {
                 let changedCount = 0;
                 let errors = [];
@@ -619,15 +619,12 @@
                     const input = opnameData[code];
                     const item = appData.items.find(i => i.code === code);
                     
-                    // Hanya proses jika ada input rusak/hilang > 0
                     if (item && input.damaged > 0) {
-                        // Validasi: Stok rusak tidak boleh melebihi stok fisik saat ini
                         if (input.damaged > item.stock) {
                             errors.push(`Item <b>${item.name}</b>: Input rusak (${input.damaged}) melebihi stok baik (${item.stock}).`);
-                            continue; // Lewati item ini
+                            continue;
                         }
                         
-                        // Kurangi stok baik, tambah ke stok rusak
                         item.stock -= input.damaged;
                         item.damaged = (item.damaged || 0) + input.damaged;
                         changedCount++;
@@ -678,7 +675,7 @@
 
         /**
          * ==========================================
-         * MODULE: LINEN LOGIC (V5.1)
+         * MODULE: LINEN LOGIC
          * ==========================================
          */
         const LinenLogic = {
@@ -759,7 +756,7 @@
 
         /**
          * ==========================================
-         * MODULE: APP UI CONTROLLER (V5.1)
+         * MODULE: APP UI CONTROLLER
          * ==========================================
          */
         const AppUI = {
@@ -898,7 +895,6 @@
                     if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
                     
                     const temp = this.tempOpnameData[item.code] || { damaged: 0, note: '' };
-                    // Perhitungan sisa baik berdasarkan input sementara
                     const sisaBaik = Math.max(0, item.stock - temp.damaged);
                     
                     const tr = document.createElement('tr');
@@ -934,7 +930,6 @@
                         const el = document.querySelector(`.res-${code}`);
                         if(el) {
                             el.innerText = sisa;
-                            // Visual warning jika sisa minus (input terlalu besar)
                             if (numVal > item.stock) {
                                 el.className = "text-danger font-bold";
                                 el.innerHTML = `${sisa} <small>(Over)</small>`;
@@ -963,10 +958,7 @@
                     this.tempOpnameData = {};
                     this.renderOpnameTable();
                     this.renderDashboard();
-                } catch (e) { 
-                    // Tampilkan error HTML (support break line untuk multi-error)
-                    AppUI.showToast(e.message, "error"); 
-                }
+                } catch (e) { AppUI.showToast(e.message, "error"); }
             },
 
             renderAnalysisResults: function(results) {
@@ -1031,8 +1023,14 @@
                     document.getElementById('inp-type').value = item.type;
                     document.getElementById('inp-category').value = item.category;
                     document.getElementById('inp-price').value = item.price;
-                    document.getElementById('inp-rotation').value = item.rotation || 1.0;
                     
+                    // Set rotasi hanya jika tipe item
+                    if(item.type === 'item') {
+                        document.getElementById('inp-rotation').value = item.rotation || 1.0;
+                    } else {
+                        document.getElementById('inp-rotation').value = 1.0; // Default reset jika set
+                    }
+
                     if(item.type === 'set') {
                         const parts = DataStore.normalizeComposition(item.composition);
                         const container = document.getElementById('composition-rows');
@@ -1042,6 +1040,7 @@
                 } else {
                     document.getElementById('modalTitle').innerText = 'Tambah Linen Baru';
                     document.getElementById('inp-type').value = 'item';
+                    document.getElementById('inp-rotation').value = 1.0;
                 }
                 this.toggleSetInput(document.getElementById('inp-type').value);
             },
@@ -1091,7 +1090,6 @@
                     stock:0, damaged:0
                 };
 
-                // Validasi Manual (Mencegah Error 'not focusable')
                 if(!newItem.name || !newItem.category) {
                     AppUI.showToast("Nama dan Kategori wajib diisi!", "error");
                     return;
@@ -1108,7 +1106,6 @@
                     if (compArray.length === 0) { AppUI.showToast("Set harus memiliki minimal 1 komponen.", "error"); return; }
                     newItem.composition = compArray;
                 } else {
-                    // Jika tipe item, ambil stok dari form
                     newItem.stock = parseInt(document.getElementById('inp-stock').value) || 0;
                 }
 
