@@ -1053,6 +1053,7 @@
 
             saveItem: function(e) {
                 e.preventDefault();
+                const form = document.getElementById('linenForm');
                 const type = document.getElementById('inp-type').value;
                 const newItem = {
                     code: this.currentEditCode, 
@@ -1064,9 +1065,9 @@
                     stock:0, damaged:0
                 };
 
-                // Validasi Manual
+                // Validasi Manual (Mencegah Error 'not focusable')
                 if(!newItem.name || !newItem.category) {
-                    AppUI.showToast("Nama dan Kategori wajib diisi.", "error");
+                    AppUI.showToast("Nama dan Kategori wajib diisi!", "error");
                     return;
                 }
 
@@ -1080,6 +1081,9 @@
                     });
                     if (compArray.length === 0) { AppUI.showToast("Set harus memiliki minimal 1 komponen.", "error"); return; }
                     newItem.composition = compArray;
+                } else {
+                    // Jika tipe item, ambil stok dari form
+                    newItem.stock = parseInt(document.getElementById('inp-stock').value) || 0;
                 }
 
                 try { 
