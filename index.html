@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V4.2 Refined)</title>
+    <title>Sistem Linen RS Charlie (V4.3 Upgrade)</title>
     
     <!-- Assets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -69,6 +69,7 @@
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
         .btn:hover { filter: brightness(90%); transform: translateY(-1px); }
         .btn:active { transform: translateY(0); }
+        .btn-sm { padding: 4px 8px; font-size: 0.8rem; }
 
         /* Utilities */
         .hidden { display: none !important; }
@@ -95,7 +96,7 @@
 
         /* Custom Helpers */
         .helper-text { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: block; }
-        .composition-tag { display: inline-block; background: var(--info-bg); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-right: 4px; margin-bottom: 4px; }
+        .composition-row { display: flex; gap: 8px; margin-bottom: 8px; }
         
         @media (max-width: 768px) {
             .app-container { grid-template-columns: 1fr; }
@@ -110,7 +111,7 @@
     <div id="loadingOverlay">
         <div class="spinner"></div>
         <h3 style="color:var(--primary); font-weight:600;">Sistem Linen RS Charlie</h3>
-        <p class="text-muted" style="font-size:0.9rem;">Menyinkronkan data keamanan...</p>
+        <p class="text-muted" style="font-size:0.9rem;">Menyinkronkan data...</p>
     </div>
 
     <div class="app-container">
@@ -121,7 +122,7 @@
                     <i class="fas fa-hospital fa-lg"></i>
                     <h3 style="line-height:1;">Sistem Linen</h3>
                 </div>
-                <small style="color: var(--text-muted); font-weight:500;">V4.2 Refined Hybrid</small>
+                <small style="color: var(--text-muted); font-weight:500;">V4.3 Upgrade</small>
             </div>
             <div class="nav-item active" onclick="App.switchView('dashboard')">
                 <i class="fas fa-chart-pie" style="width:20px;"></i> Dashboard
@@ -151,6 +152,7 @@
                     <p id="currentDate" class="text-muted" style="font-size: 0.9rem;"></p>
                 </div>
                 <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-outline" onclick="App.restoreData()"><i class="fas fa-upload"></i> Restore</button>
                     <button class="btn btn-outline" onclick="App.backupData()"><i class="fas fa-download"></i> Backup</button>
                     <button class="btn btn-success" onclick="CloudManager.syncToCloud()"><i class="fas fa-cloud-upload-alt"></i> Sync Cloud</button>
                 </div>
@@ -201,7 +203,7 @@
                                     <th>Kode</th><th>Nama Item</th><th>Kategori</th><th>Tipe</th>
                                     <th title="Stok fisik baik">Stok Baik</th>
                                     <th title="Stok rusak/afkir">Rusak</th>
-                                    <th title="Jumlah set yang bisa disusun (otomatis)">Stok Set</th>
+                                    <th title="Jumlah set (Otomatis/Manual)">Stok Set</th>
                                     <th>Harga Satuan</th><th>Aksi</th>
                                 </tr>
                             </thead>
@@ -250,10 +252,6 @@
                             <label>Faktor Kehilangan (%)</label>
                             <input type="number" id="param-loss-factor" value="5" min="0" max="100">
                         </div>
-                        <div>
-                            <label>Umur Pakai (Bulan)</label>
-                            <input type="number" id="param-linen-age" value="24" readonly class="text-muted" title="Saat ini hardcoded, akan update di versi next">
-                        </div>
                         <div style="display: flex; align-items: flex-end;">
                             <button class="btn btn-primary" onclick="App.runAnalysis()" style="width:100%; justify-content:center;"><i class="fas fa-calculator"></i> Mulai Analisa</button>
                         </div>
@@ -275,7 +273,6 @@
             <section id="view-config" class="view-section hidden">
                 <div class="card">
                     <h3>Konfigurasi Fasilitas RS</h3>
-                    <p class="text-muted helper-text" style="margin-bottom:20px;">Data ini digunakan untuk menghitung analisa kebutuhan linen secara otomatis.</p>
                     <div style="max-width: 500px; margin-top: 20px;">
                         <div class="form-group">
                             <label>Jumlah Bed Rawat Inap (Aktif)</label>
@@ -292,7 +289,6 @@
                         <div class="form-group">
                             <label>Buffer Laundry (Siklus Cuci)</label>
                             <input type="number" id="cfg-buffer" min="1">
-                            <small class="helper-text">Contoh: 3 artinya butuh 3 set cadangan selama 1 set dicuci.</small>
                         </div>
                         <button class="btn btn-primary" onclick="App.saveConfig()"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
                     </div>
@@ -351,14 +347,21 @@
                     <input type="number" id="inp-price" min="0" placeholder="0 jika tidak ada harga">
                 </div>
                 
-                <!-- LOGIC AREA: SET -->
-                <div id="set-logic-area" class="hidden" style="background: var(--info-bg); padding: 15px; border-radius: 8px; margin-bottom: 15px; border:1px dashed var(--primary);">
-                    <label style="color:var(--primary-dark);">Komposisi Set</label>
-                    <textarea id="inp-composition" rows="3" placeholder="Contoh: Sprei 180, Sarung Bantal, Selimut Tipis" style="font-family:monospace;"></textarea>
-                    <small class="helper-text">
-                        <i class="fas fa-info-circle"></i> Pisahkan item dengan tanda koma (,). Item harus sudah ada di Master Linen.
+                <!-- LOGIC AREA: SET (NEW DYNAMIC UI) -->
+                <div id="set-logic-area" class="hidden" style="background: var(--info-bg); padding: 20px; border-radius: 8px; margin-bottom: 15px; border:1px dashed var(--primary);">
+                    <label style="color:var(--primary-dark); margin-bottom:10px; display:block;">Komposisi Paket</label>
+                    
+                    <!-- Container untuk baris input -->
+                    <div id="composition-rows" style="display:flex; flex-direction:column; gap:8px;"></div>
+                    
+                    <!-- Tombol Tambah Baris -->
+                    <button type="button" class="btn btn-sm btn-outline" onclick="AppUI.addCompositionRow()" style="margin-top:10px; width:100%; border-style:dashed;">
+                        <i class="fas fa-plus"></i> Tambah Komponen
+                    </button>
+
+                    <small class="helper-text" style="margin-top:10px;">
+                        <i class="fas fa-info-circle"></i> Input Nama Item & Qty. Jika nama item cocok dengan Master Data, stok akan otomatis terhitung.
                     </small>
-                    <div id="composition-preview" style="margin-top:10px; font-size:0.85rem;"></div>
                 </div>
 
                 <!-- LOGIC AREA: ITEM -->
@@ -391,10 +394,8 @@
          * CONFIGURATION & CONSTANTS
          * ==========================================
          */
-        // PENTING: Ganti URL ini dengan URL Web App Google Script Anda (Deploy sebagai Web App)
         const BASE_URL = `https://script.google.com/macros/s/AKfycbxLpyDCnfLXWXggQIiMYzOPiJxX6iHPPyQ1YAud0fKfIjmAuM8gvku_FuihRIMtDzUduw/exec`;
         
-        // Default Data jika LocalStorage kosong
         const defaults = {
             items: [
                 { code: 'LIN-SPR-001', name: 'Sprei 180', type: 'item', category: 'Bed', stock: 50, damaged: 0, price: 85000, rotation: 1.0, composition: '' },
@@ -404,7 +405,6 @@
             config: { beds: 100, bor: 70, ops: 10, buffer: 3 }
         };
 
-        // Main App State
         let appData = {
             items: [],
             config: {},
@@ -413,23 +413,18 @@
 
         /**
          * ==========================================
-         * MODULE: CLOUD MANAGER (SYNC LOGIC)
+         * MODULE: CLOUD MANAGER
          * ==========================================
          */
         const CloudManager = {
             isLoading: false,
-
-            // Load Strategy: Try Cloud -> Fallback to Local -> Init Defaults
             loadFromCloud: function() {
                 this.showLoading(true);
                 const callbackName = 'cb_' + Math.floor(Math.random() * 1000000);
                 const url = `${BASE_URL}?callback=${callbackName}&action=get`;
                 const script = document.createElement('script');
                 script.src = url;
-                script.onerror = () => {
-                    console.warn("Cloud connection failed. Using LocalStorage.");
-                    this.finishLoading(false); 
-                };
+                script.onerror = () => { console.warn("Cloud failed. Using Local."); this.finishLoading(false); };
                 document.body.appendChild(script);
 
                 window[callbackName] = (response) => {
@@ -440,18 +435,12 @@
                             appData.items = response.data.items || [];
                             appData.config = response.data.config || defaults.config;
                             appData.audit = response.data.audit || [];
-                            this.saveToLocal(); // Update cache
+                            this.saveToLocal();
                             this.finishLoading(true, "Data dimuat dari Cloud");
-                        } else {
-                            throw new Error("Invalid format");
-                        }
-                    } catch (e) {
-                        console.error("Cloud parsing error", e);
-                        this.finishLoading(false);
-                    }
+                        } else { throw new Error("Invalid format"); }
+                    } catch (e) { this.finishLoading(false); }
                 };
             },
-
             finishLoading: function(isCloudSuccess, msg) {
                 this.showLoading(false);
                 if (!isCloudSuccess) {
@@ -462,57 +451,26 @@
                 }
                 AppUI.init();
             },
-
             syncToCloud: function() {
                 if(!confirm("Kirim data lokal ke Spreadsheet Google? Pastikan koneksi internet stabil.")) return;
-                
                 this.showLoading(true);
-                const payload = {
-                    action: "update",
-                    data: {
-                        items: appData.items,
-                        config: appData.config,
-                        audit: appData.audit
-                    }
-                };
-
-                // Gunakan fetch 'no-cors' untuk simpelnya JSONP tidak perlu di handle kompleks di GAS
-                fetch(BASE_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(() => {
-                    this.showLoading(false);
-                    AppUI.showToast("✅ Data berhasil dikirim ke Server!", "success");
-                })
-                .catch(err => {
-                    this.showLoading(false);
-                    AppUI.showToast("❌ Gagal sinkronisasi. Data tersimpan di Local.", "error");
-                    console.error(err);
-                });
+                const payload = { action: "update", data: { items: appData.items, config: appData.config, audit: appData.audit } };
+                fetch(BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                .then(() => { this.showLoading(false); AppUI.showToast("✅ Data berhasil dikirim ke Server!", "success"); })
+                .catch(err => { this.showLoading(false); AppUI.showToast("❌ Gagal sinkronisasi. Data tersimpan di Local.", "error"); });
             },
-
             loadFromLocal: function() {
                 const stored = localStorage.getItem('linen_hybrid_v4_2');
                 if (stored) {
                     const parsed = JSON.parse(stored);
-                    // Simple migration check
                     appData = parsed.items ? parsed : { items: [], config: {}, audit: [] };
                 } else {
-                    appData = { 
-                        items: JSON.parse(JSON.stringify(defaults.items)), 
-                        config: JSON.parse(JSON.stringify(defaults.config)), 
-                        audit: [] 
-                    };
+                    appData = { items: JSON.parse(JSON.stringify(defaults.items)), config: JSON.parse(JSON.stringify(defaults.config)), audit: [] };
                 }
             },
-
             saveToLocal: function() {
                 localStorage.setItem('linen_hybrid_v4_2', JSON.stringify(appData));
             },
-
             showLoading: function(show) {
                 const el = document.getElementById('loadingOverlay');
                 el.style.display = show ? 'flex' : 'none';
@@ -521,57 +479,64 @@
 
         /**
          * ==========================================
-         * MODULE: DATA STORE & BUSINESS LOGIC
+         * MODULE: DATA STORE (LOGIC UPGRADE)
          * ==========================================
          */
         const DataStore = {
-            saveData: function() {
-                CloudManager.saveToLocal();
+            saveData: function() { CloudManager.saveToLocal(); },
+
+            // Fungsi Normalisasi: Konversi format lama (String) ke format baru (Array Object)
+            normalizeComposition: function(compInput) {
+                if (Array.isArray(compInput)) return compInput; // Sudah format baru
+                
+                // Migrasi format lama: "Sprei 180, Sarung Bantal" -> [{name:"Sprei 180", qty:1}, ...]
+                if (typeof compInput === 'string' && compInput.trim() !== '') {
+                    return compInput.split(',').map(part => {
+                        const p = part.trim().split('x');
+                        const name = p[0].trim();
+                        const qty = p.length > 1 ? parseInt(p[1]) : 1;
+                        return { name: name, qty: isNaN(qty) ? 1 : qty };
+                    }).filter(item => item.name !== '');
+                }
+                return []; 
             },
 
             addItem: function(newItem) {
-                // Normalisasi input
                 newItem.name = newItem.name.trim();
                 newItem.category = newItem.category.trim();
 
-                // Validasi Nama Duplikat (abaikan diri sendiri saat edit)
-                const dup = appData.items.find(i => 
-                    i.name.toLowerCase() === newItem.name.toLowerCase() && 
-                    i.code !== newItem.code
-                );
-                if (dup) throw new Error(`Nama "${newItem.name}" sudah terdaftar! Gunakan nama unik.`);
+                const dup = appData.items.find(i => i.name.toLowerCase() === newItem.name.toLowerCase() && i.code !== newItem.code);
+                if (dup) throw new Error(`Nama "${newItem.name}" sudah terdaftar!`);
 
-                // Jika Edit
+                if (newItem.type === 'set') {
+                    newItem.composition = this.normalizeComposition(newItem.composition);
+                }
+
                 if (newItem.code) {
                     const idx = appData.items.findIndex(i => i.code === newItem.code);
                     if(idx !== -1) {
-                        // Pertahankan stok fisik, hanya update atribut master
                         newItem.stock = appData.items[idx].stock;
                         newItem.damaged = appData.items[idx].damaged;
                         appData.items[idx] = newItem;
-                        AuditLog.add('EDIT', `Update Master: ${newItem.code} (${newItem.name})`);
+                        AuditLog.add('EDIT', `Update Master: ${newItem.code}`);
                     }
-                } 
-                // Jika Add Baru
-                else {
+                } else {
                     newItem.code = this.generateCode(newItem.category, newItem.type);
                     if (newItem.type === 'item') newItem.stock = newItem.stock || 0;
                     newItem.damaged = 0;
                     appData.items.push(newItem);
-                    AuditLog.add('CREATE', `Tambah Master: ${newItem.code} (${newItem.name})`);
+                    AuditLog.add('CREATE', `Tambah Master: ${newItem.code}`);
                 }
                 this.saveData();
             },
 
             deleteItem: function(code) {
-                // Cek apakah item ini dipakai di Set lain
-                const usedInSet = appData.items.find(i => 
-                    i.type === 'set' && 
-                    i.composition.toLowerCase().includes(code.toLowerCase())
-                );
+                // Validasi: Cek apakah item dipakai di set lain
+                const usedInSet = appData.items.find(i => i.type === 'set' && i.composition && JSON.stringify(i.composition).toLowerCase().includes(code.toLowerCase()));
                 
+                // Note: Pencarian string di JSON array mungkin kurang presisi jika kode mirip, tapi cukup aman untuk warning
                 if(usedInSet) {
-                    throw new Error(`Gagal! Item ini adalah komponen dari Set: "${usedInSet.name}". Hapus/Hapus Set tersebut terlebih dahulu.`);
+                    throw new Error(`Gagal! Item ini adalah komponen dari Set: "${usedInSet.name}".`);
                 }
 
                 appData.items = appData.items.filter(i => i.code !== code);
@@ -581,55 +546,23 @@
 
             processOpname: function(opnameData) {
                 let changedCount = 0;
-                let logs = [];
-                
                 for (const code in opnameData) {
                     const input = opnameData[code];
                     const item = appData.items.find(i => i.code === code);
-                    
                     if (item && input.damaged > 0) {
                         if (input.damaged > item.stock) throw new Error(`Stok tidak cukup untuk ${item.name}. Maksimal rusak: ${item.stock}`);
-                        
                         item.stock -= input.damaged;
                         item.damaged = (item.damaged || 0) + input.damaged;
                         changedCount++;
-                        logs.push(`${item.name}: -${input.damaged}`);
                     }
                 }
-                
-                if (changedCount > 0) {
-                    AuditLog.add('OPNAME', `Proses Opname: ${changedCount} item berubah. (${logs.join(', ')})`);
-                }
+                if (changedCount > 0) AuditLog.add('OPNAME', `Opname: ${changedCount} item berubah.`);
                 this.saveData();
                 return changedCount;
             },
 
-            // Cek validitas komposisi set (apakah itemnya ada?)
-            validateComposition: function(text) {
-                const errors = [];
-                const foundItems = [];
-                if (!text) return { errors, foundItems };
-                
-                const parts = text.split(',').map(s => s.trim()).filter(s => s);
-                parts.forEach(part => {
-                    // Cari item yang namanya mengandung string tersebut (fuzzy match sederhana)
-                    const component = appData.items.find(i => 
-                        i.type === 'item' && 
-                        part.toLowerCase() === i.name.toLowerCase()
-                    );
-                    
-                    if (component) {
-                        foundItems.push(component.name);
-                    } else {
-                        errors.push(`Item "${part}" tidak ditemukan di Master Data.`);
-                    }
-                });
-                return { errors, foundItems };
-            },
-
             generateCode: function(cat, type) {
                 const prefix = type === 'set' ? 'SET' : 'LIN';
-                // Filter item by prefix
                 const items = appData.items.filter(i => i.code.startsWith(prefix));
                 let max = 0;
                 items.forEach(i => {
@@ -649,13 +582,9 @@
             add: function(action, details) {
                 const newLog = {
                     timestamp: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-                    action: action,
-                    details: details,
-                    user: 'Admin' // Hardcoded untuk simpel, bisa diganti session user nanti
+                    action: action, details: details, user: 'Admin'
                 };
-                // Tambahkan ke awal array (unshift)
                 appData.audit.unshift(newLog);
-                // Batasi logs 500 terakhir agar storage tidak penuh
                 if (appData.audit.length > 500) appData.audit.pop();
                 CloudManager.saveToLocal();
             }
@@ -663,30 +592,35 @@
 
         /**
          * ==========================================
-         * MODULE: LINEN LOGIC (CALCULATIONS)
+         * MODULE: LINEN LOGIC (UPGRADED)
          * ==========================================
          */
         const LinenLogic = {
-            // Hitung berapa set yang bisa dibentuk dari stok item
+            // Hitung stok set. Return 'null' jika mode Manual (ada komponen tidak terhubung)
             calculateSetStock: function(setItem) {
-                if (!setItem.composition) return 0;
-                const parts = setItem.composition.split(',').map(s => s.trim()).filter(s => s);
+                const parts = DataStore.normalizeComposition(setItem.composition);
+                if (parts.length === 0) return 0;
+
                 let minStock = Infinity;
-                
-                parts.forEach(part => {
-                    const component = appData.items.find(i => 
-                        i.type === 'item' && 
-                        i.name.toLowerCase() === part.toLowerCase()
-                    );
+                let isManual = false;
+
+                for (const part of parts) {
+                    const component = appData.items.find(i => i.type === 'item' && i.name.toLowerCase() === part.name.toLowerCase());
                     if (component) {
-                        const avail = Math.floor(component.stock / 1); // Asumsi 1 butuh per set
+                        const avail = Math.floor(component.stock / (part.qty || 1));
                         if (avail < minStock) minStock = avail;
                     } else {
-                        // Jika komponen tidak ditemukan di master, anggap set tidak bisa dibuat (0)
-                        minStock = 0;
+                        // Komponen tidak ditemukan -> Switch ke Manual
+                        isManual = true; 
+                        break; 
                     }
-                });
+                }
+                if (isManual) return null; // Null = Mode Manual
                 return minStock === Infinity ? 0 : minStock;
+            },
+
+            getSetMode: function(setItem) {
+                return this.calculateSetStock(setItem) === null ? 'MANUAL' : 'AUTO';
             },
 
             runAnalysis: function(lossFactor) {
@@ -694,52 +628,31 @@
                 const activeBeds = Math.ceil(appData.config.beds * (appData.config.bor / 100));
                 const buffer = appData.config.buffer;
 
-                // 1. Analisa ITEM SATUAN
+                // 1. Analisa ITEM
                 appData.items.forEach(item => {
-                    if (item.type === 'set') return; // Set dianalisa terpisah
-
-                    // Kebutuhan = (Bed Aktif * Rotasi) * Buffer * (1 + Loss%)
+                    if (item.type === 'set') return;
                     const neededPerCycle = activeBeds * (item.rotation || 1);
                     const totalNeeded = Math.ceil(neededPerCycle * buffer * (1 + (lossFactor/100)));
                     const diff = item.stock - totalNeeded;
-                    
-                    let status = 'AMAN';
-                    let colorClass = 'success';
-                    if (diff < 0) {
-                        status = diff < -(totalNeeded * 0.2) ? 'KRITIS' : 'DEFISIT';
-                        colorClass = status === 'KRITIS' ? 'danger' : 'warning';
-                    } else if (diff > totalNeeded) {
-                        status = 'SURPLUS';
-                        colorClass = 'info';
-                    }
-
-                    results.push({ 
-                        code: item.code, name: item.name, stock: item.stock, 
-                        needed: totalNeeded, diff: diff, status: status, color: colorClass, isSet: false
-                    });
+                    let status = 'AMAN', colorClass = 'success';
+                    if (diff < 0) { status = diff < -(totalNeeded * 0.2) ? 'KRITIS' : 'DEFISIT'; colorClass = status === 'KRITIS' ? 'danger' : 'warning'; }
+                    else if (diff > totalNeeded) { status = 'SURPLUS'; colorClass = 'info'; }
+                    results.push({ code: item.code, name: item.name, stock: item.stock, needed: totalNeeded, diff: diff, status: status, color: colorClass, isSet: false });
                 });
 
-                // 2. Analisa SET (Berdasarkan Operasi/Hari atau Bed)
+                // 2. Analisa SET
                 appData.items.filter(i => i.type === 'set').forEach(set => {
                     const setStock = this.calculateSetStock(set);
-                    // Kebutuhan Set diasumsikan berdasarkan konfigurasi OPS (Operasi) atau Bed default
-                    // Di sini kita gunakan config.ops sebagai kebutuhan harian untuk set
-                    const setNeeded = appData.config.ops * buffer; 
-                    const diff = setStock - setNeeded;
+                    // Jika Manual, gunakan stok manual (item.stock)
+                    const effectiveStock = setStock === null ? set.stock : setStock;
                     
-                    let status = 'AMAN';
-                    let colorClass = 'success';
-                    if (diff < 0) {
-                        status = 'KRITIS';
-                        colorClass = 'danger';
-                    }
+                    const setNeeded = appData.config.ops * buffer; 
+                    const diff = effectiveStock - setNeeded;
+                    let status = 'AMAN', colorClass = 'success';
+                    if (diff < 0) { status = 'KRITIS'; colorClass = 'danger'; }
 
-                    results.push({ 
-                        code: set.code, name: set.name + ' (SET)', stock: setStock, 
-                        needed: setNeeded, diff: diff, status: status, color: colorClass, isSet: true
-                    });
+                    results.push({ code: set.code, name: set.name + ' (SET)', stock: effectiveStock, needed: setNeeded, diff: diff, status: status, color: colorClass, isSet: true });
                 });
-
                 return results;
             }
         };
@@ -754,38 +667,22 @@
             tempOpnameData: {},
 
             init: function() {
-                // Set tanggal header
                 const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 document.getElementById('currentDate').innerText = new Date().toLocaleDateString('id-ID', options);
-                
                 this.populateCategoryDatalist();
                 this.renderDashboard();
             },
 
             switchView: function(viewId) {
-                // Hide all sections
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-                // Show target
                 document.getElementById('view-' + viewId).classList.remove('hidden');
-                // Update Nav
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                
-                // Trick to get clicked element if triggered by onclick, else find by id logic
                 const targetNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick').includes(viewId));
                 if(targetNav) targetNav.classList.add('active');
                 
-                // Set Title
-                const titles = { 
-                    'dashboard': 'Dashboard Monitoring', 
-                    'master': 'Master Data Linen', 
-                    'opname': 'Stock Opname Harian', 
-                    'analisa': 'Analisa Kebutuhan Cerdas', 
-                    'config': 'Konfigurasi RS', 
-                    'audit': 'Audit Log Sistem' 
-                };
+                const titles = { 'dashboard': 'Dashboard Monitoring', 'master': 'Master Data Linen', 'opname': 'Stock Opname Harian', 'analisa': 'Analisa Kebutuhan Cerdas', 'config': 'Konfigurasi RS', 'audit': 'Audit Log Sistem' };
                 document.getElementById('pageTitle').innerText = titles[viewId];
 
-                // Trigger refresh functions
                 if(viewId === 'dashboard') this.renderDashboard();
                 if(viewId === 'master') this.renderMasterTable();
                 if(viewId === 'opname') { this.tempOpnameData = {}; this.renderOpnameTable(); }
@@ -796,31 +693,24 @@
             /* --- DASHBOARD RENDERER --- */
             renderDashboard: function() {
                 let totalDamaged = 0, replacementCost = 0, setsReady = 0, warnings = [];
-                
                 appData.items.forEach(item => {
                     totalDamaged += (item.damaged || 0);
                     replacementCost += ((item.damaged || 0) * item.price);
-                    
                     if (item.type === 'set') {
                         const stock = LinenLogic.calculateSetStock(item);
-                        if (stock < 5) warnings.push(`<div class="badge" style="background:var(--danger-bg); color:var(--danger-text); display:inline-block; margin-right:5px;">KRITIS</div> <b>${item.name}</b> sisa ${stock} set.`);
-                        else if (stock < 15) warnings.push(`<div class="badge" style="background:var(--warning-bg); color:var(--warning-text); display:inline-block; margin-right:5px;">WARNING</div> <b>${item.name}</b> sisa ${stock} set.`);
-                        
-                        setsReady += stock;
+                        const displayStock = stock === null ? item.stock : stock;
+                        if (displayStock < 5) warnings.push(`<div class="badge" style="background:var(--danger-bg); color:var(--danger-text); display:inline-block; margin-right:5px;">KRITIS</div> <b>${item.name}</b> sisa ${displayStock} set.`);
+                        else if (displayStock < 15) warnings.push(`<div class="badge" style="background:var(--warning-bg); color:var(--warning-text); display:inline-block; margin-right:5px;">WARNING</div> <b>${item.name}</b> sisa ${displayStock} set.`);
+                        setsReady += displayStock;
                     }
                 });
-
                 document.getElementById('dash-total-items').innerText = appData.items.length;
                 document.getElementById('dash-damaged-items').innerText = totalDamaged;
                 document.getElementById('dash-sets-ready').innerText = setsReady;
                 document.getElementById('dash-replacement-cost').innerText = this.formatRupiah(replacementCost);
-                
                 const warnContainer = document.getElementById('dashboard-warnings');
-                if (warnings.length) {
-                    warnContainer.innerHTML = warnings.map(w => `<div style="margin-bottom:8px; font-size:0.9rem;">${w}</div>`).join('');
-                } else {
-                    warnContainer.innerHTML = '<div class="text-success" style="font-weight:600;"><i class="fas fa-check-circle"></i> Semua stok dalam kondisi aman.</div>';
-                }
+                if (warnings.length) warnContainer.innerHTML = warnings.map(w => `<div style="margin-bottom:8px; font-size:0.9rem;">${w}</div>`).join('');
+                else warnContainer.innerHTML = '<div class="text-success" style="font-weight:600;"><i class="fas fa-check-circle"></i> Semua stok dalam kondisi aman.</div>';
             },
 
             /* --- MASTER TABLE RENDERER --- */
@@ -828,11 +718,23 @@
                 const search = document.getElementById('masterSearch').value.toLowerCase();
                 const tbody = document.getElementById('masterTableBody');
                 tbody.innerHTML = '';
-
                 appData.items.forEach(item => {
                     if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
                     
-                    const setStock = item.type === 'set' ? LinenLogic.calculateSetStock(item) : '-';
+                    let setStockDisplay = '-';
+                    let setStockClass = 'text-muted';
+                    
+                    if (item.type === 'set') {
+                        const calc = LinenLogic.calculateSetStock(item);
+                        if (calc === null) {
+                            setStockDisplay = `<span class="text-warning font-bold" title="Input Stok Manual">${item.stock} (Manual)</span>`;
+                            setStockClass = 'text-warning';
+                        } else {
+                            setStockDisplay = `<span class="text-success font-bold" title="Otomatis dari Item">${calc}</span>`;
+                            setStockClass = 'text-success';
+                        }
+                    }
+
                     const typeBadge = item.type === 'set' 
                         ? `<span class="badge" style="background:var(--warning-bg); color:var(--warning-text)">SET</span>`
                         : `<span class="badge" style="background:var(--info-bg); color:var(--info-text)">ITEM</span>`;
@@ -845,11 +747,11 @@
                         <td>${typeBadge}</td>
                         <td class="font-bold text-primary">${item.stock}</td>
                         <td class="text-danger">${item.damaged || 0}</td>
-                        <td class="font-bold ${item.type==='set' ? 'text-success' : 'text-muted'}">${setStock}</td>
+                        <td class="${setStockClass} font-bold">${setStockDisplay}</td>
                         <td>${this.formatRupiah(item.price)}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline" style="padding:4px 8px; font-size:0.8rem;" onclick="AppUI.openModal('edit', '${item.code}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="AppUI.deleteItem('${item.code}')"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-outline" onclick="AppUI.openModal('edit', '${item.code}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="AppUI.deleteItem('${item.code}')"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -861,14 +763,11 @@
                 const search = document.getElementById('opnameSearch').value.toLowerCase();
                 const tbody = document.getElementById('opnameTableBody');
                 tbody.innerHTML = '';
-                
                 appData.items.forEach(item => {
-                    if (item.type === 'set') return; // Opname item fisik saja, set terhitung otomatis
+                    if (item.type === 'set') return;
                     if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
-                    
                     const temp = this.tempOpnameData[item.code] || { damaged: 0, note: '' };
-                    const sisaBaik = Math.max(0, item.stock - temp.damaged); // Cegah minus visual
-
+                    const sisaBaik = Math.max(0, item.stock - temp.damaged);
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><span style="font-family:monospace;">${item.code}</span></td>
@@ -893,13 +792,10 @@
 
             updateOpnameInput: function(code, field, val) {
                 if (!this.tempOpnameData[code]) this.tempOpnameData[code] = { damaged: 0, note: '' };
-                
                 if (field === 'damaged') {
                     let numVal = parseInt(val) || 0;
                     if(numVal < 0) numVal = 0;
                     this.tempOpnameData[code][field] = numVal;
-                    
-                    // Live Update Sisa
                     const item = appData.items.find(i => i.code === code);
                     if(item) {
                         const sisa = Math.max(0, item.stock - numVal);
@@ -915,37 +811,27 @@
             },
 
             resetOpname: function() {
-                if(confirm('Reset semua input opname?')) { 
-                    this.tempOpnameData = {}; 
-                    this.renderOpnameTable(); 
-                }
+                if(confirm('Reset semua input opname?')) { this.tempOpnameData = {}; this.renderOpnameTable(); }
             },
 
             finalizeOpname: function() {
                 try {
                     const count = DataStore.processOpname(this.tempOpnameData);
-                    if(count === 0) {
-                        AppUI.showToast("Tidak ada perubahan stok yang disimpan.", "info");
-                    } else {
-                        AppUI.showToast(`✅ Opname Selesai. ${count} item diperbarui.`, "success");
-                    }
+                    if(count === 0) AppUI.showToast("Tidak ada perubahan stok.", "info");
+                    else { AppUI.showToast(`✅ Opname Selesai. ${count} item diperbarui.`, "success"); }
                     this.tempOpnameData = {};
                     this.renderOpnameTable();
                     this.renderDashboard();
-                } catch (e) { 
-                    AppUI.showToast(e.message, "error"); 
-                }
+                } catch (e) { AppUI.showToast(e.message, "error"); }
             },
 
             /* --- ANALISA RENDERER --- */
             renderAnalysisResults: function(results) {
                 const tbody = document.getElementById('analysisBody');
                 tbody.innerHTML = '';
-                
                 results.forEach(r => {
                     const badgeColor = r.color === 'danger' ? 'var(--danger-bg)' : (r.color === 'warning' ? 'var(--warning-bg)' : (r.color === 'info' ? 'var(--info-bg)' : 'var(--success-bg)'));
                     const textColor = r.color === 'danger' ? 'var(--danger-text)' : (r.color === 'warning' ? 'var(--warning-text)' : (r.color === 'info' ? 'var(--info-text)' : 'var(--success-text)'));
-                    
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><span class="badge" style="background:${badgeColor}; color:${textColor}">${r.status}</span></td>
@@ -955,9 +841,7 @@
                         <td>${r.needed}</td>
                         <td class="font-bold" style="color:${r.color}">${r.diff > 0 ? '+' : ''}${r.diff}</td>
                         <td>
-                            ${r.diff < 0 
-                                ? `<b class="text-danger">BELI ${Math.abs(r.diff)}</b>` 
-                                : `<span class="text-muted">Cukup</span>`}
+                            ${r.diff < 0 ? `<b class="text-danger">BELI ${Math.abs(r.diff)}</b>` : `<span class="text-muted">Cukup</span>`}
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -991,8 +875,6 @@
                 modal.classList.add('open');
                 document.getElementById('linenForm').reset();
                 this.currentEditCode = code;
-                
-                // Populate Categories
                 this.populateCategoryDatalist();
 
                 if(mode==='edit' && code) {
@@ -1004,12 +886,18 @@
                     document.getElementById('inp-type').value = item.type;
                     document.getElementById('inp-category').value = item.category;
                     document.getElementById('inp-price').value = item.price;
-                    document.getElementById('inp-composition').value = item.composition || '';
                     document.getElementById('inp-rotation').value = item.rotation || 1.0;
+                    
+                    // Handle Set Composition
+                    if(item.type === 'set') {
+                        const parts = DataStore.normalizeComposition(item.composition);
+                        const container = document.getElementById('composition-rows');
+                        container.innerHTML = ''; 
+                        parts.forEach(p => this.addCompositionRow(p.name, p.qty));
+                    }
                 } else {
                     document.getElementById('modalTitle').innerText = 'Tambah Linen Baru';
                     document.getElementById('inp-code').disabled = false;
-                    // Default values
                     document.getElementById('inp-type').value = 'item';
                 }
                 this.toggleSetInput(document.getElementById('inp-type').value);
@@ -1022,29 +910,30 @@
             toggleSetInput: function(type) {
                 const setArea = document.getElementById('set-logic-area');
                 const itemArea = document.getElementById('item-logic-area');
-                
                 if(type==='set') { 
                     setArea.classList.remove('hidden'); 
                     itemArea.classList.add('hidden'); 
+                    // Init rows if empty
+                    const container = document.getElementById('composition-rows');
+                    if(container.children.length === 0) this.addCompositionRow();
                 } else { 
                     setArea.classList.add('hidden'); 
                     itemArea.classList.remove('hidden'); 
                 }
             },
 
-            validateAndPreviewComposition: function() {
-                const text = document.getElementById('inp-composition').value;
-                const preview = document.getElementById('composition-preview');
-                const check = DataStore.validateComposition(text);
-                
-                if(check.errors.length > 0) {
-                    preview.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> ${check.errors[0]}</span>`;
-                    return false;
-                } else {
-                    const tags = check.foundItems.map(i => `<span class="composition-tag"><i class="fas fa-check"></i> ${i}</span>`).join('');
-                    preview.innerHTML = tags || `<small class="text-muted">Belum ada komponen</small>`;
-                    return true;
-                }
+            addCompositionRow: function(name = '', qty = 1) {
+                const container = document.getElementById('composition-rows');
+                const div = document.createElement('div');
+                div.className = 'comp-row';
+                div.style.display = 'flex';
+                div.style.gap = '10px';
+                div.innerHTML = `
+                    <input type="text" class="comp-name" placeholder="Nama Item (Mis: Sprei)" value="${name}" style="flex:2;">
+                    <input type="number" class="comp-qty" placeholder="Qty" value="${qty}" min="1" style="flex:1;">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="padding: 0 10px;">&times;</button>
+                `;
+                container.appendChild(div);
             },
 
             saveItem: function(e) {
@@ -1056,13 +945,21 @@
                     name: document.getElementById('inp-name').value,
                     category: document.getElementById('inp-category').value, 
                     price: parseInt(document.getElementById('inp-price').value)||0,
-                    rotation: parseFloat(document.getElementById('inp-rotation').value)||1.0, 
-                    composition: document.getElementById('inp-composition').value, 
+                    rotation: parseFloat(document.getElementById('inp-rotation').value)||1.0,
                     stock:0, damaged:0
                 };
 
                 if(type==='set') {
-                    if(!this.validateAndPreviewComposition()) return; // Stop if invalid
+                    const rows = document.querySelectorAll('.comp-row');
+                    const compArray = [];
+                    let isValid = true;
+                    rows.forEach(row => {
+                        const name = row.querySelector('.comp-name').value.trim();
+                        const qty = parseInt(row.querySelector('.comp-qty').value) || 1;
+                        if(name) compArray.push({ name, qty });
+                    });
+                    if (compArray.length === 0) { AppUI.showToast("Set harus memiliki minimal 1 komponen.", "error"); return; }
+                    newItem.composition = compArray;
                 }
 
                 try { 
@@ -1071,9 +968,7 @@
                     this.closeModal(); 
                     this.renderMasterTable(); 
                     this.renderDashboard(); 
-                } catch (err) { 
-                    AppUI.showToast(err.message, 'error'); 
-                }
+                } catch (err) { AppUI.showToast(err.message, 'error'); }
             },
 
             deleteItem: function(code) {
@@ -1083,9 +978,7 @@
                         this.renderMasterTable(); 
                         this.renderDashboard(); 
                         AppUI.showToast('Item dihapus', 'success');
-                    } catch(err) {
-                        AppUI.showToast(err.message, 'error');
-                    }
+                    } catch(err) { AppUI.showToast(err.message, 'error'); }
                 }
             },
 
@@ -1136,20 +1029,46 @@
                 AppUI.showToast('Analisa selesai', 'success');
             },
             backupData: function() {
-                const blob = new Blob([JSON.stringify(appData, null, 2)], {type:'application/json'});
+                const backupObj = {
+                    meta: { app: "Sistem Linen RS Charlie", version: "4.3 Upgrade", timestamp: new Date().toISOString() },
+                    data: { items: appData.items, config: appData.config, audit: appData.audit }
+                };
+                const blob = new Blob([JSON.stringify(backupObj, null, 2)], {type:'application/json'});
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); a.href = url; a.download = `backup_linen_rs_${new Date().toISOString().slice(0,10)}.json`;
+                const dateStr = new Date().toISOString().slice(0,10).replace(/-/g,"");
+                const a = document.createElement('a'); a.href = url; a.download = `linen_backup_${dateStr}.json`;
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                AppUI.showToast('Backup file didownload', 'success');
+                AppUI.showToast('Backup JSON berhasil diunduh.', 'success');
+            },
+            restoreData: function() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = event => {
+                        try {
+                            const parsed = JSON.parse(event.target.result);
+                            if (!parsed.data || !Array.isArray(parsed.data.items)) throw new Error("Format file backup tidak valid.");
+                            if(confirm(`Restore data dari backup?\nWaktu: ${parsed.meta.timestamp || '-'}\n\nData saat ini akan TIMPA.`)) {
+                                appData.items = parsed.data.items;
+                                appData.config = parsed.data.config || defaults.config;
+                                appData.audit = parsed.data.audit || [];
+                                CloudManager.saveToLocal();
+                                AuditLog.add('RESTORE', 'Restore data dari file JSON');
+                                AppUI.showToast('Data berhasil dipulihkan!', 'success');
+                                AppUI.init();
+                            }
+                        } catch (err) { AppUI.showToast("Gagal restore: " + err.message, "error"); }
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
             }
         };
 
-        // Event Listener for composition preview
-        document.getElementById('inp-composition').addEventListener('input', function() {
-            AppUI.validateAndPreviewComposition();
-        });
-
-        // Start
         document.addEventListener('DOMContentLoaded', () => App.init());
 
     </script>
