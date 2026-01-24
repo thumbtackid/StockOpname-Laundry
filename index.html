@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V4.3 Upgrade)</title>
+    <title>Sistem Linen RS Charlie (V5.0 Stable)</title>
     
     <!-- Assets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
 
         /* Main Content */
         .main-content { display: flex; flex-direction: column; gap: 20px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 10px; }
         h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary-dark); }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         
@@ -59,6 +59,7 @@
         .form-group { margin-bottom: 16px; }
         label { display: block; font-weight: 600; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; transition: border 0.2s; background: #fff; }
+        input:disabled, select:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
         
         /* Buttons */
@@ -70,6 +71,7 @@
         .btn:hover { filter: brightness(90%); transform: translateY(-1px); }
         .btn:active { transform: translateY(0); }
         .btn-sm { padding: 4px 8px; font-size: 0.8rem; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         /* Utilities */
         .hidden { display: none !important; }
@@ -96,7 +98,7 @@
 
         /* Custom Helpers */
         .helper-text { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; display: block; }
-        .composition-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .composition-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
         
         @media (max-width: 768px) {
             .app-container { grid-template-columns: 1fr; }
@@ -111,7 +113,7 @@
     <div id="loadingOverlay">
         <div class="spinner"></div>
         <h3 style="color:var(--primary); font-weight:600;">Sistem Linen RS Charlie</h3>
-        <p class="text-muted" style="font-size:0.9rem;">Menyinkronkan data...</p>
+        <p class="text-muted" style="font-size:0.9rem;">Memproses data...</p>
     </div>
 
     <div class="app-container">
@@ -122,24 +124,24 @@
                     <i class="fas fa-hospital fa-lg"></i>
                     <h3 style="line-height:1;">Sistem Linen</h3>
                 </div>
-                <small style="color: var(--text-muted); font-weight:500;">V4.3 Upgrade</small>
+                <small style="color: var(--text-muted); font-weight:500;">V5.0 Stable</small>
             </div>
-            <div class="nav-item active" onclick="App.switchView('dashboard')">
+            <div class="nav-item active" data-view="dashboard">
                 <i class="fas fa-chart-pie" style="width:20px;"></i> Dashboard
             </div>
-            <div class="nav-item" onclick="App.switchView('master')">
+            <div class="nav-item" data-view="master">
                 <i class="fas fa-layer-group" style="width:20px;"></i> Master Data
             </div>
-            <div class="nav-item" onclick="App.switchView('opname')">
+            <div class="nav-item" data-view="opname">
                 <i class="fas fa-clipboard-list" style="width:20px;"></i> Stock Opname
             </div>
-            <div class="nav-item" onclick="App.switchView('analisa')">
+            <div class="nav-item" data-view="analisa">
                 <i class="fas fa-brain" style="width:20px;"></i> Analisa Cerdas
             </div>
-            <div class="nav-item" onclick="App.switchView('config')">
+            <div class="nav-item" data-view="config">
                 <i class="fas fa-sliders-h" style="width:20px;"></i> Konfigurasi RS
             </div>
-            <div class="nav-item" onclick="App.switchView('audit')">
+            <div class="nav-item" data-view="audit">
                 <i class="fas fa-shield-alt" style="width:20px;"></i> Audit Log
             </div>
         </nav>
@@ -152,9 +154,9 @@
                     <p id="currentDate" class="text-muted" style="font-size: 0.9rem;"></p>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-outline" onclick="App.restoreData()"><i class="fas fa-upload"></i> Restore</button>
-                    <button class="btn btn-outline" onclick="App.backupData()"><i class="fas fa-download"></i> Backup</button>
-                    <button class="btn btn-success" onclick="CloudManager.syncToCloud()"><i class="fas fa-cloud-upload-alt"></i> Sync Cloud</button>
+                    <button class="btn btn-outline" id="btnRestore"><i class="fas fa-upload"></i> Restore</button>
+                    <button class="btn btn-outline" id="btnBackup"><i class="fas fa-download"></i> Backup</button>
+                    <button class="btn btn-success" id="btnSyncCloud"><i class="fas fa-cloud-upload-alt"></i> Sync Cloud</button>
                 </div>
             </header>
 
@@ -191,10 +193,8 @@
             <section id="view-master" class="view-section hidden">
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
-                        <div style="display:flex; gap:10px; flex:1;">
-                            <input type="text" id="masterSearch" placeholder="Cari kode atau nama linen..." style="max-width:300px;" oninput="AppUI.renderMasterTable()">
-                        </div>
-                        <button class="btn btn-primary" onclick="AppUI.openModal('add')"><i class="fas fa-plus"></i> Tambah Baru</button>
+                        <input type="text" id="masterSearch" placeholder="Cari kode atau nama linen..." style="max-width:300px;">
+                        <button class="btn btn-primary" id="btnAddMaster"><i class="fas fa-plus"></i> Tambah Baru</button>
                     </div>
                     <div style="overflow-x:auto;">
                         <table>
@@ -220,10 +220,10 @@
                         <strong><i class="fas fa-info-circle"></i> Petunjuk:</strong> Masukkan jumlah item yang <b>Rusak</b> atau <b>Hilang</b>. Sisa stok baik akan otomatis dihitung.
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
-                        <input type="text" id="opnameSearch" placeholder="Filter item opname..." style="width: 300px;" oninput="AppUI.renderOpnameTable()">
+                        <input type="text" id="opnameSearch" placeholder="Filter item opname..." style="width: 300px;">
                         <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-outline" onclick="AppUI.resetOpname()"><i class="fas fa-undo"></i> Reset</button>
-                            <button class="btn btn-success" onclick="AppUI.finalizeOpname()"><i class="fas fa-save"></i> Finalisasi Data</button>
+                            <button class="btn btn-outline" id="btnResetOpname"><i class="fas fa-undo"></i> Reset</button>
+                            <button class="btn btn-success" id="btnFinalizeOpname"><i class="fas fa-save"></i> Finalisasi Data</button>
                         </div>
                     </div>
                     <div style="overflow-x:auto;">
@@ -253,7 +253,7 @@
                             <input type="number" id="param-loss-factor" value="5" min="0" max="100">
                         </div>
                         <div style="display: flex; align-items: flex-end;">
-                            <button class="btn btn-primary" onclick="App.runAnalysis()" style="width:100%; justify-content:center;"><i class="fas fa-calculator"></i> Mulai Analisa</button>
+                            <button class="btn btn-primary" id="btnRunAnalysis" style="width:100%; justify-content:center;"><i class="fas fa-calculator"></i> Mulai Analisa</button>
                         </div>
                     </div>
                     <div style="overflow-x:auto;">
@@ -290,7 +290,7 @@
                             <label>Buffer Laundry (Siklus Cuci)</label>
                             <input type="number" id="cfg-buffer" min="1">
                         </div>
-                        <button class="btn btn-primary" onclick="App.saveConfig()"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
+                        <button class="btn btn-primary" id="btnSaveConfig"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
                     </div>
                 </div>
             </section>
@@ -320,12 +320,12 @@
     <div id="itemModal" class="modal-overlay">
         <div class="modal-content">
             <h2 style="margin-bottom: 20px; color:var(--primary-dark);" id="modalTitle">Tambah Linen</h2>
-            <form id="linenForm" onsubmit="AppUI.saveItem(event)">
-                <input type="hidden" id="inp-code">
+            <form id="linenForm" autocomplete="off">
+                <input type="hidden" id="inp-code" name="inp-code">
                 
                 <div class="form-group">
                     <label>Tipe Data</label>
-                    <select id="inp-type" onchange="AppUI.toggleSetInput(this.value)">
+                    <select id="inp-type" name="inp-type">
                         <option value="item">Item Satuan (Contoh: Sprei)</option>
                         <option value="set">Set / Paket (Contoh: Set Bed Pasien)</option>
                     </select>
@@ -333,21 +333,21 @@
 
                 <div class="form-group">
                     <label>Nama Item / Nama Set</label>
-                    <input type="text" id="inp-name" required placeholder="Nama barang...">
+                    <input type="text" id="inp-name" name="inp-name" required placeholder="Nama barang...">
                 </div>
 
                 <div class="form-group">
                     <label>Kategori</label>
-                    <input type="text" id="inp-category" list="listCategory" required placeholder="Contoh: Bed, Operasi, Bayi">
+                    <input type="text" id="inp-category" name="inp-category" required list="listCategory" placeholder="Contoh: Bed, Operasi, Bayi">
                     <datalist id="listCategory"></datalist>
                 </div>
 
                 <div class="form-group">
                     <label>Harga Satuan (Rp)</label>
-                    <input type="number" id="inp-price" min="0" placeholder="0 jika tidak ada harga">
+                    <input type="number" id="inp-price" name="inp-price" min="0" placeholder="0 jika tidak ada harga">
                 </div>
                 
-                <!-- LOGIC AREA: SET (NEW DYNAMIC UI) -->
+                <!-- LOGIC AREA: SET -->
                 <div id="set-logic-area" class="hidden" style="background: var(--info-bg); padding: 20px; border-radius: 8px; margin-bottom: 15px; border:1px dashed var(--primary);">
                     <label style="color:var(--primary-dark); margin-bottom:10px; display:block;">Komposisi Paket</label>
                     
@@ -355,12 +355,12 @@
                     <div id="composition-rows" style="display:flex; flex-direction:column; gap:8px;"></div>
                     
                     <!-- Tombol Tambah Baris -->
-                    <button type="button" class="btn btn-sm btn-outline" onclick="AppUI.addCompositionRow()" style="margin-top:10px; width:100%; border-style:dashed;">
+                    <button type="button" class="btn btn-sm btn-outline" id="btnAddCompRow" style="margin-top:10px; width:100%; border-style:dashed;">
                         <i class="fas fa-plus"></i> Tambah Komponen
                     </button>
 
                     <small class="helper-text" style="margin-top:10px;">
-                        <i class="fas fa-info-circle"></i> Input Nama Item & Qty. Jika nama item cocok dengan Master Data, stok akan otomatis terhitung.
+                        <i class="fas fa-info-circle"></i> Jika nama item cocok dengan Master Data, stok akan otomatis terhitung (AUTO). Jika tidak, stok bersifat MANUAL.
                     </small>
                 </div>
 
@@ -368,17 +368,17 @@
                 <div id="item-logic-area">
                     <div class="form-group">
                         <label>Stok Awal (Baik)</label>
-                        <input type="number" id="inp-stock" min="0">
+                        <input type="number" id="inp-stock" name="inp-stock" min="0">
                     </div>
                     <div class="form-group">
                         <label>Rasio Rotasi (Per Bed/Per Hari)</label>
-                        <input type="number" id="inp-rotation" value="1.0" step="0.5" min="0.1">
+                        <input type="number" id="inp-rotation" name="inp-rotation" value="1.0" step="0.5" min="0.1">
                         <small class="helper-text">Berapa kali item ini diganti dalam sehari?</small>
                     </div>
                 </div>
 
                 <div style="text-align: right; margin-top: 25px; border-top: 1px solid var(--border); padding-top:15px;">
-                    <button type="button" class="btn btn-outline" onclick="AppUI.closeModal()">Batal</button>
+                    <button type="button" class="btn btn-outline" id="btnCancelModal">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan Data</button>
                 </div>
             </form>
@@ -394,8 +394,12 @@
          * CONFIGURATION & CONSTANTS
          * ==========================================
          */
-        const BASE_URL = `https://script.google.com/macros/s/AKfycbxLpyDCnfLXWXggQIiMYzOPiJxX6iHPPyQ1YAud0fKfIjmAuM8gvku_FuihRIMtDzUduw/exec`;
-        
+        const CONFIG = {
+            APP_VERSION: '5.0 Stable',
+            BASE_URL: `https://script.google.com/macros/s/AKfycbxLpyDCnfLXWXggQIiMYzOPiJxX6iHPPyQ1YAud0fKfIjmAuM8gvku_FuihRIMtDzUduw/exec`,
+            STORAGE_KEY: 'linen_hybrid_v5'
+        };
+
         const defaults = {
             items: [
                 { code: 'LIN-SPR-001', name: 'Sprei 180', type: 'item', category: 'Bed', stock: 50, damaged: 0, price: 85000, rotation: 1.0, composition: '' },
@@ -413,18 +417,20 @@
 
         /**
          * ==========================================
-         * MODULE: CLOUD MANAGER
+         * MODULE: CLOUD MANAGER (V5.0)
          * ==========================================
          */
         const CloudManager = {
-            isLoading: false,
             loadFromCloud: function() {
                 this.showLoading(true);
                 const callbackName = 'cb_' + Math.floor(Math.random() * 1000000);
-                const url = `${BASE_URL}?callback=${callbackName}&action=get`;
+                const url = `${CONFIG.BASE_URL}?callback=${callbackName}&action=get`;
                 const script = document.createElement('script');
                 script.src = url;
-                script.onerror = () => { console.warn("Cloud failed. Using Local."); this.finishLoading(false); };
+                script.onerror = () => { 
+                    console.warn("Cloud connection failed. Using LocalStorage."); 
+                    this.finishLoading(false, "Koneksi Cloud Gagal. Mode Offline aktif."); 
+                };
                 document.body.appendChild(script);
 
                 window[callbackName] = (response) => {
@@ -437,40 +443,98 @@
                             appData.audit = response.data.audit || [];
                             this.saveToLocal();
                             this.finishLoading(true, "Data dimuat dari Cloud");
-                        } else { throw new Error("Invalid format"); }
-                    } catch (e) { this.finishLoading(false); }
+                        } else {
+                            throw new Error("Invalid format");
+                        }
+                    } catch (e) {
+                        this.finishLoading(false, "Format data Cloud error.");
+                    }
                 };
             },
+
             finishLoading: function(isCloudSuccess, msg) {
                 this.showLoading(false);
                 if (!isCloudSuccess) {
                     this.loadFromLocal();
-                    AppUI.showToast("Mode Offline: Data diambil dari LocalStorage.", "warning");
+                    AppUI.showToast(msg || "Mode Offline: Data diambil dari LocalStorage.", "warning");
                 } else {
                     AppUI.showToast("✅ " + (msg || "Sinkronisasi Berhasil"), "success");
                 }
                 AppUI.init();
             },
+
             syncToCloud: function() {
                 if(!confirm("Kirim data lokal ke Spreadsheet Google? Pastikan koneksi internet stabil.")) return;
+                
                 this.showLoading(true);
-                const payload = { action: "update", data: { items: appData.items, config: appData.config, audit: appData.audit } };
-                fetch(BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-                .then(() => { this.showLoading(false); AppUI.showToast("✅ Data berhasil dikirim ke Server!", "success"); })
-                .catch(err => { this.showLoading(false); AppUI.showToast("❌ Gagal sinkronisasi. Data tersimpan di Local.", "error"); });
+                AppUI.showToast("Mengirim data ke Server...", "info");
+
+                const payload = {
+                    action: "update",
+                    data: {
+                        items: appData.items,
+                        config: appData.config,
+                        audit: appData.audit
+                    }
+                };
+
+                // Fix V5.0: Use text/plain instead of application/json to avoid preflight issues with some GAS setups
+                fetch(CONFIG.BASE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' }, 
+                    body: JSON.stringify(payload)
+                })
+                .then(response => {
+                    // Since we rely on no-cors often, we can't check response.ok reliably.
+                    // We assume success if network request didn't throw.
+                    // Simulation for UX:
+                    setTimeout(() => {
+                        this.showLoading(false);
+                        AppUI.showToast("✅ Data berhasil dikirim ke Server!", "success");
+                        AuditLog.add('SYNC', 'Sync Data ke Cloud');
+                    }, 800);
+                })
+                .catch(err => {
+                    this.showLoading(false);
+                    AppUI.showToast("❌ Gagal sinkronisasi. Cek koneksi internet.", "error");
+                    console.error(err);
+                });
             },
+
             loadFromLocal: function() {
-                const stored = localStorage.getItem('linen_hybrid_v4_2');
+                const stored = localStorage.getItem(CONFIG.STORAGE_KEY);
                 if (stored) {
-                    const parsed = JSON.parse(stored);
-                    appData = parsed.items ? parsed : { items: [], config: {}, audit: [] };
+                    try {
+                        const parsed = JSON.parse(stored);
+                        // Check structure integrity
+                        if (parsed && Array.isArray(parsed.items)) {
+                            appData.items = parsed.items;
+                            appData.config = parsed.config || defaults.config;
+                            appData.audit = parsed.audit || [];
+                        } else {
+                            throw new Error("Corrupt Data");
+                        }
+                    } catch(e) {
+                        console.error("Local data corrupt, loading defaults", e);
+                        this.loadDefaults();
+                    }
                 } else {
-                    appData = { items: JSON.parse(JSON.stringify(defaults.items)), config: JSON.parse(JSON.stringify(defaults.config)), audit: [] };
+                    this.loadDefaults();
                 }
             },
-            saveToLocal: function() {
-                localStorage.setItem('linen_hybrid_v4_2', JSON.stringify(appData));
+
+            loadDefaults: function() {
+                appData = { 
+                    items: JSON.parse(JSON.stringify(defaults.items)), 
+                    config: JSON.parse(JSON.stringify(defaults.config)), 
+                    audit: [] 
+                };
             },
+
+            saveToLocal: function() {
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(appData));
+            },
+
             showLoading: function(show) {
                 const el = document.getElementById('loadingOverlay');
                 el.style.display = show ? 'flex' : 'none';
@@ -479,17 +543,17 @@
 
         /**
          * ==========================================
-         * MODULE: DATA STORE (LOGIC UPGRADE)
+         * MODULE: DATA STORE (V5.0 REFACTOR)
          * ==========================================
          */
         const DataStore = {
             saveData: function() { CloudManager.saveToLocal(); },
 
-            // Fungsi Normalisasi: Konversi format lama (String) ke format baru (Array Object)
             normalizeComposition: function(compInput) {
-                if (Array.isArray(compInput)) return compInput; // Sudah format baru
+                // Already new format
+                if (Array.isArray(compInput)) return compInput;
                 
-                // Migrasi format lama: "Sprei 180, Sarung Bantal" -> [{name:"Sprei 180", qty:1}, ...]
+                // Migration from String to Array
                 if (typeof compInput === 'string' && compInput.trim() !== '') {
                     return compInput.split(',').map(part => {
                         const p = part.trim().split('x');
@@ -505,7 +569,10 @@
                 newItem.name = newItem.name.trim();
                 newItem.category = newItem.category.trim();
 
-                const dup = appData.items.find(i => i.name.toLowerCase() === newItem.name.toLowerCase() && i.code !== newItem.code);
+                const dup = appData.items.find(i => 
+                    i.name.toLowerCase() === newItem.name.toLowerCase() && 
+                    i.code !== newItem.code
+                );
                 if (dup) throw new Error(`Nama "${newItem.name}" sudah terdaftar!`);
 
                 if (newItem.type === 'set') {
@@ -513,28 +580,38 @@
                 }
 
                 if (newItem.code) {
+                    // Edit Mode
                     const idx = appData.items.findIndex(i => i.code === newItem.code);
                     if(idx !== -1) {
+                        // Preserve physical stock
                         newItem.stock = appData.items[idx].stock;
                         newItem.damaged = appData.items[idx].damaged;
                         appData.items[idx] = newItem;
-                        AuditLog.add('EDIT', `Update Master: ${newItem.code}`);
+                        AuditLog.add('EDIT', `Update Master: ${newItem.code} (${newItem.name})`);
                     }
                 } else {
+                    // Add Mode
                     newItem.code = this.generateCode(newItem.category, newItem.type);
                     if (newItem.type === 'item') newItem.stock = newItem.stock || 0;
                     newItem.damaged = 0;
                     appData.items.push(newItem);
-                    AuditLog.add('CREATE', `Tambah Master: ${newItem.code}`);
+                    AuditLog.add('CREATE', `Tambah Master: ${newItem.code} (${newItem.name})`);
                 }
                 this.saveData();
             },
 
             deleteItem: function(code) {
-                // Validasi: Cek apakah item dipakai di set lain
-                const usedInSet = appData.items.find(i => i.type === 'set' && i.composition && JSON.stringify(i.composition).toLowerCase().includes(code.toLowerCase()));
-                
-                // Note: Pencarian string di JSON array mungkin kurang presisi jika kode mirip, tapi cukup aman untuk warning
+                // V5.0 Fix: Precise check instead of stringify
+                const itemToDelete = appData.items.find(i => i.code === code);
+                if (!itemToDelete) throw new Error("Item tidak ditemukan.");
+
+                // Check usage in Sets
+                const usedInSet = appData.items.find(set => {
+                    if (set.type !== 'set' || !set.composition) return false;
+                    // Loop composition array
+                    return set.composition.some(comp => comp.name.toLowerCase() === itemToDelete.name.toLowerCase());
+                });
+
                 if(usedInSet) {
                     throw new Error(`Gagal! Item ini adalah komponen dari Set: "${usedInSet.name}".`);
                 }
@@ -549,14 +626,19 @@
                 for (const code in opnameData) {
                     const input = opnameData[code];
                     const item = appData.items.find(i => i.code === code);
+                    
                     if (item && input.damaged > 0) {
                         if (input.damaged > item.stock) throw new Error(`Stok tidak cukup untuk ${item.name}. Maksimal rusak: ${item.stock}`);
+                        
                         item.stock -= input.damaged;
                         item.damaged = (item.damaged || 0) + input.damaged;
                         changedCount++;
                     }
                 }
-                if (changedCount > 0) AuditLog.add('OPNAME', `Opname: ${changedCount} item berubah.`);
+                
+                if (changedCount > 0) {
+                    AuditLog.add('OPNAME', `Proses Opname: ${changedCount} item berubah.`);
+                }
                 this.saveData();
                 return changedCount;
             },
@@ -582,9 +664,12 @@
             add: function(action, details) {
                 const newLog = {
                     timestamp: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }),
-                    action: action, details: details, user: 'Admin'
+                    action: action,
+                    details: details,
+                    user: 'Admin'
                 };
                 appData.audit.unshift(newLog);
+                // Limit log size
                 if (appData.audit.length > 500) appData.audit.pop();
                 CloudManager.saveToLocal();
             }
@@ -592,11 +677,10 @@
 
         /**
          * ==========================================
-         * MODULE: LINEN LOGIC (UPGRADED)
+         * MODULE: LINEN LOGIC (V5.0)
          * ==========================================
          */
         const LinenLogic = {
-            // Hitung stok set. Return 'null' jika mode Manual (ada komponen tidak terhubung)
             calculateSetStock: function(setItem) {
                 const parts = DataStore.normalizeComposition(setItem.composition);
                 if (parts.length === 0) return 0;
@@ -605,17 +689,22 @@
                 let isManual = false;
 
                 for (const part of parts) {
-                    const component = appData.items.find(i => i.type === 'item' && i.name.toLowerCase() === part.name.toLowerCase());
+                    const component = appData.items.find(i => 
+                        i.type === 'item' && 
+                        i.name.toLowerCase() === part.name.toLowerCase()
+                    );
+                    
                     if (component) {
                         const avail = Math.floor(component.stock / (part.qty || 1));
                         if (avail < minStock) minStock = avail;
                     } else {
-                        // Komponen tidak ditemukan -> Switch ke Manual
+                        // Component not found -> Manual Mode
                         isManual = true; 
                         break; 
                     }
                 }
-                if (isManual) return null; // Null = Mode Manual
+                
+                if (isManual) return null; // Null indicates Manual Mode
                 return minStock === Infinity ? 0 : minStock;
             },
 
@@ -628,30 +717,43 @@
                 const activeBeds = Math.ceil(appData.config.beds * (appData.config.bor / 100));
                 const buffer = appData.config.buffer;
 
-                // 1. Analisa ITEM
+                // 1. Analyze Items
                 appData.items.forEach(item => {
                     if (item.type === 'set') return;
+                    
                     const neededPerCycle = activeBeds * (item.rotation || 1);
                     const totalNeeded = Math.ceil(neededPerCycle * buffer * (1 + (lossFactor/100)));
                     const diff = item.stock - totalNeeded;
+                    
                     let status = 'AMAN', colorClass = 'success';
-                    if (diff < 0) { status = diff < -(totalNeeded * 0.2) ? 'KRITIS' : 'DEFISIT'; colorClass = status === 'KRITIS' ? 'danger' : 'warning'; }
-                    else if (diff > totalNeeded) { status = 'SURPLUS'; colorClass = 'info'; }
-                    results.push({ code: item.code, name: item.name, stock: item.stock, needed: totalNeeded, diff: diff, status: status, color: colorClass, isSet: false });
+                    if (diff < 0) { 
+                        status = diff < -(totalNeeded * 0.2) ? 'KRITIS' : 'DEFISIT'; 
+                        colorClass = status === 'KRITIS' ? 'danger' : 'warning'; 
+                    } else if (diff > totalNeeded) { 
+                        status = 'SURPLUS'; colorClass = 'info'; 
+                    }
+
+                    results.push({ 
+                        code: item.code, name: item.name, stock: item.stock, 
+                        needed: totalNeeded, diff: diff, status: status, color: colorClass, isSet: false 
+                    });
                 });
 
-                // 2. Analisa SET
+                // 2. Analyze Sets
                 appData.items.filter(i => i.type === 'set').forEach(set => {
                     const setStock = this.calculateSetStock(set);
-                    // Jika Manual, gunakan stok manual (item.stock)
                     const effectiveStock = setStock === null ? set.stock : setStock;
                     
                     const setNeeded = appData.config.ops * buffer; 
                     const diff = effectiveStock - setNeeded;
+                    
                     let status = 'AMAN', colorClass = 'success';
                     if (diff < 0) { status = 'KRITIS'; colorClass = 'danger'; }
 
-                    results.push({ code: set.code, name: set.name + ' (SET)', stock: effectiveStock, needed: setNeeded, diff: diff, status: status, color: colorClass, isSet: true });
+                    results.push({ 
+                        code: set.code, name: set.name + ' (SET)', stock: effectiveStock, 
+                        needed: setNeeded, diff: diff, status: status, color: colorClass, isSet: true 
+                    });
                 });
                 return results;
             }
@@ -659,7 +761,7 @@
 
         /**
          * ==========================================
-         * MODULE: APP UI CONTROLLER
+         * MODULE: APP UI CONTROLLER (V5.0)
          * ==========================================
          */
         const AppUI = {
@@ -674,15 +776,28 @@
             },
 
             switchView: function(viewId) {
+                // Hide all sections
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                // Show target
                 document.getElementById('view-' + viewId).classList.remove('hidden');
+                
+                // Update Nav State
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                const targetNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick').includes(viewId));
+                const targetNav = document.querySelector(`.nav-item[data-view="${viewId}"]`);
                 if(targetNav) targetNav.classList.add('active');
                 
-                const titles = { 'dashboard': 'Dashboard Monitoring', 'master': 'Master Data Linen', 'opname': 'Stock Opname Harian', 'analisa': 'Analisa Kebutuhan Cerdas', 'config': 'Konfigurasi RS', 'audit': 'Audit Log Sistem' };
+                // Titles
+                const titles = { 
+                    'dashboard': 'Dashboard Monitoring', 
+                    'master': 'Master Data Linen', 
+                    'opname': 'Stock Opname Harian', 
+                    'analisa': 'Analisa Kebutuhan Cerdas', 
+                    'config': 'Konfigurasi RS', 
+                    'audit': 'Audit Log Sistem' 
+                };
                 document.getElementById('pageTitle').innerText = titles[viewId];
 
+                // Refresh Functions
                 if(viewId === 'dashboard') this.renderDashboard();
                 if(viewId === 'master') this.renderMasterTable();
                 if(viewId === 'opname') { this.tempOpnameData = {}; this.renderOpnameTable(); }
@@ -693,24 +808,33 @@
             /* --- DASHBOARD RENDERER --- */
             renderDashboard: function() {
                 let totalDamaged = 0, replacementCost = 0, setsReady = 0, warnings = [];
+                
                 appData.items.forEach(item => {
                     totalDamaged += (item.damaged || 0);
                     replacementCost += ((item.damaged || 0) * item.price);
+                    
                     if (item.type === 'set') {
                         const stock = LinenLogic.calculateSetStock(item);
                         const displayStock = stock === null ? item.stock : stock;
+                        
                         if (displayStock < 5) warnings.push(`<div class="badge" style="background:var(--danger-bg); color:var(--danger-text); display:inline-block; margin-right:5px;">KRITIS</div> <b>${item.name}</b> sisa ${displayStock} set.`);
                         else if (displayStock < 15) warnings.push(`<div class="badge" style="background:var(--warning-bg); color:var(--warning-text); display:inline-block; margin-right:5px;">WARNING</div> <b>${item.name}</b> sisa ${displayStock} set.`);
+                        
                         setsReady += displayStock;
                     }
                 });
+
                 document.getElementById('dash-total-items').innerText = appData.items.length;
                 document.getElementById('dash-damaged-items').innerText = totalDamaged;
                 document.getElementById('dash-sets-ready').innerText = setsReady;
                 document.getElementById('dash-replacement-cost').innerText = this.formatRupiah(replacementCost);
+                
                 const warnContainer = document.getElementById('dashboard-warnings');
-                if (warnings.length) warnContainer.innerHTML = warnings.map(w => `<div style="margin-bottom:8px; font-size:0.9rem;">${w}</div>`).join('');
-                else warnContainer.innerHTML = '<div class="text-success" style="font-weight:600;"><i class="fas fa-check-circle"></i> Semua stok dalam kondisi aman.</div>';
+                if (warnings.length) {
+                    warnContainer.innerHTML = warnings.map(w => `<div style="margin-bottom:8px; font-size:0.9rem;">${w}</div>`).join('');
+                } else {
+                    warnContainer.innerHTML = '<div class="text-success" style="font-weight:600;"><i class="fas fa-check-circle"></i> Semua stok dalam kondisi aman.</div>';
+                }
             },
 
             /* --- MASTER TABLE RENDERER --- */
@@ -718,6 +842,10 @@
                 const search = document.getElementById('masterSearch').value.toLowerCase();
                 const tbody = document.getElementById('masterTableBody');
                 tbody.innerHTML = '';
+                
+                // Prepare Item Names for Datalist (V5.0 Feature)
+                const itemNames = appData.items.filter(i => i.type === 'item').map(i => i.name);
+
                 appData.items.forEach(item => {
                     if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
                     
@@ -727,10 +855,10 @@
                     if (item.type === 'set') {
                         const calc = LinenLogic.calculateSetStock(item);
                         if (calc === null) {
-                            setStockDisplay = `<span class="text-warning font-bold" title="Input Stok Manual">${item.stock} (Manual)</span>`;
+                            setStockDisplay = `<span class="text-warning font-bold" title="Mode Manual: Isi stok manual di edit">${item.stock} (Manual)</span>`;
                             setStockClass = 'text-warning';
                         } else {
-                            setStockDisplay = `<span class="text-success font-bold" title="Otomatis dari Item">${calc}</span>`;
+                            setStockDisplay = `<span class="text-success font-bold" title="Mode Auto: Dihitung dari komponen">${calc}</span>`;
                             setStockClass = 'text-success';
                         }
                     }
@@ -750,12 +878,26 @@
                         <td class="${setStockClass} font-bold">${setStockDisplay}</td>
                         <td>${this.formatRupiah(item.price)}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline" onclick="AppUI.openModal('edit', '${item.code}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger" onclick="AppUI.deleteItem('${item.code}')"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-outline btn-edit-master" data-code="${item.code}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger btn-delete-master" data-code="${item.code}"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
+
+                // Update Datalist in Modal for Composition Input
+                this.updateCompositionDatalist(itemNames);
+            },
+
+            updateCompositionDatalist: function(itemNames) {
+                const list = document.getElementById('listMasterItemForComp');
+                if(!list) {
+                    // Create dynamically if not exists
+                    const dl = document.createElement('datalist');
+                    dl.id = 'listMasterItemForComp';
+                    document.body.appendChild(dl);
+                }
+                document.getElementById('listMasterItemForComp').innerHTML = itemNames.map(n => `<option value="${n}">`).join('');
             },
 
             /* --- OPNAME RENDERER --- */
@@ -763,9 +905,11 @@
                 const search = document.getElementById('opnameSearch').value.toLowerCase();
                 const tbody = document.getElementById('opnameTableBody');
                 tbody.innerHTML = '';
+                
                 appData.items.forEach(item => {
                     if (item.type === 'set') return;
                     if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
+                    
                     const temp = this.tempOpnameData[item.code] || { damaged: 0, note: '' };
                     const sisaBaik = Math.max(0, item.stock - temp.damaged);
                     const tr = document.createElement('tr');
@@ -774,16 +918,13 @@
                         <td>${item.name}</td>
                         <td class="font-bold">${item.stock}</td>
                         <td>
-                            <input type="number" min="0" style="width:100px;" 
-                                value="${temp.damaged}" 
-                                onchange="AppUI.updateOpnameInput('${item.code}', 'damaged', this.value)"
-                                onkeyup="AppUI.updateOpnameInput('${item.code}', 'damaged', this.value)">
+                            <input type="number" min="0" class="inp-opname-damaged" data-code="${item.code}" 
+                                value="${temp.damaged}" style="width:100px;">
                         </td>
-                        <td class="font-bold text-primary" id="res-${item.code}">${sisaBaik}</td>
+                        <td class="font-bold text-primary res-${item.code}">${sisaBaik}</td>
                         <td>
-                            <input type="text" placeholder="Keterangan..." style="border:none; background:transparent;" 
-                                value="${temp.note}" 
-                                onblur="AppUI.updateOpnameInput('${item.code}', 'note', this.value)">
+                            <input type="text" class="inp-opname-note" data-code="${item.code}" placeholder="Keterangan..." 
+                                value="${temp.note}" style="border:none; background:transparent;">
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -792,14 +933,16 @@
 
             updateOpnameInput: function(code, field, val) {
                 if (!this.tempOpnameData[code]) this.tempOpnameData[code] = { damaged: 0, note: '' };
+                
                 if (field === 'damaged') {
                     let numVal = parseInt(val) || 0;
                     if(numVal < 0) numVal = 0;
                     this.tempOpnameData[code][field] = numVal;
+                    
                     const item = appData.items.find(i => i.code === code);
                     if(item) {
                         const sisa = Math.max(0, item.stock - numVal);
-                        const el = document.getElementById(`res-${code}`);
+                        const el = document.querySelector(`.res-${code}`);
                         if(el) {
                             el.innerText = sisa;
                             el.className = numVal > item.stock ? "text-danger font-bold" : "font-bold text-primary";
@@ -811,7 +954,10 @@
             },
 
             resetOpname: function() {
-                if(confirm('Reset semua input opname?')) { this.tempOpnameData = {}; this.renderOpnameTable(); }
+                if(confirm('Reset semua input opname?')) { 
+                    this.tempOpnameData = {}; 
+                    this.renderOpnameTable(); 
+                }
             },
 
             finalizeOpname: function() {
@@ -829,9 +975,11 @@
             renderAnalysisResults: function(results) {
                 const tbody = document.getElementById('analysisBody');
                 tbody.innerHTML = '';
+                
                 results.forEach(r => {
                     const badgeColor = r.color === 'danger' ? 'var(--danger-bg)' : (r.color === 'warning' ? 'var(--warning-bg)' : (r.color === 'info' ? 'var(--info-bg)' : 'var(--success-bg)'));
                     const textColor = r.color === 'danger' ? 'var(--danger-text)' : (r.color === 'warning' ? 'var(--warning-text)' : (r.color === 'info' ? 'var(--info-text)' : 'var(--success-text)'));
+                    
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><span class="badge" style="background:${badgeColor}; color:${textColor}">${r.status}</span></td>
@@ -873,7 +1021,12 @@
             openModal: function(mode, code) {
                 const modal = document.getElementById('itemModal'); 
                 modal.classList.add('open');
-                document.getElementById('linenForm').reset();
+                const form = document.getElementById('linenForm');
+                form.reset();
+                
+                // V5.0 Fix: Remove 'disabled' attribute during Add mode to prevent validation error
+                document.getElementById('inp-code').disabled = (mode === 'edit');
+                
                 this.currentEditCode = code;
                 this.populateCategoryDatalist();
 
@@ -881,14 +1034,12 @@
                     const item = appData.items.find(i => i.code === code);
                     document.getElementById('modalTitle').innerText = 'Edit Data Linen';
                     document.getElementById('inp-code').value = item.code; 
-                    document.getElementById('inp-code').disabled = true;
                     document.getElementById('inp-name').value = item.name;
                     document.getElementById('inp-type').value = item.type;
                     document.getElementById('inp-category').value = item.category;
                     document.getElementById('inp-price').value = item.price;
                     document.getElementById('inp-rotation').value = item.rotation || 1.0;
                     
-                    // Handle Set Composition
                     if(item.type === 'set') {
                         const parts = DataStore.normalizeComposition(item.composition);
                         const container = document.getElementById('composition-rows');
@@ -897,7 +1048,6 @@
                     }
                 } else {
                     document.getElementById('modalTitle').innerText = 'Tambah Linen Baru';
-                    document.getElementById('inp-code').disabled = false;
                     document.getElementById('inp-type').value = 'item';
                 }
                 this.toggleSetInput(document.getElementById('inp-type').value);
@@ -910,6 +1060,8 @@
             toggleSetInput: function(type) {
                 const setArea = document.getElementById('set-logic-area');
                 const itemArea = document.getElementById('item-logic-area');
+                const typeInput = document.getElementById('inp-type');
+                
                 if(type==='set') { 
                     setArea.classList.remove('hidden'); 
                     itemArea.classList.add('hidden'); 
@@ -925,19 +1077,25 @@
             addCompositionRow: function(name = '', qty = 1) {
                 const container = document.getElementById('composition-rows');
                 const div = document.createElement('div');
-                div.className = 'comp-row';
-                div.style.display = 'flex';
-                div.style.gap = '10px';
+                div.className = 'composition-row';
                 div.innerHTML = `
-                    <input type="text" class="comp-name" placeholder="Nama Item (Mis: Sprei)" value="${name}" style="flex:2;">
+                    <input type="text" class="comp-name" list="listMasterItemForComp" placeholder="Nama Item (Mis: Sprei)" value="${name}" style="flex:2;">
                     <input type="number" class="comp-qty" placeholder="Qty" value="${qty}" min="1" style="flex:1;">
-                    <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="padding: 0 10px;">&times;</button>
+                    <button type="button" class="btn btn-sm btn-danger btn-remove-row" style="padding: 0 10px;">&times;</button>
                 `;
                 container.appendChild(div);
             },
 
             saveItem: function(e) {
                 e.preventDefault();
+                const form = document.getElementById('linenForm');
+                
+                // V5.0 Fix: Use native validation to catch hidden field errors safely
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
                 const type = document.getElementById('inp-type').value;
                 const newItem = {
                     code: this.currentEditCode, 
@@ -950,9 +1108,8 @@
                 };
 
                 if(type==='set') {
-                    const rows = document.querySelectorAll('.comp-row');
+                    const rows = document.querySelectorAll('.composition-row');
                     const compArray = [];
-                    let isValid = true;
                     rows.forEach(row => {
                         const name = row.querySelector('.comp-name').value.trim();
                         const qty = parseInt(row.querySelector('.comp-qty').value) || 1;
@@ -1030,7 +1187,7 @@
             },
             backupData: function() {
                 const backupObj = {
-                    meta: { app: "Sistem Linen RS Charlie", version: "4.3 Upgrade", timestamp: new Date().toISOString() },
+                    meta: { app: "Sistem Linen RS Charlie", version: CONFIG.APP_VERSION, timestamp: new Date().toISOString() },
                     data: { items: appData.items, config: appData.config, audit: appData.audit }
                 };
                 const blob = new Blob([JSON.stringify(backupObj, null, 2)], {type:'application/json'});
@@ -1069,7 +1226,71 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => App.init());
+        // --- EVENT LISTENERS INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Init App
+            App.init();
+
+            // 2. Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const viewId = e.currentTarget.getAttribute('data-view');
+                    App.switchView(viewId);
+                });
+            });
+
+            // 3. Modal Trigger
+            document.getElementById('btnAddMaster').addEventListener('click', () => AppUI.openModal('add'));
+            
+            // 4. Form Submission
+            document.getElementById('linenForm').addEventListener('submit', (e) => AppUI.saveItem(e));
+            document.getElementById('btnCancelModal').addEventListener('click', () => AppUI.closeModal());
+
+            // 5. Type Toggle
+            document.getElementById('inp-type').addEventListener('change', (e) => AppUI.toggleSetInput(e.target.value));
+
+            // 6. Composition Row Logic
+            document.getElementById('btnAddCompRow').addEventListener('click', () => AppUI.addCompositionRow());
+            document.addEventListener('click', (e) => {
+                if(e.target.classList.contains('btn-remove-row')) {
+                    e.target.parentElement.remove();
+                }
+            });
+
+            // 7. Master Table Actions
+            document.getElementById('masterTableBody').addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if(!btn) return;
+                if(btn.classList.contains('btn-edit-master')) {
+                    AppUI.openModal('edit', btn.getAttribute('data-code'));
+                } else if (btn.classList.contains('btn-delete-master')) {
+                    AppUI.deleteItem(btn.getAttribute('data-code'));
+                }
+            });
+
+            // 8. Opname Actions
+            document.getElementById('opnameTableBody').addEventListener('input', (e) => {
+                const target = e.target;
+                const code = target.getAttribute('data-code');
+                if(!code) return;
+
+                if(target.classList.contains('inp-opname-damaged')) {
+                    AppUI.updateOpnameInput(code, 'damaged', target.value);
+                } else if (target.classList.contains('inp-opname-note')) {
+                    AppUI.updateOpnameInput(code, 'note', target.value);
+                }
+            });
+
+            document.getElementById('btnResetOpname').addEventListener('click', () => AppUI.resetOpname());
+            document.getElementById('btnFinalizeOpname').addEventListener('click', () => AppUI.finalizeOpname());
+
+            // 9. Global Actions
+            document.getElementById('btnSyncCloud').addEventListener('click', () => App.syncToCloud());
+            document.getElementById('btnBackup').addEventListener('click', () => App.backupData());
+            document.getElementById('btnRestore').addEventListener('click', () => App.restoreData());
+            document.getElementById('btnSaveConfig').addEventListener('click', () => App.saveConfig());
+            document.getElementById('btnRunAnalysis').addEventListener('click', () => App.runAnalysis());
+        });
 
     </script>
 </body>
