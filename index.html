@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Linen RS Charlie (V5.2 Fixed Focus)</title>
+    <title>Sistem Linen RS Charlie (V5.3 Final Fix)</title>
     
     <!-- Assets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -125,7 +125,7 @@
                     <i class="fas fa-hospital fa-lg"></i>
                     <h3 style="line-height:1;">Sistem Linen</h3>
                 </div>
-                <small style="color: var(--text-muted); font-weight:500;">V5.2 Fixed</small>
+                <small style="color: var(--text-muted); font-weight:500;">V5.3 Final</small>
             </div>
             <div class="nav-item active" data-view="dashboard">
                 <i class="fas fa-chart-pie" style="width:20px;"></i> Dashboard
@@ -202,8 +202,10 @@
                             <thead>
                                 <tr>
                                     <th>Kode</th><th>Nama Item</th><th>Kategori</th><th>Tipe</th>
-                                    <th title="Stok fisik baik">Stok Baik</th>
-                                    <th title="Stok rusak/afkir">Rusak</th>
+                                    <!-- Kolom Stok Diperbaiki -->
+                                    <th title="Stok fisik yang baik">Stok Baik</th>
+                                    <th title="Stok Rusak/Afkir">Stok Rusak</th>
+                                    <th title="Total Stok (Baik + Rusak)">Total Stok</th>
                                     <th title="Jumlah set (Otomatis/Manual)">Stok Set</th>
                                     <th>Harga Satuan</th><th>Aksi</th>
                                 </tr>
@@ -218,7 +220,7 @@
             <section id="view-opname" class="view-section hidden">
                 <div class="card">
                     <div class="alert-box" style="background: var(--info-bg); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: var(--text-main);">
-                        <strong><i class="fas fa-info-circle"></i> Petunjuk:</strong> Masukkan jumlah item yang <b>Rusak</b> atau <b>Hilang</b>. Sisa stok baik akan otomatis dihitung.
+                        <strong><i class="fas fa-info-circle"></i> Petunjuk:</strong> Masukkan jumlah item yang <b>Rusak</b> atau <b>Hilang</b>. Sisa stok baik akan otomatis dihitung dan stok rusak akan bertambah.
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
                         <input type="text" id="opnameSearch" placeholder="Filter item opname..." style="width: 300px;">
@@ -232,9 +234,9 @@
                             <thead>
                                 <tr>
                                     <th>Kode</th><th>Nama Item</th>
-                                    <th>Stok Baik (Sistem)</th>
+                                    <th>Stok Baik (Awal)</th>
                                     <th>Input Rusak/Hilang</th>
-                                    <th>Sisa Baik (Hasil)</th>
+                                    <th>Sisa Baik (Akhir)</th>
                                     <th>Catatan</th>
                                 </tr>
                             </thead>
@@ -321,7 +323,8 @@
     <div id="itemModal" class="modal-overlay">
         <div class="modal-content">
             <h2 style="margin-bottom: 20px; color:var(--primary-dark);" id="modalTitle">Tambah Linen</h2>
-            <form id="linenForm" autocomplete="off">
+            <!-- FORM NOVALIDATE AGAR ERROR FOCUS TIDAK MUNCUL -->
+            <form id="linenForm" autocomplete="off" novalidate>
                 <input type="hidden" id="inp-code" name="inp-code">
                 
                 <div class="form-group">
@@ -334,12 +337,12 @@
 
                 <div class="form-group">
                     <label>Nama Item / Nama Set</label>
-                    <input type="text" id="inp-name" name="inp-name" required placeholder="Nama barang...">
+                    <input type="text" id="inp-name" name="inp-name" placeholder="Nama barang...">
                 </div>
 
                 <div class="form-group">
                     <label>Kategori</label>
-                    <input type="text" id="inp-category" name="inp-category" required list="listCategory" placeholder="Contoh: Bed, Operasi, Bayi">
+                    <input type="text" id="inp-category" name="inp-category" list="listCategory" placeholder="Contoh: Bed, Operasi, Bayi">
                     <datalist id="listCategory"></datalist>
                 </div>
 
@@ -372,7 +375,7 @@
                         <input type="number" id="inp-stock" name="inp-stock" min="0">
                     </div>
                     
-                    <!-- PERBAIKAN: Input Rotation dipindah ke sini agar tidak ter-hidden saat mode Set -->
+                    <!-- Input Rotation (Tanpa atribut required) -->
                     <div class="form-group">
                         <label>Rasio Rotasi (Per Bed/Per Hari)</label>
                         <input type="number" id="inp-rotation" name="inp-rotation" value="1.0" step="0.5" min="0.1">
@@ -398,7 +401,7 @@
          * ==========================================
          */
         const CONFIG = {
-            APP_VERSION: '5.2 Fixed Focus',
+            APP_VERSION: '5.3 Final Fix',
             BASE_URL: `https://script.google.com/macros/s/AKfycbxLpyDCnfLXWXggQIiMYzOPiJxX6iHPPyQ1YAud0fKfIjmAuM8gvku_FuihRIMtDzUduw/exec`,
             STORAGE_KEY: 'linen_hybrid_v5'
         };
@@ -578,6 +581,7 @@
                 if (newItem.code) {
                     const idx = appData.items.findIndex(i => i.code === newItem.code);
                     if(idx !== -1) {
+                        // Saat edit, pertahankan stok yang ada
                         newItem.stock = appData.items[idx].stock;
                         newItem.damaged = appData.items[idx].damaged;
                         appData.items[idx] = newItem;
@@ -620,11 +624,13 @@
                     const item = appData.items.find(i => i.code === code);
                     
                     if (item && input.damaged > 0) {
+                        // Validasi: Jangan input rusak lebih dari stok baik yang tersedia
                         if (input.damaged > item.stock) {
                             errors.push(`Item <b>${item.name}</b>: Input rusak (${input.damaged}) melebihi stok baik (${item.stock}).`);
                             continue;
                         }
                         
+                        // Logika Transfer: Kurangi Stok Baik, Tambah Stok Rusak
                         item.stock -= input.damaged;
                         item.damaged = (item.damaged || 0) + input.damaged;
                         changedCount++;
@@ -756,7 +762,7 @@
 
         /**
          * ==========================================
-         * MODULE: APP UI CONTROLLER
+         * MODULE: APP UI CONTROLLER (FIXED)
          * ==========================================
          */
         const AppUI = {
@@ -836,6 +842,9 @@
                 appData.items.forEach(item => {
                     if (!item.name.toLowerCase().includes(search) && !item.code.toLowerCase().includes(search)) return;
                     
+                    // Hitung total stok
+                    const totalStock = item.stock + (item.damaged || 0);
+
                     let setStockDisplay = '-';
                     let setStockClass = 'text-muted';
                     
@@ -861,7 +870,8 @@
                         <td>${item.category}</td>
                         <td>${typeBadge}</td>
                         <td class="font-bold text-primary">${item.stock}</td>
-                        <td class="text-danger">${item.damaged || 0}</td>
+                        <td class="text-danger font-bold">${item.damaged || 0}</td>
+                        <td class="text-muted font-bold">${totalStock}</td>
                         <td class="${setStockClass} font-bold">${setStockDisplay}</td>
                         <td>${this.formatRupiah(item.price)}</td>
                         <td>
@@ -1024,7 +1034,6 @@
                     document.getElementById('inp-category').value = item.category;
                     document.getElementById('inp-price').value = item.price;
                     
-                    // Set rotasi hanya jika tipe item
                     if(item.type === 'item') {
                         document.getElementById('inp-rotation').value = item.rotation || 1.0;
                     } else {
@@ -1052,15 +1061,21 @@
             toggleSetInput: function(type) {
                 const setArea = document.getElementById('set-logic-area');
                 const itemArea = document.getElementById('item-logic-area');
+                const rotationInput = document.getElementById('inp-rotation');
                 
                 if(type==='set') { 
                     setArea.classList.remove('hidden'); 
                     itemArea.classList.add('hidden'); 
+                    // Disable input rotasi saat tipe Set untuk menghindari error
+                    rotationInput.disabled = true; 
+
                     const container = document.getElementById('composition-rows');
                     if(container.children.length === 0) this.addCompositionRow();
                 } else { 
                     setArea.classList.add('hidden'); 
                     itemArea.classList.remove('hidden'); 
+                    // Enable input rotasi saat tipe Item
+                    rotationInput.disabled = false;
                 }
             },
 
@@ -1078,21 +1093,45 @@
 
             saveItem: function(e) {
                 e.preventDefault();
-                const form = document.getElementById('linenForm');
                 const type = document.getElementById('inp-type').value;
+                const name = document.getElementById('inp-name').value.trim();
+                const category = document.getElementById('inp-category').value.trim();
+                const price = parseInt(document.getElementById('inp-price').value) || 0;
+
+                // --- MANUAL VALIDATION (No native browser errors) ---
+                if (!name) {
+                    AppUI.showToast("Nama Item wajib diisi!", "error");
+                    return;
+                }
+                if (!category) {
+                    AppUI.showToast("Kategori wajib diisi!", "error");
+                    return;
+                }
+
                 const newItem = {
                     code: this.currentEditCode, 
                     type: type, 
-                    name: document.getElementById('inp-name').value,
-                    category: document.getElementById('inp-category').value, 
-                    price: parseInt(document.getElementById('inp-price').value)||0,
-                    rotation: parseFloat(document.getElementById('inp-rotation').value)||1.0,
-                    stock:0, damaged:0
+                    name: name,
+                    category: category,
+                    price: price,
+                    stock: 0, 
+                    damaged: 0
                 };
 
-                if(!newItem.name || !newItem.category) {
-                    AppUI.showToast("Nama dan Kategori wajib diisi!", "error");
-                    return;
+                // Handle Rotation & Stock logic safely
+                if (type === 'item') {
+                    const rotationEl = document.getElementById('inp-rotation');
+                    // Cek jika elemen ada dan tidak disabled
+                    if(rotationEl && !rotationEl.disabled) {
+                        newItem.rotation = parseFloat(rotationEl.value) || 1.0;
+                    } else {
+                        newItem.rotation = 1.0;
+                    }
+                    newItem.stock = parseInt(document.getElementById('inp-stock').value) || 0;
+                } else {
+                    // Tipe SET tidak butuh rotation manual
+                    newItem.rotation = 0;
+                    newItem.stock = 0;
                 }
 
                 if(type==='set') {
@@ -1106,7 +1145,7 @@
                     if (compArray.length === 0) { AppUI.showToast("Set harus memiliki minimal 1 komponen.", "error"); return; }
                     newItem.composition = compArray;
                 } else {
-                    newItem.stock = parseInt(document.getElementById('inp-stock').value) || 0;
+                    newItem.composition = [];
                 }
 
                 try { 
@@ -1155,6 +1194,11 @@
         const App = {
             init: function() {
                 CloudManager.loadFromCloud();
+            },
+            transferStock: function(code) {
+                // Fitur Transfer Manual (Opsional, jika ingin memindahkan stock dari Baik -> Rusak lewat menu Master)
+                // Saat ini fitur ini sudah terakomodasi di Menu Stock Opname
+                AppUI.showToast("Gunakan menu Stock Opname untuk mencatat barang rusak.", "info");
             },
             switchView: function(id) { AppUI.switchView(id); },
             syncToCloud: function() { CloudManager.syncToCloud(); },
