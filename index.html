@@ -82,8 +82,8 @@
         /* Tables */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; background: #f8fafc; }
-        td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; background: #f8fafc; white-space: nowrap; }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.9rem; }
         tr:hover { background: #fdfdfd; }
 
         /* Forms & Buttons */
@@ -96,21 +96,24 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
         .btn:hover { filter: brightness(90%); opacity: 0.9; }
 
         /* Badges */
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
         .bg-success-light { background: var(--success-bg); color: var(--success-text); }
         .bg-warning-light { background: var(--warning-bg); color: var(--warning-text); }
         .bg-danger-light { background: var(--danger-bg); color: var(--danger-text); }
         .bg-info-light { background: var(--primary-light); color: var(--primary-dark); }
+        .bg-secondary { background: var(--secondary-light); color: var(--text-muted); }
 
         /* --- 5. UTILS & MODALS --- */
         .hidden { display: none !important; }
         .flex { display: flex; }
         .flex-between { justify-content: space-between; }
         .items-center { align-items: center; }
+        .text-center { text-align: center; }
         
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -126,20 +129,21 @@
             justify-content: center; align-items: center; backdrop-filter: blur(2px);
         }
         .modal.active { display: flex; }
-        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 12px; padding: 24px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 12px; padding: 24px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
 
         /* Toast */
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; animation: slideIn 0.3s; display: flex; align-items: center; gap: 10px; min-width: 250px; }
+        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; animation: slideIn 0.3s; display: flex; align-items: center; gap: 10px; min-width: 250px; box-shadow: var(--shadow); }
         .toast.success { background: var(--success); }
         .toast.error { background: var(--danger); }
+        .toast.info { background: var(--primary); }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         /* --- 6. RESPONSIVE --- */
         @media (max-width: 768px) {
             .app-layout { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; left: -260px; width: 260px; transition: 0.3s; }
+            .sidebar { position: fixed; left: -260px; width: 260px; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
             .sidebar.active { left: 0; }
             .main-content { padding: 15px; padding-top: 70px; }
             #mobile-header { display: flex; padding: 15px; background: white; border-bottom: 1px solid var(--border); position: fixed; top: 0; width: 100%; z-index: 40; justify-content: space-between; align-items: center; }
@@ -159,11 +163,11 @@
             <form id="loginForm">
                 <div class="form-group" style="text-align: left;">
                     <label>Username</label>
-                    <input type="text" id="username" placeholder="admin / supervisor / operator" value="admin">
+                    <input type="text" id="username" placeholder="Farhan" value="Farhan">
                 </div>
                 <div class="form-group" style="text-align: left;">
                     <label>Password</label>
-                    <input type="password" id="password" placeholder="admin123" value="admin123">
+                    <input type="password" id="password" placeholder="123Farhan" value="123Farhan">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">MASUK SISTEM</button>
             </form>
@@ -197,11 +201,9 @@
                 <a class="nav-item" onclick="App.nav('unit')"><i class="fas fa-procedures"></i> Unit RS</a>
                 <a class="nav-item" onclick="App.nav('machine')"><i class="fas fa-cogs"></i> Mesin Laundry</a>
                 <a class="nav-item" onclick="App.nav('inventory')"><i class="fas fa-flask"></i> Inventory Bahan</a>
-                <a class="nav-item" onclick="App.nav('sdm')"><i class="fas fa-users"></i> Data SDM</a>
                 
-                <div class="nav-category">Laporan & Keuangan</div>
-                <a class="nav-item" onclick="App.nav('finance')"><i class="fas fa-coins"></i> Keuangan</a>
-                <a class="nav-item" onclick="App.nav('audit')"><i class="fas fa-shield-alt"></i> Audit Log</a>
+                <div class="nav-category">Laporan & Log</div>
+                <a class="nav-item" onclick="App.nav('audit')"><i class="fas fa-shield-alt"></i> Audit Log Transaksi</a>
             </div>
 
             <div class="user-profile">
@@ -229,28 +231,27 @@
                 <section id="view-dashboard" class="view-section">
                     <div class="grid-4">
                         <div class="card stat-card">
-                            <div class="stat-icon bg-success-light"><i class="fas fa-tshirt text-success"></i></div>
-                            <div class="stat-info"><h3 id="stat-linen-ok">0</h3><p>Linen Siap Pakai</p></div>
+                            <div class="stat-icon bg-success-light text-success"><i class="fas fa-tshirt"></i></div>
+                            <div class="stat-info"><h3 id="stat-linen-ok">0</h3><p>Linen Aktif</p></div>
                         </div>
                         <div class="card stat-card">
-                            <div class="stat-icon bg-warning-light"><i class="fas fa-clock text-warning"></i></div>
-                            <div class="stat-info"><h3 id="stat-process">0</h3><p>Sedang Proses Cuci</p></div>
+                            <div class="stat-icon bg-warning-light text-warning"><i class="fas fa-clock"></i></div>
+                            <div class="stat-info"><h3 id="stat-process">0</h3><p>Sedang Diproses</p></div>
                         </div>
                         <div class="card stat-card">
-                            <div class="stat-icon bg-danger-light"><i class="fas fa-first-aid text-danger"></i></div>
-                            <div class="stat-info"><h3 id="stat-infected">0</h3><p>Linen Infeksius</p></div>
+                            <div class="stat-icon bg-danger-light text-danger"><i class="fas fa-first-aid"></i></div>
+                            <div class="stat-info"><h3 id="stat-infected">0</h3><p>Unit Infeksius</p></div>
                         </div>
                         <div class="card stat-card">
-                            <div class="stat-icon bg-info-light"><i class="fas fa-user-nurse text-info"></i></div>
-                            <div class="stat-info"><h3 id="stat-staff">0</h3><p>Staff Shift Aktif</p></div>
+                            <div class="stat-icon bg-info-light text-info"><i class="fas fa-box-open"></i></div>
+                            <div class="stat-info"><h3 id="stat-low-stock">0</h3><p>Stok Menipis</p></div>
                         </div>
                     </div>
 
                     <div class="grid-4" style="grid-template-columns: 2fr 1fr;">
                         <div class="card">
-                            <h3><i class="fas fa-chart-bar"></i> Aktivitas Mencuci (7 Hari Terakhir)</h3>
+                            <h3><i class="fas fa-chart-bar"></i> Aktivitas Mencuci (Overview)</h3>
                             <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-around; padding-top: 20px;">
-                                <!-- Simple CSS Bar Chart -->
                                 <div class="bar" style="width: 10%; height: 60%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Senin"></div>
                                 <div class="bar" style="width: 10%; height: 80%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Selasa"></div>
                                 <div class="bar" style="width: 10%; height: 40%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Rabu"></div>
@@ -276,29 +277,46 @@
                 <section id="view-workflow" class="view-section hidden">
                     <div class="card">
                         <h3><i class="fas fa-random"></i> Pemindahan Status Linen</h3>
-                        <div class="form-group flex-between items-center" style="background: #f8fafc; padding: 15px; border-radius: 8px;">
-                            <div>
+                        <div class="form-group flex-between items-center" style="background: #f8fafc; padding: 15px; border-radius: 8px; flex-wrap: wrap; gap:10px;">
+                            <div style="flex: 1; min-width: 200px;">
                                 <label>Scan/Input ID Linen</label>
-                                <input type="text" id="wf-linen-id" placeholder="Scan Barcode atau ketik ID..." style="width: 300px;">
+                                <input type="text" id="wf-linen-id" placeholder="Contoh: SET-ICU-01" list="linen-list">
+                                <datalist id="linen-list"></datalist>
                             </div>
-                            <div>
+                            <div style="flex: 1; min-width: 200px;">
                                 <label>Pindah Status Ke:</label>
-                                <select id="wf-target-status" style="width: 200px;">
-                                    <option value="sorting">1. Sorting (Kotor Masuk)</option>
-                                    <option value="washing">2. Washing (Cuci)</option>
-                                    <option value="drying">3. Drying (Pengeringan)</option>
-                                    <option value="ironing">4. Ironing (Setrika)</option>
-                                    <option value="packing">5. Packing</option>
-                                    <option value="ready">6. Ready (Siap Distribusi)</option>
-                                    <option value="distributed">7. Distributed (Terkirim)</option>
-                                    <option value="damaged">X. Rusak/Afkir</option>
+                                <select id="wf-target-status">
+                                    <option value="" disabled selected>-- Pilih Proses --</option>
+                                    <optgroup label="Inbound (Masuk)">
+                                        <option value="Di Laundry">Di Laundry (Terima)</option>
+                                        <option value="Sortir Infeksius">Sortir Infeksius</option>
+                                        <option value="Sortir Non-Infeksius">Sortir Non-Infeksius</option>
+                                        <option value="Sortir Bedah">Sortir Bedah</option>
+                                    </optgroup>
+                                    <optgroup label="Processing (Cuci)">
+                                        <option value="Cuci">Cuci (Washing)</option>
+                                        <option value="Pengeringan">Pengeringan (Drying)</option>
+                                        <option value="Setrika">Setrika (Ironing)</option>
+                                        <option value="Pelipatan">Pelipatan (Folding)</option>
+                                    </optgroup>
+                                    <optgroup label="Outbound (Keluar)">
+                                        <option value="Siap Distribusi">Siap Distribusi</option>
+                                        <option value="Di Unit">Di Unit (Dikirim)</option>
+                                    </optgroup>
+                                    <optgroup label="Quality Control">
+                                        <option value="Inspeksi">Inspeksi</option>
+                                        <option value="Rusak Ringan">Rusak Ringan</option>
+                                        <option value="Gudang Rusak">Gudang Rusak</option>
+                                    </optgroup>
                                 </select>
                             </div>
-                            <div>
+                            <div style="flex: 0 0 150px; min-width: 150px;">
                                 <label>Petugas</label>
-                                <input type="text" id="wf-operator" value="Operator" readonly style="width: 150px; background: #e2e8f0;">
+                                <input type="text" id="wf-operator" value="Operator" readonly style="background: #e2e8f0;">
                             </div>
-                            <button class="btn btn-primary" onclick="Workflow.processStep()"><i class="fas fa-arrow-right"></i> Proses</button>
+                            <div style="flex: 0 0 100px; margin-top: 24px;">
+                                <button class="btn btn-primary" style="width:100%" onclick="Workflow.processStep()"><i class="fas fa-arrow-right"></i> Proses</button>
+                            </div>
                         </div>
                     </div>
 
@@ -306,7 +324,7 @@
                         <h3>Riwayat Proses Hari Ini</h3>
                         <div class="table-responsive">
                             <table id="table-workflow-log">
-                                <thead><tr><th>Waktu</th><th>ID Linen</th><th>Nama Linen</th><th>Status</th><th>Petugas</th></tr></thead>
+                                <thead><tr><th>Waktu</th><th>ID Linen</th><th>Nama Linen</th><th>Status Dari -> Ke</th><th>Petugas</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -318,7 +336,7 @@
                     <div class="card">
                         <div class="table-responsive">
                             <table id="table-linen">
-                                <thead><tr><th>Kode</th><th>Nama</th><th>Kategori</th><th>Unit Asal</th><th>Status</th><th>Lokasi</th><th>Aksi</th></tr></thead>
+                                <thead><tr><th>LinenID</th><th>Name</th><th>Kategori</th><th>Berat Std</th><th>Siklus</th><th>Status</th><th>Lokasi</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -330,7 +348,7 @@
                     <div class="card">
                         <div class="table-responsive">
                             <table id="table-unit">
-                                <thead><tr><th>Kode</th><th>Nama Unit</th><th>Jenis</th><th>Kontak</th><th>Jadwal Ambil</th><th>Aksi</th></tr></thead>
+                                <thead><tr><th>Kode</th><th>Nama Unit</th><th>Tipe</th><th>Kontak PIC</th><th>Aksi</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -342,7 +360,7 @@
                     <div class="card">
                         <div class="table-responsive">
                             <table id="table-machine">
-                                <thead><tr><th>Kode</th><th>Nama Mesin</th><th>Tipe</th><th>Kap. (Kg)</th><th>Status</th><th>Maintenance</th><th>Aksi</th></tr></thead>
+                                <thead><tr><th>MachineID</th><th>Nama Mesin</th><th>Tipe</th><th>Kap. (Kg)</th><th>Status</th><th>Maintenance</th><th>Aksi</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -354,57 +372,14 @@
                     <div class="card">
                         <div class="table-responsive">
                             <table id="table-inventory">
-                                <thead><tr><th>Nama Bahan</th><th>Kategori</th><th>Stok</th><th>Unit</th><th>Min. Stok</th><th>Status</th><th>Aksi</th></tr></thead>
+                                <thead><tr><th>Nama Item</th><th>Kategori</th><th>Stok</th><th>Unit</th><th>Min. Stok</th><th>Status</th><th>Aksi</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- 7. SDM -->
-                <section id="view-sdm" class="view-section hidden">
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="table-sdm">
-                                <thead><tr><th>NIP</th><th>Nama</th><th>Role</th><th>Shift</th><th>Status</th><th>Sertifikat</th><th>Aksi</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 8. FINANCE -->
-                <section id="view-finance" class="view-section hidden">
-                    <div class="card">
-                        <h3>Laporan Biaya Operasional</h3>
-                        <div class="form-group flex-between" style="max-width: 400px;">
-                            <label>Periode</label>
-                            <select id="fin-period" onchange="Finance.render()"><option value="current">Bulan Ini</option><option value="last">Bulan Lalu</option></select>
-                        </div>
-                        <div class="grid-4" style="margin-bottom: 20px;">
-                            <div class="stat-card">
-                                <div class="stat-info"><h3 id="fin-electric">Rp 0</h3><p>Listrik</p></div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-info"><h3 id="fin-chemical">Rp 0</h3><p>Bahan Kimia</p></div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-info"><h3 id="fin-labor">Rp 0</h3><p>SDM (Lembur)</p></div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-info"><h3 id="fin-kg-cost">Rp 0</h3><p>Cost / Kg</p></div>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table id="table-finance">
-                                <thead><tr><th>Tanggal</th><th>Kategori</th><th>Deskripsi</th><th>Jumlah (Rp)</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 9. AUDIT -->
+                <!-- 7. AUDIT -->
                 <section id="view-audit" class="view-section hidden">
                     <div class="card">
                         <h3><i class="fas fa-history"></i> Log Aktivitas Sistem</h3>
@@ -445,78 +420,125 @@
     <script>
         /**
          * ==========================================
-         * CORE SYSTEM CONFIGURATION & STATE
+         * 1. DATA SEEDING (DARI SHEET KAMU)
          * ==========================================
          */
-        const CONFIG = {
-            APP_NAME: "Sistem Laundry RS Charlie V6.0",
-            GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxL3d88GrbIv7iCpJu_IR2JPvV-SNmuUnxNPuwimlJe43XjV43wHnFuNECParQw3sPOFQ/exec", 
-            DB_VERSION: 1.0
-        };
-
-        // Global State
-        const State = {
-            currentUser: null,
-            data: {
-                linen: [],
-                units: [],
-                machines: [],
-                inventory: [],
-                sdm: [],
-                transactions: [], // For workflow logs & finance
-                audit: []
-            }
+        const DB = {
+            users: [
+                { user: "Farhan", pass: "123Farhan", role: "Admin", name: "Farhan Fadhlurrahman" }
+            ],
+            units: [
+                { code: "U-IGD-01", name: "Instalasi Gawat Darurat (IGD)", type: "Infectious", contact: "Ka. IGD - Ext 101" },
+                { code: "U-ICU-01", name: "Intensive Care Unit (ICU)", type: "Infectious", contact: "Ka. ICU - Ext 102" },
+                { code: "U-ISO-01", name: "Ruang Isolasi", type: "Infectious", contact: "IPC Nurse - Ext 103" },
+                { code: "U-RI-01", name: "Ruang Rawat Inap Dewasa", type: "Non", contact: "Ka. Ruang RI - Ext 201" },
+                { code: "U-RI-02", name: "Ruang Rawat Inap Anak", type: "Non", contact: "Ka. Ruang Anak - Ext 202" },
+                { code: "U-RI-03", name: "Ruang Rawat Inap VIP", type: "Non", contact: "Ka. Ruang VIP - Ext 203" },
+                { code: "U-OK-01", name: "Kamar Operasi (OK)", type: "Infectious", contact: "Ka. OK - Ext 301" },
+                { code: "U-CSSD-01", name: "Central Sterile Supply Dept", type: "Infectious", contact: "Ka. CSSD - Ext 302" },
+                { code: "U-BSL-01", name: "Ruang Bersalin", type: "Infectious", contact: "Ka. Bersalin - Ext 401" },
+                { code: "U-NICU-01", name: "NICU", type: "Infectious", contact: "Ka. NICU - Ext 402" },
+                { code: "U-HD-01", name: "Hemodialisa", type: "Infectious", contact: "Ka. HD - Ext 501" },
+                { code: "U-HD-02", name: "Hemodialisa Isolasi", type: "Infectious", contact: "IPC HD - Ext 502" },
+                { code: "U-POLI-01", name: "Poliklinik Umum", type: "Non", contact: "Koord. Poli - Ext 601" },
+                { code: "U-POLI-02", name: "Poli Gigi", type: "Non", contact: "Koord. Poli Gigi - Ext 602" },
+                { code: "U-LAB-01", name: "Laboratorium", type: "Non", contact: "Ka. Lab - Ext 701" },
+                { code: "U-RAD-01", name: "Radiologi", type: "Non", contact: "Ka. Radiologi - Ext 702" },
+                { code: "U-LAUN-01", name: "Instalasi Laundry", type: "Infectious", contact: "Ka. Laundry - Ext 802" }
+            ],
+            linen: [
+                { id: "SET-ICU-01", name: "Set Linen ICU Dewasa", cat: "ICU", weight: "4.5 Kg", cycle: 180, status: "Cuci Aktif", loc: "Laundry RS" },
+                { id: "SET-ICU-02", name: "Set Linen ICU Anak", cat: "ICU", weight: "4.0 Kg", cycle: 170, status: "Active", loc: "ICU Ward" },
+                { id: "SET-ICU-03", name: "Set Linen ICU Isolasi", cat: "ICU", weight: "5.0 Kg", cycle: 160, status: "Active", loc: "Ruang Isolasi" },
+                { id: "SET-RI-01", name: "Set Linen Rawat Inap Dewasa", cat: "Rawat Inap", weight: "3.8 Kg", cycle: 200, status: "Active", loc: "Ruang Rawat Inap" },
+                { id: "SET-RI-02", name: "Set Linen Rawat Inap VIP", cat: "Rawat Inap", weight: "4.2 Kg", cycle: 220, status: "Active", loc: "Ruang VIP" },
+                { id: "SET-OK-01", name: "Set Linen Operasi Mayor", cat: "OK / Bedah", weight: "6.5 Kg", cycle: 150, status: "Active", loc: "CSSD" },
+                { id: "SET-OK-02", name: "Set Linen Operasi Minor", cat: "OK / Bedah", weight: "5.0 Kg", cycle: 160, status: "Active", loc: "Ruang OK" },
+                { id: "SET-IGD-01", name: "Set Linen IGD Dewasa", cat: "IGD", weight: "3.6 Kg", cycle: 180, status: "Active", loc: "IGD" },
+                { id: "SET-BERSALIN-01", name: "Set Linen Persalinan Normal", cat: "Bersalin", weight: "5.2 Kg", cycle: 170, status: "Active", loc: "Ruang Bersalin" },
+                { id: "SET-DAMAGE-01", name: "Set Linen Rusak Ringan", cat: "Recovery", weight: "3.0 Kg", cycle: 0, status: "Damage", loc: "Gudang Linen Rusak" }
+            ],
+            machines: [
+                { id: "MC-W-01", name: "Washer Barrier 1", type: "Washer", cap: "50 Kg", status: "Active", maint: "2026-01-10" },
+                { id: "MC-W-02", name: "Washer Barrier 2", type: "Washer", cap: "50 Kg", status: "Active", maint: "2026-01-12" },
+                { id: "MC-W-03", name: "Washer Non-Barrier", type: "Washer", cap: "35 Kg", status: "Active", maint: "2026-01-15" },
+                { id: "MC-D-01", name: "Dryer Gas 1", type: "Dryer", cap: "50 Kg", status: "Active", maint: "2026-01-11" },
+                { id: "MC-D-02", name: "Dryer Gas 2", type: "Dryer", cap: "50 Kg", status: "Active", maint: "2026-01-13" },
+                { id: "MC-D-03", name: "Dryer Electric", type: "Dryer", cap: "30 Kg", status: "Maintenance", maint: "2026-01-25" },
+                { id: "MC-I-01", name: "Roller Ironer 1", type: "Ironer", cap: "60 Kg/Jam", status: "Active", maint: "2026-01-09" },
+                { id: "MC-F-01", name: "Automatic Folding Machine", type: "Folding", cap: "80 Kg/Jam", status: "Active", maint: "2026-01-08" }
+            ],
+            inventory: [
+                { name: "Detergent Powder Medical Grade", cat: "Chemical", stock: 250, unit: "Kg", min: 100 },
+                { name: "Oxygen Bleach", cat: "Chemical", stock: 120, unit: "Kg", min: 50 },
+                { name: "Chlorine Bleach", cat: "Chemical", stock: 90, unit: "Liter", min: 40 },
+                { name: "Softener Linen", cat: "Chemical", stock: 45, unit: "Liter", min: 50 }, // Low Stock
+                { name: "Plastic Linen Bag Infectious", cat: "Consumable", stock: 500, unit: "Pcs", min: 200 },
+                { name: "Yellow Infectious Bag", cat: "Consumable", stock: 150, unit: "Pcs", min: 200 }, // Low Stock
+                { name: "Sarung Tangan Karet", cat: "APD", stock: 90, unit: "Pasang", min: 100 }, // Low Stock
+                { name: "Masker Medis", cat: "APD", stock: 1500, unit: "Pcs", min: 500 },
+                { name: "Troli Linen Bersih", cat: "Equipment", stock: 18, unit: "Unit", min: 5 },
+                { name: "V-Belt Mesin Washer", cat: "Sparepart", stock: 8, unit: "Pcs", min: 10 } // Low Stock
+            ],
+            transactions: [
+                { time: "2026-01-30 7:15", linenId: "SET-ICU-01", from: "Di Unit", to: "Di Laundry", op: "Andi - Runner" },
+                { time: "2026-01-30 7:25", linenId: "SET-ICU-01", from: "Di Laundry", to: "Sortir Infeksius", op: "Siti - Laundry" },
+                { time: "2026-01-30 7:50", linenId: "SET-RI-01", from: "Sortir Non-Infeksius", to: "Cuci", op: "Budi - Operator" },
+                { time: "2026-01-30 8:55", linenId: "SET-DAMAGE-01", from: "Inspeksi", to: "Rusak Ringan", op: "Quality Control" }
+            ]
         };
 
         /**
          * ==========================================
-         * MODULE 1: AUTHENTICATION & ROLE
+         * 2. GLOBAL STATE & CONFIG
+         * ==========================================
+         */
+        const State = {
+            currentUser: null,
+            data: JSON.parse(JSON.stringify(DB)) // Deep copy for manipulation
+        };
+
+        const Config = {
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxL3d88GrbIv7iCpJu_IR2JPvV-SNmuUnxNPuwimlJe43XjV43wHnFuNECParQw3sPOFQ/exec"
+        };
+
+        /**
+         * ==========================================
+         * 3. AUTH MODULE
          * ==========================================
          */
         const Auth = {
-            users: [
-                { user: "admin", pass: "admin123", role: "admin", name: "Administrator" },
-                { user: "spv", pass: "spv123", role: "supervisor", name: "Supervisor Laundry" },
-                { user: "op", pass: "op123", role: "operator", name: "Operator Cuci" }
-            ],
-
             init: function() {
                 const sess = sessionStorage.getItem('rs_laundry_user');
                 if (sess) {
-                    this.loginSuccess(JSON.parse(sess));
+                    this.setUser(JSON.parse(sess));
                 } else {
                     document.getElementById('login-screen').classList.remove('hidden');
                 }
             },
-
-            login: function(u, p) {
-                const found = this.users.find(x => x.user === u && x.pass === p);
+            login: function() {
+                const u = document.getElementById('username').value;
+                const p = document.getElementById('password').value;
+                const found = DB.users.find(x => x.user === u && x.pass === p);
+                
                 if (found) {
-                    this.loginSuccess(found);
+                    sessionStorage.setItem('rs_laundry_user', JSON.stringify(found));
+                    this.setUser(found);
                 } else {
-                    UI.showToast("Username atau password salah!", "error");
+                    UI.showToast("Username atau Password Salah!", "error");
                 }
             },
-
-            loginSuccess: function(userObj) {
-                State.currentUser = userObj;
-                sessionStorage.setItem('rs_laundry_user', JSON.stringify(userObj));
+            setUser: function(user) {
+                State.currentUser = user;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('user-display-name').innerText = user.name;
+                document.getElementById('user-role-display').innerText = user.role.toUpperCase();
+                document.getElementById('wf-operator').value = user.name;
                 
-                // Update UI User Info
-                document.getElementById('user-display-name').innerText = userObj.name;
-                document.getElementById('user-role-display').innerText = userObj.role.toUpperCase();
-                document.getElementById('wf-operator').value = userObj.name;
-
-                // Log & Init Data
-                Audit.log("LOGIN", "User login berhasil");
-                DataStore.loadLocal();
-                App.initDashboard();
+                App.init();
             },
-
             logout: function() {
-                Audit.log("LOGOUT", "User keluar sistem");
                 sessionStorage.removeItem('rs_laundry_user');
                 location.reload();
             }
@@ -524,364 +546,239 @@
 
         /**
          * ==========================================
-         * MODULE 2: DATA STORE & SYNC
-         * ==========================================
-         */
-        const DataStore = {
-            loadLocal: function() {
-                const stored = localStorage.getItem('rs_laundry_db_v6');
-                if (stored) {
-                    State.data = JSON.parse(stored);
-                } else {
-                    // SEED DATA (DUMMY DATA FOR DEMO)
-                    this.seedData();
-                }
-            },
-
-            saveLocal: function() {
-                localStorage.setItem('rs_laundry_db_v6', JSON.stringify(State.data));
-            },
-
-            seedData: function() {
-                State.data.units = [
-                    { code: 'ICU', name: 'ICU (Intensive Care Unit)', type: 'Infeksius', contact: 'Ibu Siti', schedule: '08:00 & 16:00' },
-                    { code: 'INAP', name: 'Rawat Inap Lt. 3', type: 'Non-Infeksius', contact: 'Budi', schedule: '09:00' }
-                ];
-                State.data.linen = [
-                    { id: 'L001', name: 'Sprei Bed 180', category: 'Bed', unit: 'INAP', status: 'ready', location: 'Gudang Linen' },
-                    { id: 'L002', name: 'Sarung Bantal', category: 'Bed', unit: 'INAP', status: 'ready', location: 'Gudang Linen' },
-                    { id: 'L003', name: 'Baju Pasien (M)', category: 'Pakaian', unit: 'ICU', status: 'dirty', location: 'ICU' }
-                ];
-                State.data.machines = [
-                    { code: 'MW01', name: 'Washer 01', type: 'Washer', cap: 50, status: 'running', maint: 'OK' },
-                    { code: 'DR01', name: 'Dryer 01', type: 'Dryer', cap: 50, status: 'idle', maint: 'OK' }
-                ];
-                State.data.inventory = [
-                    { name: 'Deterjen A', cat: 'Chemical', stock: 100, unit: 'Liter', min: 20 },
-                    { name: 'Softener', cat: 'Chemical', stock: 15, unit: 'Liter', min: 10 }, // Low stock example
-                ];
-                State.data.sdm = [
-                    { nip: 'E001', name: 'Joko', role: 'Operator', shift: 'Pagi', status: 'Active', cert: 'K3' }
-                ];
-                this.saveLocal();
-            },
-
-            syncToCloud: async function() {
-                // Simulasi Sync ke Google Spreadsheet
-                UI.showLoading(true);
-                await new Promise(r => setTimeout(r, 1500)); // Fake delay
-                
-                // Di sini kita akan melakukan fetch POST ke Google Apps Script
-                /* 
-                try {
-                    await fetch(CONFIG.GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(State.data) });
-                } catch(e) { ... }
-                */
-                
-                UI.showLoading(false);
-                UI.showToast("Sinkronisasi Cloud Berhasil!", "success");
-                Audit.log("SYNC", "Data disinkronisasi ke Cloud");
-            }
-        };
-
-        /**
-         * ==========================================
-         * MODULE 3: WORKFLOW ENGINE
-         * ==========================================
-         */
-        const Workflow = {
-            processStep: function() {
-                const linenId = document.getElementById('wf-linen-id').value.trim();
-                const targetStatus = document.getElementById('wf-target-status').value;
-                const operator = State.currentUser.name;
-
-                if(!linenId) return UI.showToast("Scan/ID Linen wajib diisi!", "error");
-
-                const linenItem = State.data.linen.find(l => l.id === linenId);
-                
-                if (!linenItem) {
-                    // Auto create if new? No, strict for hospital
-                    return UI.showToast("Linen ID tidak ditemukan di Master Data!", "error");
-                }
-
-                // Update Status
-                const oldStatus = linenItem.status;
-                linenItem.status = targetStatus;
-                linenItem.location = (targetStatus === 'distributed') ? linenItem.unit : 'Laundry';
-                
-                if(targetStatus === 'ready') linenItem.location = 'Gudang Linen';
-
-                // Log Transaction
-                const log = {
-                    timestamp: new Date().toLocaleString('id-ID'),
-                    id: linenId,
-                    name: linenItem.name,
-                    status: this.getStatusLabel(targetStatus),
-                    operator: operator
-                };
-                
-                State.data.transactions.unshift(log); // Add to top
-                DataStore.saveLocal();
-                
-                // UI Feedback
-                UI.renderTable('table-workflow-log', State.data.transactions, ['timestamp', 'id', 'name', 'status', 'operator']);
-                document.getElementById('wf-linen-id').value = '';
-                document.getElementById('wf-linen-id').focus();
-                
-                UI.showToast(`Linen ${linenId} dipindah ke ${log.status}`, "success");
-                Audit.log("WORKFLOW", `Update status ${linenId} -> ${targetStatus}`);
-                App.initDashboard(); // Refresh stats
-            },
-
-            getStatusLabel: function(key) {
-                const map = {
-                    'sorting': '<span class="badge bg-warning-light">Sorting</span>',
-                    'washing': '<span class="badge bg-info-light">Washing</span>',
-                    'drying': '<span class="badge bg-info-light">Drying</span>',
-                    'ironing': '<span class="badge bg-info-light">Ironing</span>',
-                    'packing': '<span class="badge bg-info-light">Packing</span>',
-                    'ready': '<span class="badge bg-success-light">Ready</span>',
-                    'distributed': '<span class="badge bg-secondary">Distributed</span>',
-                    'damaged': '<span class="badge bg-danger-light">Rusak</span>'
-                };
-                return map[key] || key;
-            }
-        };
-
-        /**
-         * ==========================================
-         * MODULE 4: FINANCE LOGIC
-         * ==========================================
-         */
-        const Finance = {
-            render: function() {
-                // Simulasi Kalkulasi Keuangan
-                // Di sistem nyata, ini dihitung dari log pemakaian mesin & inventory keluar
-                
-                const dummyCost = {
-                    electric: 4500000,
-                    chemical: 1200000,
-                    labor: 1500000
-                };
-                
-                document.getElementById('fin-electric').innerText = UI.formatRupiah(dummyCost.electric);
-                document.getElementById('fin-chemical').innerText = UI.formatRupiah(dummyCost.chemical);
-                document.getElementById('fin-labor').innerText = UI.formatRupiah(dummyCost.labor);
-                
-                const total = dummyCost.electric + dummyCost.chemical + dummyCost.labor;
-                const totalKg = 1200; // Dummy
-                
-                document.getElementById('fin-kg-cost').innerText = UI.formatRupiah(total / totalKg);
-
-                const transactions = [
-                    { date: '2023-10-25', cat: 'Inventory', desc: 'Beli Deterjen 50L', amount: 500000 },
-                    { date: '2023-10-24', cat: 'Listrik', desc: 'Token Listrik MW01', amount: 200000 },
-                ];
-                UI.renderTable('table-finance', transactions, ['date', 'cat', 'desc', 'amount']);
-            }
-        };
-
-        /**
-         * ==========================================
-         * MODULE 5: AUDIT LOG
-         * ==========================================
-         */
-        const Audit = {
-            log: function(action, details) {
-                const entry = {
-                    timestamp: new Date().toLocaleString('id-ID'),
-                    user: State.currentUser ? State.currentUser.name : 'System',
-                    role: State.currentUser ? State.currentUser.role : '-',
-                    action: action,
-                    details: details
-                };
-                State.data.audit.unshift(entry);
-                // Keep last 100 logs only
-                if(State.data.audit.length > 100) State.data.audit.pop();
-                DataStore.saveLocal();
-            },
-            
-            renderTable: function() {
-                UI.renderTable('table-audit', State.data.audit, ['timestamp', 'user', 'role', 'action', 'details']);
-            }
-        };
-
-        /**
-         * ==========================================
-         * APP CONTROLLER & UI UTILS
+         * 4. APP LOGIC & CONTROLLERS
          * ==========================================
          */
         const App = {
-            initDashboard: function() {
-                // Kalkulasi Statistik Dashboard
-                const totalLinen = State.data.linen.length;
-                const readyLinen = State.data.linen.filter(l => l.status === 'ready').length;
-                const processLinen = State.data.linen.filter(l => ['washing','drying','ironing'].includes(l.status)).length;
-                const infectedLinen = State.data.linen.filter(l => l.status === 'dirty' && State.data.units.find(u=>u.code===l.unit)?.type==='Infeksius').length;
-                const staffActive = State.data.sdm.filter(s => s.status === 'Active').length;
-
-                document.getElementById('stat-linen-ok').innerText = readyLinen;
-                document.getElementById('stat-process').innerText = processLinen;
-                document.getElementById('stat-infected').innerText = infectedLinen;
-                document.getElementById('stat-staff').innerText = staffActive;
-
-                // Warnings
-                const warnings = document.getElementById('dashboard-warnings');
-                warnings.innerHTML = '';
-                
-                State.data.inventory.forEach(item => {
-                    if(item.stock <= item.min) {
-                        warnings.innerHTML += `<li style="margin-bottom:5px; color:var(--danger);"><i class="fas fa-exclamation-circle"></i> Stok <b>${item.name}</b> menipis (${item.stock} ${item.unit})</li>`;
-                    }
-                });
-                if(warnings.innerHTML === '') warnings.innerHTML = '<li style="color:var(--success);"><i class="fas fa-check"></i> Sistem normal, tidak ada peringatan.</li>';
-
-                // Refresh Workflow Table
-                UI.renderTable('table-workflow-log', State.data.transactions.slice(0, 5), ['timestamp', 'id', 'name', 'status', 'operator']);
+            init: function() {
+                this.initDashboard();
+                this.populateDatalist();
             },
-
+            populateDatalist: function() {
+                const dl = document.getElementById('linen-list');
+                dl.innerHTML = '';
+                State.data.linen.forEach(l => {
+                    const opt = document.createElement('option');
+                    opt.value = l.id;
+                    dl.appendChild(opt);
+                });
+            },
             nav: function(viewId) {
-                // Hide all sections
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-                // Show target
-                document.getElementById('view-' + viewId).classList.remove('hidden');
                 
-                // Set active nav
-                // Find nav item containing onclick with viewId (simple approach)
+                document.getElementById('view-' + viewId).classList.remove('hidden');
                 const navs = document.querySelectorAll('.nav-item');
                 navs.forEach(nav => {
                     if(nav.getAttribute('onclick').includes(viewId)) nav.classList.add('active');
                 });
 
-                // Update Header Title
+                // Titles
                 const titles = {
-                    'dashboard': 'Dashboard Monitoring',
-                    'workflow': 'Workflow & Proses',
-                    'linen': 'Master Data Linen',
-                    'unit': 'Master Unit RS',
-                    'machine': 'Manajemen Mesin',
-                    'inventory': 'Gudang Bahan (Inventory)',
-                    'sdm': 'Sumber Daya Manusia (SDM)',
-                    'finance': 'Laporan Keuangan',
-                    'audit': 'Audit Log & Security'
+                    dashboard: 'Dashboard Monitoring',
+                    workflow: 'Workflow & Proses',
+                    linen: 'Master Data Linen',
+                    unit: 'Master Unit RS',
+                    machine: 'Manajemen Mesin',
+                    inventory: 'Gudang Bahan (Inventory)',
+                    audit: 'Audit Log Transaksi'
                 };
-                document.getElementById('page-title').innerText = titles[viewId];
+                document.getElementById('page-title').innerText = titles[viewId] || 'Halaman';
 
-                // Render specific view data
-                if(viewId === 'linen') UI.renderTable('table-linen', State.data.linen, ['id', 'name', 'category', 'unit', 'status', 'location']);
-                if(viewId === 'unit') UI.renderTable('table-unit', State.data.units, ['code', 'name', 'type', 'contact', 'schedule']);
-                if(viewId === 'machine') UI.renderTable('table-machine', State.data.machines, ['code', 'name', 'type', 'cap', 'status', 'maint']);
-                if(viewId === 'inventory') UI.renderTable('table-inventory', State.data.inventory, ['name', 'cat', 'stock', 'unit', 'min']); // Special render for status badge needed?
-                if(viewId === 'sdm') UI.renderTable('table-sdm', State.data.sdm, ['nip', 'name', 'role', 'shift', 'status', 'cert']);
-                if(viewId === 'finance') Finance.render();
-                if(viewId === 'audit') Audit.renderTable();
+                // Render Table based on View
+                if(viewId === 'linen') UI.renderTable('table-linen', State.data.linen);
+                if(viewId === 'unit') UI.renderTable('table-unit', State.data.units);
+                if(viewId === 'machine') UI.renderTable('table-machine', State.data.machines);
+                if(viewId === 'inventory') UI.renderTable('table-inventory', State.data.inventory);
+                if(viewId === 'audit') UI.renderTable('table-audit', State.data.transactions); // Reusing trans for audit in demo
 
-                // Mobile sidebar handling
+                // Mobile sidebar
                 if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('active');
             },
+            initDashboard: function() {
+                // Stats Calculation
+                const activeLinen = State.data.linen.filter(l => l.status === 'Active').length;
+                const damageLinen = State.data.linen.filter(l => l.status === 'Damage').length;
+                const infectedUnits = State.data.units.filter(u => u.type === 'Infectious').length;
+                
+                const lowStockItems = State.data.inventory.filter(i => parseInt(i.stock) <= parseInt(i.min));
+                
+                document.getElementById('stat-linen-ok').innerText = activeLinen;
+                document.getElementById('stat-process').innerText = State.data.transactions.length; // Demo purpose
+                document.getElementById('stat-infected').innerText = infectedUnits;
+                document.getElementById('stat-low-stock').innerText = lowStockItems.length;
 
-            actionAdd: function() {
-                // Logic for opening modal based on current view
-                // For simplicity in this single-file demo, we'll just alert
-                // But let's implement a simple prompt for adding items
-                
-                const currentView = document.querySelector('.view-section:not(.hidden)').id.replace('view-', '');
-                let msg = "";
-                if(currentView === 'linen') msg = "Masukkan Nama Linen Baru:";
-                if(currentView === 'unit') msg = "Masukkan Nama Unit Baru:";
-                if(currentView === 'inventory') msg = "Masukkan Nama Bahan:";
-                
-                if(msg) {
-                    const val = prompt(msg);
-                    if(val) {
-                        UI.showToast(`Fitur tambah data untuk '${val}' akan membuka Form Modal (Next Version)`, "info");
-                        // Implement logic here...
-                    }
+                // Warnings List
+                const wList = document.getElementById('dashboard-warnings');
+                wList.innerHTML = '';
+                if(lowStockItems.length > 0) {
+                    lowStockItems.forEach(i => {
+                        wList.innerHTML += `<li style="margin-bottom:8px; color:var(--danger); font-size:0.85rem;">
+                            <i class="fas fa-exclamation-circle"></i> <b>${i.name}</b> sisa ${i.stock} ${i.unit}
+                        </li>`;
+                    });
                 } else {
-                    UI.showToast("Fitur tambah data tidak tersedia untuk halaman ini.", "warning");
+                    wList.innerHTML = '<li style="color:var(--success);">Stok Aman.</li>';
                 }
+                
+                // Render Workflow Log
+                UI.renderTable('table-workflow-log', State.data.transactions);
             },
-
             sync: function() {
-                DataStore.syncToCloud();
+                UI.showLoading(true);
+                setTimeout(() => {
+                    UI.showLoading(false);
+                    UI.showToast("Data berhasil disimpan ke LocalStorage (Simulasi Sync)", "success");
+                }, 1000);
+            },
+            actionAdd: function() {
+                alert("Fitur Tambah Data (CRUD) disimulasikan terbuka.\nDalam implementasi penuh, ini akan membuka Modal Form input data.");
             }
         };
 
+        const Workflow = {
+            processStep: function() {
+                const id = document.getElementById('wf-linen-id').value;
+                const status = document.getElementById('wf-target-status').value;
+                const operator = document.getElementById('wf-operator').value;
+
+                if(!id || !status) return UI.showToast("Lengkapi ID Linen dan Status", "warning");
+
+                const linen = State.data.linen.find(l => l.id === id);
+                if(!linen) return UI.showToast("ID Linen tidak ditemukan!", "error");
+
+                // Logic Update Lokasi di Master
+                if(status === 'Siap Distribusi' || status === 'Gudang Rusak') linen.loc = 'Laundry / Gudang';
+                else if(status === 'Di Unit') linen.loc = 'Unit RS'; // Simplifikasi
+                
+                // Add Transaction
+                const newLog = {
+                    time: new Date().toLocaleString('id-ID'),
+                    linenId: id,
+                    from: linen.status, // Ambil status terakhir sebagai 'from'
+                    to: status,
+                    op: operator
+                };
+                
+                // Update status linen sementara untuk display
+                linen.status = status; 
+                
+                State.data.transactions.unshift(newLog);
+                
+                UI.renderTable('table-workflow-log', State.data.transactions);
+                document.getElementById('wf-linen-id').value = '';
+                document.getElementById('wf-target-status').value = '';
+                
+                UI.showToast(`Proses ${id} -> ${status} Berhasil`, "success");
+                App.initDashboard(); // Refresh stats
+            }
+        };
+
+        /**
+         * ==========================================
+         * 5. UI RENDERER & UTILS
+         * ==========================================
+         */
         const UI = {
-            renderTable: function(tableId, data, fields) {
+            renderTable: function(tableId, data) {
                 const tbody = document.querySelector(`#${tableId} tbody`);
                 if(!tbody) return;
                 tbody.innerHTML = '';
                 
                 if(data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${fields.length}" class="text-center text-muted" style="text-align:center; padding:20px;">Tidak ada data</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="10" class="text-center">Tidak ada data</td></tr>`;
                     return;
                 }
 
                 data.forEach(row => {
                     const tr = document.createElement('tr');
-                    fields.forEach(f => {
-                        const td = document.createElement('td');
-                        // Formatting based on field name or value
-                        if(f === 'stock') {
-                            const item = row; // reference
-                            if(item.stock <= item.min) td.innerHTML = `<span class="badge bg-danger-light">${row[f]}</span>`;
-                            else td.innerHTML = row[f];
-                        } else if (f === 'status') {
-                            td.innerHTML = Workflow.getStatusLabel(row[f]);
-                        } else if (f === 'amount') {
-                            td.innerHTML = this.formatRupiah(row[f]);
-                        } else {
-                            td.innerHTML = row[f] || '-';
-                        }
-                        tr.appendChild(td);
-                    });
-                    // Add Action Column (Hardcoded for this demo)
-                    const tdAct = document.createElement('td');
-                    tdAct.innerHTML = `<button class="btn btn-sm btn-outline" onclick="UI.showToast('Edit clicked', 'info')"><i class="fas fa-edit"></i></button>`;
-                    tr.appendChild(tdAct);
-
+                    
+                    // Generate cells dynamically based on object keys or mapped logic
+                    if(tableId === 'table-linen') {
+                        tr.innerHTML = `
+                            <td><b>${row.id}</b></td>
+                            <td>${row.name}</td>
+                            <td>${row.cat}</td>
+                            <td>${row.weight}</td>
+                            <td>${row.cycle}</td>
+                            <td>${this.getStatusBadge(row.status)}</td>
+                            <td>${row.loc}</td>
+                        `;
+                    } else if (tableId === 'table-unit') {
+                        tr.innerHTML = `
+                            <td><b>${row.code}</b></td>
+                            <td>${row.name}</td>
+                            <td>${row.type === 'Infectious' ? '<span class="badge bg-danger-light">Infeksius</span>' : '<span class="badge bg-success-light">Non-Infeksius</span>'}</td>
+                            <td>${row.contact}</td>
+                            <td><button class="btn btn-sm btn-outline" onclick="UI.showToast('Detail Unit', 'info')"><i class="fas fa-eye"></i></button></td>
+                        `;
+                    } else if (tableId === 'table-machine') {
+                        tr.innerHTML = `
+                            <td><b>${row.id}</b></td>
+                            <td>${row.name}</td>
+                            <td>${row.type}</td>
+                            <td>${row.cap}</td>
+                            <td>${row.status === 'Active' ? '<span class="badge bg-success-light">Active</span>' : '<span class="badge bg-warning-light">Maintenance</span>'}</td>
+                            <td>${row.maint}</td>
+                            <td><button class="btn btn-sm btn-outline"><i class="fas fa-wrench"></i></button></td>
+                        `;
+                    } else if (tableId === 'table-inventory') {
+                        const isLow = parseInt(row.stock) <= parseInt(row.min);
+                        tr.innerHTML = `
+                            <td>${row.name}</td>
+                            <td>${row.cat}</td>
+                            <td style="font-weight:bold; color: ${isLow ? 'var(--danger)' : 'inherit'}">${row.stock} ${row.unit}</td>
+                            <td>${row.unit}</td>
+                            <td>${row.min}</td>
+                            <td>${isLow ? '<span class="badge bg-danger-light">Low Stock</span>' : '<span class="badge bg-success-light">Aman</span>'}</td>
+                            <td><button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button></td>
+                        `;
+                    } else if (tableId === 'table-workflow-log') {
+                        tr.innerHTML = `
+                            <td>${row.time}</td>
+                            <td><b>${row.linenId}</b></td>
+                            <td>-</td>
+                            <td>${row.from} <i class="fas fa-arrow-right" style="font-size:0.7rem; margin:0 5px;"></i> ${row.to}</td>
+                            <td>${row.op}</td>
+                        `;
+                    } else {
+                        // Generic Fallback (Audit)
+                        tr.innerHTML = `<td>${Object.values(row).join('</td><td>')}</td>`;
+                    }
                     tbody.appendChild(tr);
                 });
             },
-
-            formatRupiah: function(num) {
-                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(num);
+            getStatusBadge: function(status) {
+                if(status.includes('Damage')) return `<span class="badge bg-danger-light">Damage</span>`;
+                if(status.includes('Active') || status.includes('Cuci Aktif')) return `<span class="badge bg-success-light">Active</span>`;
+                return `<span class="badge bg-secondary">${status}</span>`;
             },
-
-            showToast: function(msg, type = 'success') {
+            showToast: function(msg, type='success') {
                 const div = document.createElement('div');
                 div.className = `toast ${type}`;
-                div.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check' : 'fa-info-circle'}"></i> ${msg}`;
+                div.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'}"></i> ${msg}`;
                 document.getElementById('toast-container').appendChild(div);
                 setTimeout(() => div.remove(), 3000);
             },
-
             showLoading: function(show) {
                 document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
             },
-
             closeModal: function() {
                 document.getElementById('generic-modal').classList.remove('active');
             }
         };
 
-        // Helper for mobile sidebar
+        // Helpers
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
         }
 
-        // --- EVENT LISTENERS ---
+        // Event Listeners
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            Auth.login(u, p);
+            Auth.login();
         });
 
-        // --- INIT ---
         window.onload = function() {
             Auth.init();
         };
