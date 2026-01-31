@@ -59,12 +59,10 @@
         .modal-content { background:white; padding:25px; border-radius:12px; width:90%; max-width:400px; }
         input, select { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; margin-bottom:10px; }
         
-        /* --- TABLES & LISTS --- */
+        /* --- TABLES --- */
         table { width:100%; border-collapse:collapse; }
         th, td { padding:10px; text-align:left; border-bottom:1px solid var(--border); font-size:13px; }
         th { background:#f8fafc; color:#64748b; }
-        .stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
-        .stat-card { background:white; padding:15px; border-radius:12px; border:1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -102,39 +100,27 @@
         </nav>
 
         <main class="main">
-            <!-- VIEW: WORKFLOW (KANBAN) -->
+            <!-- VIEW: WORKFLOW -->
             <div id="v-dashboard">
                 <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
                     <h2>Live Workflow</h2>
                     <button class="btn btn-primary btn-sm" onclick="App.refresh()"><i class="fas fa-sync"></i> Refresh</button>
                 </div>
                 <div class="kanban-board">
-                    <!-- DIRTY / RECEIVED -->
                     <div class="kanban-col">
-                        <div class="kanban-header" style="color:#ef4444;">
-                            <i class="fas fa-inbox"></i> INBOUND <span id="c-dirty" class="badge bg-red">0</span>
-                        </div>
+                        <div class="kanban-header" style="color:#ef4444;"><i class="fas fa-inbox"></i> INBOUND <span id="c-dirty" class="badge bg-red">0</span></div>
                         <div id="kanban-dirty" class="kanban-cards"></div>
                     </div>
-                    <!-- WASHING / FINISHING -->
                     <div class="kanban-col">
-                        <div class="kanban-header" style="color:#3b82f6;">
-                            <i class="fas fa-tshirt"></i> PROCESS <span id="c-proc" class="badge bg-blue">0</span>
-                        </div>
+                        <div class="kanban-header" style="color:#3b82f6;"><i class="fas fa-tshirt"></i> PROCESS <span id="c-proc" class="badge bg-blue">0</span></div>
                         <div id="kanban-proc" class="kanban-cards"></div>
                     </div>
-                    <!-- READY / CLEAN -->
                     <div class="kanban-col">
-                        <div class="kanban-header" style="color:#22c55e;">
-                            <i class="fas fa-check-circle"></i> OUTBOUND <span id="c-out" class="badge bg-green">0</span>
-                        </div>
+                        <div class="kanban-header" style="color:#22c55e;"><i class="fas fa-check-circle"></i> OUTBOUND <span id="c-out" class="badge bg-green">0</span></div>
                         <div id="kanban-out" class="kanban-cards"></div>
                     </div>
-                    <!-- ALERTS -->
                     <div class="kanban-col" style="background:#fff1f2;">
-                        <div class="kanban-header" style="color:#be123c;">
-                            <i class="fas fa-exclamation-triangle"></i> ALERTS
-                        </div>
+                        <div class="kanban-header" style="color:#be123c;"><i class="fas fa-exclamation-triangle"></i> ALERTS</div>
                         <div id="kanban-alert" class="kanban-cards"></div>
                     </div>
                 </div>
@@ -178,14 +164,12 @@
         </main>
     </div>
 
-    <!-- MODAL: ACTION (Move Linen) -->
+    <!-- MODAL: ACTION -->
     <div class="modal" id="act-modal">
         <div class="modal-content">
             <h3 id="act-title">Aksi Linen</h3>
             <p id="act-info" style="margin-bottom:15px; color:#64748b;">-</p>
-            
-            <div id="act-form"></div> <!-- Inputs Generated Here -->
-            
+            <div id="act-form"></div>
             <div style="text-align:right; margin-top:20px;">
                 <button class="btn btn-outline" onclick="UI.close('act-modal')">Batal</button>
                 <button class="btn btn-primary" id="btn-do-action">Proses</button>
@@ -196,11 +180,11 @@
     <!-- MODAL: REGISTER -->
     <div class="modal" id="reg-modal">
         <div class="modal-content">
-            <h3>Daftar Baru</h3>
+            <h3>Daftar Akun Baru</h3>
             <input type="text" id="reg-user" placeholder="Username">
             <input type="text" id="reg-name" placeholder="Nama Lengkap">
             <input type="password" id="reg-pass" placeholder="Password">
-            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="Auth.register()">Daftar</button>
+            <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;" onclick="Auth.register()">Daftar</button>
             <button class="btn btn-outline" style="width:100%; justify-content:center; margin-top:5px;" onclick="UI.close('reg-modal')">Batal</button>
         </div>
     </div>
@@ -210,7 +194,8 @@
         // KONFIGURASI
         // ========================
         const CONFIG = {
-            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwb3yk_UztXNrXRQMW-Y8VgBQH8quj9xntkV3a1QE1xBWbx55heuuMD4xq9XvKUwSlenw/exec" // GANTI INI
+            // PASTE URL WEB APP BARU DARI HASIL DEPLOY KAMU DI SINI
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwytdGXjm8DLZ-ejc86bwnjFNf2mJEoMzO5rmEdCcd_SlLSgFN26QFuuIYq2mvNjGExFA/exec" 
         };
 
         const State = { data: {}, user: null, actItem: null };
@@ -226,7 +211,10 @@
                         method: 'POST', body: JSON.stringify({ action: act, ...d, role: State.user?.role })
                     });
                     return await res.json();
-                } catch(e) { return { status:'error', message:e.message }; }
+                } catch(e) { 
+                    console.error("API Error:", e);
+                    return { status:'error', message:'Koneksi Gagal: ' + e.message }; 
+                }
                 finally { UI.load(false); }
             },
             load: async () => {
@@ -234,6 +222,8 @@
                 if(res.status==='success') {
                     State.data = res.data;
                     App.renderAll();
+                } else {
+                    console.error("Load Data Error:", res);
                 }
             }
         };
@@ -246,15 +236,20 @@
                 e.preventDefault();
                 const res = await API.post('login', { username:$('#l-user').val(), password:$('#l-pass').val() });
                 if(res.status==='success') Auth.set(res.user);
-                else if(res.status==='pending') UI.msg('Akun Pending', 'warning');
-                else UI.msg(res.message, 'error');
+                else if(res.status==='pending') UI.msg('Akun Pending Admin', 'warning');
+                else UI.msg(res.message || 'Login Gagal', 'error');
             },
             register: async () => {
                 const u=$('#reg-user').val(), n=$('#reg-name').val(), p=$('#reg-pass').val();
-                if(!u||!n||!p) return UI.msg('Lengkap', 'warning');
+                if(!u||!n||!p) return UI.msg('Lengkapi semua data', 'warning');
+                
                 const res = await API.post('register', { username:u, fullname:n, password:p });
-                UI.msg(res.message, res.status==='success'?'success':'error');
-                if(res.status==='success') UI.close('reg-modal');
+                UI.msg(res.message || 'Terjadi kesalahan', res.status==='success'?'success':'error');
+                
+                if(res.status==='success') { 
+                    UI.close('reg-modal'); 
+                    $('#reg-user').val(''); $('#reg-name').val(''); $('#reg-pass').val('');
+                }
             },
             set: (u) => {
                 State.user = u;
@@ -275,7 +270,6 @@
                 $('#act-title').text(id); 
                 $('#act-info').text(`Status Saat Ini: ${status}`);
 
-                // Logic Button Generator
                 let btns = '';
                 if(status==='DIRTY' || status==='RECEIVED') {
                     btns += `<button class="btn btn-primary" style="width:100%; margin-bottom:5px;" onclick="Workflow.conf('WASHING')">Mulai Cuci</button>`;
@@ -286,7 +280,7 @@
                     btns += `<select id="dist-unit"><option>Pilih Unit...</option>${State.data.units.map(u=>`<option value="${u.UnitCode}">${u.UnitName}</option>`).join('')}</select>`;
                     btns += `<button class="btn btn-success" style="width:100%; margin-top:5px;" onclick="Workflow.conf('CLEAN')">Kirim Unit</button>`;
                 } else if(status==='DAMAGED') {
-                    btns = `<p>Tidak ada aksi untuk linen rusak.</p>`;
+                    btns = `<p>Tidak ada aksi.</p>`;
                 }
 
                 form.html(btns);
@@ -296,12 +290,13 @@
                 const payload = { linenIds: [State.actItem.id], toStatus, operator: State.user.name };
                 
                 if(toStatus === 'WASHING') {
-                    // Pilih Mesin
                     const machines = State.data.machines.filter(m=>m.Status==='Idle');
-                    if(machines.length===0) return UI.msg('Tidak ada mesin kosong!', 'error');
-                    payload.machineId = prompt("Pilih Mesin:\n" + machines.map(m=>`${m.MachineID} (${m.Name})`).join('\n'), machines[0].MachineID);
+                    if(machines.length===0) return UI.msg('Mesin penuh/maintenance', 'error');
+                    payload.machineId = prompt("Pilih Mesin ID:\n" + machines.map(m=>`${m.MachineID} - ${m.Name}`).join('\n'), machines[0].MachineID);
+                    if(!payload.machineId) return;
                 } else if (toStatus === 'CLEAN') {
                     payload.targetUnit = $('#dist-unit').val();
+                    if(!payload.targetUnit) return UI.msg('Pilih unit', 'warning');
                 }
 
                 const res = await API.post('process_workflow', payload);
@@ -314,11 +309,9 @@
             start: () => {
                 const uCode = $('#op-unit').val();
                 if(!uCode) return;
-                // Filter linen di unit tsb (Simulasi: Cek status CLEAN di lokasi unit)
                 const items = State.data.linen.filter(l => l.CurrentLocation === uCode && l.CurrentStatus === 'CLEAN');
-                
                 const tbody = $('#op-tbody'); tbody.html('');
-                if(items.length===0) return UI.msg('Tidak ada linen bersih di unit ini', 'warning');
+                if(items.length===0) return UI.msg('Tidak ada linen bersih', 'warning');
 
                 items.forEach(l => {
                     tbody.append(`
@@ -334,10 +327,11 @@
             submit: async () => {
                 const items = [];
                 $('#op-tbody tr').each(function(){
-                    const id = $(this).data('id');
-                    const sys = 1; // Hardcoded for demo (assume 1 pc per ID)
-                    const phy = parseInt($(this).find('.op-phy').val());
-                    items.push({ linenId: id, systemCount: sys, physical: phy });
+                    items.push({ 
+                        linenId: $(this).data('id'), 
+                        systemCount: 1, // Simplifikasi untuk demo
+                        physical: parseInt($(this).find('.op-phy').val()) 
+                    });
                 });
                 const res = await API.post('submit_opname', { unit: $('#op-unit').val(), items, auditor: State.user.name });
                 UI.msg(res.message, res.status==='success'?'success':'error');
@@ -355,40 +349,43 @@
             },
             refresh: () => API.load(),
             renderAll: () => {
-                // 1. KANBAN
+                // KANBAN
                 const l = State.data.linen;
-                const r = (s) => l.filter(x => ['DIRTY','RECEIVED'].includes(x.CurrentStatus));
-                const p = (s) => l.filter(x => ['WASHING','FINISHING'].includes(x.CurrentStatus));
-                const o = (s) => l.filter(x => ['READY','CLEAN'].includes(x.CurrentStatus));
-                const a = (s) => l.filter(x => ['DAMAGED','MISSING'].includes(x.CurrentStatus));
+                const r = l.filter(x => ['DIRTY','RECEIVED'].includes(x.CurrentStatus));
+                const p = l.filter(x => ['WASHING','FINISHING'].includes(x.CurrentStatus));
+                const o = l.filter(x => ['READY','CLEAN'].includes(x.CurrentStatus));
+                const a = l.filter(x => ['DAMAGED','MISSING'].includes(x.CurrentStatus));
                 
                 const renderC = (id, data, cls) => {
                     const el = $(`#${id}`); el.html('');
                     data.forEach(d => el.append(`<div class="l-card ${cls}" onclick="Workflow.click('${d.LinenID}','${d.CurrentStatus}')"><b>${d.LinenID}</b><br><small>${d.Name}</small></div>`));
                 };
-                renderC('kanban-dirty', r(), 'status-Dirty');
-                renderC('kanban-proc', p(), 'status-Washing');
-                renderC('kanban-out', o(), 'status-Ready');
-                renderC('kanban-alert', a(), 'status-Damaged');
+                renderC('kanban-dirty', r, 'status-Dirty');
+                renderC('kanban-proc', p, 'status-Washing');
+                renderC('kanban-out', o, 'status-Ready');
+                renderC('kanban-alert', a, 'status-Damaged');
 
-                // Badges
                 $('#c-dirty').text(r().length); $('#c-proc').text(p().length); $('#c-out').text(o().length);
 
-                // 2. INVENTORY
-                const i = State.data.inventory;
-                $('#inv-tbody').html(i.map(x=>`<tr><td>${x.ItemName}</td><td>${x.Category}</td><td style="${x.Stock<x.MinStock?'color:red;font-weight:bold':''}">${x.Stock}</td><td>${x.Unit}</td><td>${x.Stock<x.MinStock?'LOW':'OK'}</td></tr>`).join(''));
+                // INVENTORY
+                $('#inv-tbody').html(State.data.inventory.map(x=>`<tr><td>${x.ItemName}</td><td>${x.Category}</td><td style="${x.Stock<x.MinStock?'color:red;font-weight:bold':''}">${x.Stock}</td><td>${x.Unit}</td><td>${x.Stock<x.MinStock?'LOW':'OK'}</td></tr>`).join(''));
 
-                // 3. MACHINES
+                // MACHINES
                 $('#mach-tbody').html(State.data.machines.map(x=>`<tr><td>${x.MachineID}</td><td>${x.Name}</td><td>${x.Capacity}</td><td><span class="badge ${x.Status==='Running'?'bg-blue':'bg-green'}">${x.Status}</span></td><td><button class="btn btn-sm btn-outline">Log</button></td></tr>`).join(''));
 
-                // 4. UNITS DROPDOWN
+                // UNITS
                 $('#op-unit').html('<option>Pilih Unit...</option>' + State.data.units.map(u=>`<option value="${u.UnitCode}">${u.UnitName}</option>`).join(''));
             }
         };
 
         const UI = {
-            load: (s) => s? $('#loading').show():$('#loading').remove(),
-            msg: (t,ty) => { const c=$('<div>').addClass('toast').css({position:'fixed',bottom:20,right:20,background:ty==='error'?'red':ty==='success'?'green':'blue',color:'white',padding:10,margin:5}).text(t); $('body').append(c); setTimeout(()=>c.remove(),3000); },
+            load: (s) => { if(s) { const l=$('#loading'); if(l.length) l.show(); else $('<div id="loading">').css({position:'fixed',inset:0,background:'rgba(255,255,255,0.8)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'bold'}).text('Loading...').appendTo('body'); } else $('#loading').remove(); },
+            msg: (t,ty) => { 
+                const c=document.createElement('div');
+                c.className='toast';
+                c.style.cssText=`position:fixed;bottom:20px;right:20px;background:${ty==='error'?'#ef4444':ty==='success'?'#22c55e':'#3b82f6'};color:white;padding:12px 20px;border-radius:8px;z-index:10000;animation:slide 0.3s;`;
+                c.innerText=t; document.body.appendChild(c); setTimeout(()=>c.remove(),3000);
+            },
             open: (id) => $(`#${id}`).addClass('active'),
             close: (id) => $(`#${id}`).removeClass('active')
         };
@@ -398,4 +395,3 @@
     </script>
 </body>
 </html>
-
