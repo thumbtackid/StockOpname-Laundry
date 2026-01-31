@@ -3,56 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Laundry RS Charlie (Live)</title>
+    <title>Sistem Laundry RS Charlie (Enterprise)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #0284c7; --primary-dark: #0369a1; --bg: #f8fafc;
-            --text: #334155; --border: #cbd5e1;
-            --danger: #ef4444; --success: #22c55e; --warning: #f59e0b;
+            --primary: #0ea5e9; --dark: #0f172a; --bg: #f1f5f9;
+            --card-bg: #ffffff; --border: #e2e8f0;
+            --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; --info: #3b82f6;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-        
-        /* Components */
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-        
-        /* Screens */
-        #login-screen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; z-index: 50; }
-        .login-box { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
-        
-        /* App Layout */
-        .app-container { display: grid; grid-template-columns: 250px 1fr; height: 100vh; }
-        .sidebar { background: white; border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
-        .nav-item { padding: 12px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; color: var(--text); display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover, .nav-item.active { background: #e0f2fe; color: var(--primary-dark); font-weight: 600; }
-        
-        .main-content { padding: 20px; overflow-y: auto; }
-        .hidden { display: none !important; }
-        
-        /* Modal */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 450px; }
-        
-        /* Form */
-        input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; }
-        
-        /* Toast */
-        #toast-box { position: fixed; bottom: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; animation: slide 0.3s ease; }
-        .toast.error { border-left: 4px solid var(--danger); }
-        .toast.success { border-left: 4px solid var(--success); }
-        @keyframes slide { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        * { box-sizing: border-box; margin:0; padding:0; outline:none; }
+        body { font-family:'Inter', sans-serif; background:var(--bg); color:var(--dark); height:100vh; overflow:hidden; font-size:14px; }
 
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        th { background: #f1f5f9; color: #64748b; font-size: 12px; text-transform: uppercase; }
+        /* --- LAYOUT --- */
+        .app { display:grid; grid-template-columns:240px 1fr; height:100vh; }
+        .sidebar { background:var(--card-bg); border-right:1px solid var(--border); padding:20px; display:flex; flex-direction:column; }
+        .main { padding:20px; overflow-y:auto; display:flex; flex-direction:column; }
+        
+        /* --- COMPONENTS --- */
+        .nav-item { padding:12px; border-radius:8px; cursor:pointer; display:flex; gap:10px; align-items:center; color:#64748b; transition:0.2s; margin-bottom:5px; }
+        .nav-item:hover, .nav-item.active { background:#f0f9ff; color:var(--primary); font-weight:600; }
+        
+        .card { background:var(--card-bg); border-radius:12px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid var(--border); margin-bottom:20px; }
+        .btn { padding:10px 16px; border-radius:8px; border:none; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:8px; transition:0.2s; }
+        .btn-primary { background:var(--primary); color:white; }
+        .btn-outline { background:transparent; border:1px solid var(--border); color:var(--dark); }
+        .btn-sm { padding:6px 12px; font-size:12px; }
+        
+        .badge { padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; text-transform:uppercase; }
+        .bg-red { background:#fee2e2; color:#b91c1c; }
+        .bg-blue { background:#e0f2fe; color:#0369a1; }
+        .bg-green { background:#dcfce7; color:#15803d; }
+        .bg-gray { background:#f1f5f9; color:#475569; }
+
+        /* --- KANBAN BOARD --- */
+        .kanban-board { display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px; height:100%; overflow-x:auto; padding-bottom:10px; }
+        .kanban-col { background:#f8fafc; border-radius:12px; padding:15px; display:flex; flex-direction:column; border:1px solid var(--border); min-height:200px; }
+        .kanban-header { font-weight:700; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; }
+        .kanban-cards { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
+        .l-card { background:white; padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s; border-left:4px solid transparent; }
+        .l-card:hover { transform:translateY(-2px); box-shadow:0 4px 6px rgba(0,0,0,0.05); }
+        .l-card.status-Dirty { border-left-color:var(--danger); }
+        .l-card.status-Washing { border-left-color:var(--warning); }
+        .l-card.status-Finishing { border-left-color:var(--info); }
+        .l-card.status-Ready, .l-card.status-CLEAN { border-left-color:var(--success); }
+        
+        /* --- SCREENS --- */
+        #login-screen { position:fixed; inset:0; background:linear-gradient(135deg,var(--primary),#3b82f6); display:flex; align-items:center; justify-content:center; z-index:50; }
+        .login-box { background:white; padding:40px; border-radius:16px; width:100%; max-width:360px; text-align:center; box-shadow:0 20px 25px rgba(0,0,0,0.2); }
+        .hidden { display:none !important; }
+        
+        /* --- MODAL --- */
+        .modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:100; }
+        .modal.active { display:flex; }
+        .modal-content { background:white; padding:25px; border-radius:12px; width:90%; max-width:400px; }
+        input, select { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; margin-bottom:10px; }
+        
+        /* --- TABLES & LISTS --- */
+        table { width:100%; border-collapse:collapse; }
+        th, td { padding:10px; text-align:left; border-bottom:1px solid var(--border); font-size:13px; }
+        th { background:#f8fafc; color:#64748b; }
+        .stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px; }
+        .stat-card { background:white; padding:15px; border-radius:12px; border:1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -60,345 +72,329 @@
     <!-- LOGIN -->
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="color: var(--primary); margin-bottom: 20px;">Laundry RS</h2>
+            <h2 style="color:var(--primary); margin-bottom:20px;">RS Charlie Laundry</h2>
             <form id="form-login">
-                <input type="text" id="login-user" placeholder="Username" required>
-                <input type="password" id="login-pass" placeholder="Password" required>
-                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Masuk</button>
+                <input type="text" id="l-user" placeholder="Username" required>
+                <input type="password" id="l-pass" placeholder="Password" required>
+                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Masuk</button>
             </form>
-            <p style="margin: 20px 0; color: #94a3b8;">atau</p>
-            <button class="btn btn-outline" style="width: 100%; justify-content: center;" onclick="UI.openModal('modal-register')">Daftar Akun Baru</button>
+            <p style="margin:15px 0; color:#94a3b8; font-size:12px;">atau</p>
+            <button class="btn btn-outline" style="width:100%; justify-content:center;" onclick="UI.open('reg-modal')">Daftar Akun</button>
         </div>
     </div>
 
-    <!-- MAIN APP -->
-    <div class="app-container hidden" id="app">
+    <!-- APP -->
+    <div class="app hidden" id="app">
         <nav class="sidebar">
-            <h3 style="color: var(--primary); margin-bottom: 20px;">Laundry System</h3>
-            <div class="nav-item active" onclick="App.go('dashboard')"><i class="fas fa-home"></i> Dashboard</div>
-            <div class="nav-item" onclick="App.go('workflow')"><i class="fas fa-tasks"></i> Workflow</div>
-            <div class="nav-item" onclick="App.go('linen')"><i class="fas fa-layer-group"></i> Data Linen</div>
-            <div class="nav-item" onclick="App.go('inventory')"><i class="fas fa-box"></i> Inventory</div>
-            <div id="menu-admin" class="hidden">
-                <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
-                <small style="color:#999; margin-left:10px;">ADMIN AREA</small>
-                <div class="nav-item" onclick="App.go('users')"><i class="fas fa-users-cog"></i> Manajemen User</div>
+            <h3 style="color:var(--primary); margin-bottom:20px;">Laundry Pro</h3>
+            <div class="nav-item active" onclick="App.nav('dashboard')"><i class="fas fa-th-large"></i> Workflow</div>
+            <div class="nav-item" onclick="App.nav('opname')"><i class="fas fa-clipboard-check"></i> Stock Opname</div>
+            <div class="nav-item" onclick="App.nav('inventory')"><i class="fas fa-box"></i> Inventory</div>
+            <div class="nav-item" onclick="App.nav('machines')"><i class="fas fa-cogs"></i> Mesin</div>
+            <div id="admin-nav" class="hidden" style="margin-top:auto;">
+                <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
+                <div class="nav-item" onclick="App.nav('admin')"><i class="fas fa-users"></i> Admin</div>
             </div>
-            <div style="margin-top: auto;">
-                <div id="user-display" style="font-size: 13px; margin-bottom: 10px; font-weight: 600;">-</div>
-                <button class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 13px;" onclick="Auth.logout()">Logout</button>
+            <div style="margin-top:20px;">
+                <div id="u-name" style="font-weight:700; font-size:13px;">-</div>
+                <button class="btn btn-outline btn-sm" style="width:100%; margin-top:5px;" onclick="location.reload()">Logout</button>
             </div>
         </nav>
 
-        <main class="main-content">
-            <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 id="page-title">Dashboard</h2>
-                <button class="btn btn-primary" onclick="App.openAdd()"><i class="fas fa-plus"></i> Tambah Data</button>
-            </header>
-
-            <!-- VIEW: DASHBOARD -->
-            <div id="view-dashboard">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                    <div class="card"><h1 id="stat-linen">0</h1><p>Total Linen</p></div>
-                    <div class="card"><h1 id="stat-trans">0</h1><p>Transaksi</p></div>
-                    <div class="card"><h1 id="stat-inv">0</h1><p>Item Inventory</p></div>
+        <main class="main">
+            <!-- VIEW: WORKFLOW (KANBAN) -->
+            <div id="v-dashboard">
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                    <h2>Live Workflow</h2>
+                    <button class="btn btn-primary btn-sm" onclick="App.refresh()"><i class="fas fa-sync"></i> Refresh</button>
                 </div>
-            </div>
-
-            <!-- VIEW: WORKFLOW -->
-            <div id="view-workflow" class="hidden">
-                <div class="card">
-                    <h3>Proses Laundry</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 100px; gap: 10px; margin-top: 15px;">
-                        <input type="text" id="wf-id" placeholder="ID Linen (Cth: SET-ICU-01)">
-                        <select id="wf-status">
-                            <option value="Di Laundry">Terima Kotor</option>
-                            <option value="Cuci">Cuci</option>
-                            <option value="Setrika">Setrika</option>
-                            <option value="Siap Distribusi">Siap</option>
-                        </select>
-                        <button class="btn btn-primary" onclick="Workflow.do()">Proses</button>
+                <div class="kanban-board">
+                    <!-- DIRTY / RECEIVED -->
+                    <div class="kanban-col">
+                        <div class="kanban-header" style="color:#ef4444;">
+                            <i class="fas fa-inbox"></i> INBOUND <span id="c-dirty" class="badge bg-red">0</span>
+                        </div>
+                        <div id="kanban-dirty" class="kanban-cards"></div>
+                    </div>
+                    <!-- WASHING / FINISHING -->
+                    <div class="kanban-col">
+                        <div class="kanban-header" style="color:#3b82f6;">
+                            <i class="fas fa-tshirt"></i> PROCESS <span id="c-proc" class="badge bg-blue">0</span>
+                        </div>
+                        <div id="kanban-proc" class="kanban-cards"></div>
+                    </div>
+                    <!-- READY / CLEAN -->
+                    <div class="kanban-col">
+                        <div class="kanban-header" style="color:#22c55e;">
+                            <i class="fas fa-check-circle"></i> OUTBOUND <span id="c-out" class="badge bg-green">0</span>
+                        </div>
+                        <div id="kanban-out" class="kanban-cards"></div>
+                    </div>
+                    <!-- ALERTS -->
+                    <div class="kanban-col" style="background:#fff1f2;">
+                        <div class="kanban-header" style="color:#be123c;">
+                            <i class="fas fa-exclamation-triangle"></i> ALERTS
+                        </div>
+                        <div id="kanban-alert" class="kanban-cards"></div>
                     </div>
                 </div>
-                <div class="card">
-                    <h3>Riwayat</h3>
-                    <table><thead><tr><th>Waktu</th><th>Linen</th><th>Status</th><th>Petugas</th></tr></thead><tbody id="table-wf"></tbody></table>
-                </div>
             </div>
 
-            <!-- VIEW: LINEN -->
-            <div id="view-linen" class="hidden">
+            <!-- VIEW: STOCK OPNAME -->
+            <div id="v-opname" class="hidden">
                 <div class="card">
-                    <h3>Data Linen</h3>
-                    <table><thead><tr><th>ID</th><th>Nama</th><th>Kategori</th><th>Status</th><th>Lokasi</th></tr></thead><tbody id="table-linen"></tbody></table>
+                    <h3>Stock Opname (Audit)</h3>
+                    <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; margin-top:15px;">
+                        <select id="op-unit"><option>Pilih Unit...</option></select>
+                        <button class="btn btn-primary" onclick="Opname.start()">Mulai Opname</button>
+                    </div>
+                </div>
+                <div id="op-workspace" class="hidden">
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3>Hasil Fisik</h3>
+                            <button class="btn btn-primary btn-sm" onclick="Opname.submit()">Simpan Audit</button>
+                        </div>
+                        <table><thead><tr><th>Linen ID</th><th>Nama</th><th>Sistem</th><th>Fisik</th><th>Selisih</th></tr></thead><tbody id="op-tbody"></tbody></table>
+                    </div>
                 </div>
             </div>
 
             <!-- VIEW: INVENTORY -->
-            <div id="view-inventory" class="hidden">
+            <div id="v-inventory" class="hidden">
                 <div class="card">
-                    <h3>Data Inventory</h3>
-                    <table><thead><tr><th>Nama</th><th>Kat</th><th>Stok</th><th>Min</th></tr></thead><tbody id="table-inv"></tbody></table>
+                    <h3>Chemical & Consumable</h3>
+                    <table><thead><tr><th>Item</th><th>Kat</th><th>Stok</th><th>Unit</th><th>Status</th></tr></thead><tbody id="inv-tbody"></tbody></table>
                 </div>
             </div>
 
-            <!-- VIEW: USERS (ADMIN) -->
-            <div id="view-users" class="hidden">
+            <!-- VIEW: MACHINES -->
+            <div id="v-machines" class="hidden">
                 <div class="card">
-                    <h3>User Management</h3>
-                    <table><thead><tr><th>User</th><th>Nama</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="table-users"></tbody></table>
+                    <h3>Status Mesin</h3>
+                    <table><thead><tr><th>ID</th><th>Nama</th><th>Kapasitas</th><th>Status</th><th>Action</th></tr></thead><tbody id="mach-tbody"></tbody></table>
                 </div>
             </div>
-
         </main>
     </div>
 
-    <!-- MODAL REGISTER -->
-    <div class="modal" id="modal-register">
+    <!-- MODAL: ACTION (Move Linen) -->
+    <div class="modal" id="act-modal">
         <div class="modal-content">
-            <h3>Daftar Akun</h3>
+            <h3 id="act-title">Aksi Linen</h3>
+            <p id="act-info" style="margin-bottom:15px; color:#64748b;">-</p>
+            
+            <div id="act-form"></div> <!-- Inputs Generated Here -->
+            
+            <div style="text-align:right; margin-top:20px;">
+                <button class="btn btn-outline" onclick="UI.close('act-modal')">Batal</button>
+                <button class="btn btn-primary" id="btn-do-action">Proses</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTER -->
+    <div class="modal" id="reg-modal">
+        <div class="modal-content">
+            <h3>Daftar Baru</h3>
             <input type="text" id="reg-user" placeholder="Username">
             <input type="text" id="reg-name" placeholder="Nama Lengkap">
             <input type="password" id="reg-pass" placeholder="Password">
-            <div style="text-align: right; margin-top: 10px;">
-                <button class="btn btn-outline" onclick="UI.closeModal('modal-register')">Batal</button>
-                <button class="btn btn-primary" onclick="Auth.register()">Daftar</button>
-            </div>
+            <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="Auth.register()">Daftar</button>
+            <button class="btn btn-outline" style="width:100%; justify-content:center; margin-top:5px;" onclick="UI.close('reg-modal')">Batal</button>
         </div>
     </div>
-
-    <!-- MODAL ADD -->
-    <div class="modal" id="modal-add">
-        <div class="modal-content">
-            <h3>Tambah Data</h3>
-            <div id="add-form-container"></div>
-            <div style="text-align: right; margin-top: 10px;">
-                <button class="btn btn-outline" onclick="UI.closeModal('modal-add')">Batal</button>
-                <button class="btn btn-primary" id="btn-save-add">Simpan</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast-box"></div>
 
     <script>
-        // ==========================================
+        // ========================
         // KONFIGURASI
-        // ==========================================
+        // ========================
         const CONFIG = {
-            // GANTI URL INI DENGAN URL WEB APP BARU
-            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbz_Upbvn7CTWhOMnn6JYxKDCu4XMoD3y0eKGlHGLw8nLnl8yg0rmIXPaHYXpkN9_MoUjw/exec"
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxL3d88GrbIv7iCpJu_IR2JPvV-SNmuUnxNPuwimlJe43XjV43wHnFuNECParQw3sPOFQ/exec" // GANTI INI
         };
 
-        const State = { user: null, data: {} };
+        const State = { data: {}, user: null, actItem: null };
 
-        // ==========================================
+        // ========================
         // API CONNECTION
-        // ==========================================
+        // ========================
         const API = {
-            post: async function(action, data) {
-                UI.loading(true);
+            post: async (act, d) => {
+                UI.load(true);
                 try {
                     const res = await fetch(CONFIG.SCRIPT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({ action, ...data })
+                        method: 'POST', body: JSON.stringify({ action: act, ...d, role: State.user?.role })
                     });
-                    const json = await res.json();
-                    UI.loading(false);
-                    return json;
-                } catch (err) {
-                    UI.loading(false);
-                    console.error(err);
-                    return { status: 'error', message: 'Koneksi Gagal: ' + err.message };
-                }
+                    return await res.json();
+                } catch(e) { return { status:'error', message:e.message }; }
+                finally { UI.load(false); }
             },
-            
-            load: async function() {
-                const res = await this.post('get_all_data');
-                if(res.status === 'success') {
+            load: async () => {
+                const res = await API.post('get_all_data');
+                if(res.status==='success') {
                     State.data = res.data;
                     App.renderAll();
                 }
             }
         };
 
-        // ==========================================
+        // ========================
         // LOGIC: AUTH
-        // ==========================================
+        // ========================
         const Auth = {
-            init: function() {
-                const u = localStorage.getItem('rs_user');
-                if(u) this.loginSuccess(JSON.parse(u));
-            },
-            login: async function(e) {
+            login: async (e) => {
                 e.preventDefault();
-                const u = document.getElementById('login-user').value;
-                const p = document.getElementById('login-pass').value;
-                const res = await API.post('login', { username: u, password: p });
-                
-                if(res.status === 'success') {
-                    this.loginSuccess(res.user);
-                } else {
-                    UI.msg(res.message || 'Login gagal', 'error');
-                }
+                const res = await API.post('login', { username:$('#l-user').val(), password:$('#l-pass').val() });
+                if(res.status==='success') Auth.set(res.user);
+                else if(res.status==='pending') UI.msg('Akun Pending', 'warning');
+                else UI.msg(res.message, 'error');
             },
-            register: async function() {
-                const u = document.getElementById('reg-user').value;
-                const n = document.getElementById('reg-name').value;
-                const p = document.getElementById('reg-pass').value;
-                if(!u || !n || !p) return UI.msg("Lengkapi data", "error");
-
-                const res = await API.post('register', { username: u, fullname: n, password: p });
-                UI.msg(res.message, res.status === 'success' ? 'success' : 'error');
-                if(res.status === 'success') UI.closeModal('modal-register');
+            register: async () => {
+                const u=$('#reg-user').val(), n=$('#reg-name').val(), p=$('#reg-pass').val();
+                if(!u||!n||!p) return UI.msg('Lengkap', 'warning');
+                const res = await API.post('register', { username:u, fullname:n, password:p });
+                UI.msg(res.message, res.status==='success'?'success':'error');
+                if(res.status==='success') UI.close('reg-modal');
             },
-            loginSuccess: function(user) {
-                State.user = user;
-                localStorage.setItem('rs_user', JSON.stringify(user));
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
-                document.getElementById('user-display').innerText = user.name;
-                
-                if(user.role === 'Admin') document.getElementById('menu-admin').classList.remove('hidden');
-                else document.getElementById('menu-admin').classList.add('hidden');
-                
+            set: (u) => {
+                State.user = u;
+                $('#login-screen').hide(); $('#app').show();
+                $('#u-name').text(u.name);
+                if(u.role==='Admin') $('#admin-nav').removeClass('hidden');
                 API.load();
-            },
-            logout: function() {
-                localStorage.removeItem('rs_user');
-                location.reload();
-            },
-            approve: async function(username) {
-                if(!confirm("Approve user ini?")) return;
-                const res = await API.post('approve_user', { adminRole: State.user.role, targetUsername: username });
-                UI.msg(res.message, res.status === 'success' ? 'success' : 'error');
-                if(res.status === 'success') API.load();
             }
         };
 
-        // ==========================================
-        // LOGIC: WORKFLOW
-        // ==========================================
+        // ========================
+        // LOGIC: WORKFLOW & OPNAME
+        // ========================
         const Workflow = {
-            do: async function() {
-                const id = document.getElementById('wf-id').value;
-                const status = document.getElementById('wf-status').value;
-                if(!id) return UI.msg("Masukkan ID Linen", "warning");
+            click: (id, status) => {
+                State.actItem = { id, status };
+                const form = $('#act-form'); form.html('');
+                $('#act-title').text(id); 
+                $('#act-info').text(`Status Saat Ini: ${status}`);
 
-                const linen = State.data.linen.find(l => l['LinenID'] == id);
-                if(!linen) return UI.msg("ID Linen tidak ditemukan", "error");
+                // Logic Button Generator
+                let btns = '';
+                if(status==='DIRTY' || status==='RECEIVED') {
+                    btns += `<button class="btn btn-primary" style="width:100%; margin-bottom:5px;" onclick="Workflow.conf('WASHING')">Mulai Cuci</button>`;
+                    btns += `<button class="btn btn-outline" style="width:100%;" onclick="Workflow.conf('DAMAGED')">Lapor Rusak</button>`;
+                } else if(status==='WASHING' || status==='FINISHING') {
+                    btns += `<button class="btn btn-primary" style="width:100%; margin-bottom:5px;" onclick="Workflow.conf('READY')">Selesai</button>`;
+                } else if(status==='READY') {
+                    btns += `<select id="dist-unit"><option>Pilih Unit...</option>${State.data.units.map(u=>`<option value="${u.UnitCode}">${u.UnitName}</option>`).join('')}</select>`;
+                    btns += `<button class="btn btn-success" style="width:100%; margin-top:5px;" onclick="Workflow.conf('CLEAN')">Kirim Unit</button>`;
+                } else if(status==='DAMAGED') {
+                    btns = `<p>Tidak ada aksi untuk linen rusak.</p>`;
+                }
+
+                form.html(btns);
+                UI.open('act-modal');
+            },
+            conf: async (toStatus) => {
+                const payload = { linenIds: [State.actItem.id], toStatus, operator: State.user.name };
                 
-                const from = linen['Status(Active/Damage)'] || 'Unknown';
+                if(toStatus === 'WASHING') {
+                    // Pilih Mesin
+                    const machines = State.data.machines.filter(m=>m.Status==='Idle');
+                    if(machines.length===0) return UI.msg('Tidak ada mesin kosong!', 'error');
+                    payload.machineId = prompt("Pilih Mesin:\n" + machines.map(m=>`${m.MachineID} (${m.Name})`).join('\n'), machines[0].MachineID);
+                } else if (toStatus === 'CLEAN') {
+                    payload.targetUnit = $('#dist-unit').val();
+                }
+
+                const res = await API.post('process_workflow', payload);
+                UI.msg(res.message, res.status==='success'?'success':'error');
+                if(res.status==='success') { UI.close('act-modal'); API.load(); }
+            }
+        };
+
+        const Opname = {
+            start: () => {
+                const uCode = $('#op-unit').val();
+                if(!uCode) return;
+                // Filter linen di unit tsb (Simulasi: Cek status CLEAN di lokasi unit)
+                const items = State.data.linen.filter(l => l.CurrentLocation === uCode && l.CurrentStatus === 'CLEAN');
                 
-                const res = await API.post('workflow_process', {
-                    linenId: id, fromStatus: from, toStatus: status,
-                    operator: State.user.name
+                const tbody = $('#op-tbody'); tbody.html('');
+                if(items.length===0) return UI.msg('Tidak ada linen bersih di unit ini', 'warning');
+
+                items.forEach(l => {
+                    tbody.append(`
+                        <tr data-id="${l.LinenID}" data-sys="1">
+                            <td>${l.LinenID}</td><td>${l.Name}</td><td>1</td>
+                            <td><input type="number" class="op-phy" value="1" style="width:60px; padding:5px;"></td>
+                            <td class="op-diff">0</td>
+                        </tr>
+                    `);
                 });
-                UI.msg(res.message, res.status === 'success' ? 'success' : 'error');
-                if(res.status === 'success') API.load();
+                $('#op-workspace').removeClass('hidden');
+            },
+            submit: async () => {
+                const items = [];
+                $('#op-tbody tr').each(function(){
+                    const id = $(this).data('id');
+                    const sys = 1; // Hardcoded for demo (assume 1 pc per ID)
+                    const phy = parseInt($(this).find('.op-phy').val());
+                    items.push({ linenId: id, systemCount: sys, physical: phy });
+                });
+                const res = await API.post('submit_opname', { unit: $('#op-unit').val(), items, auditor: State.user.name });
+                UI.msg(res.message, res.status==='success'?'success':'error');
+                if(res.status==='success') { $('#op-workspace').addClass('hidden'); API.load(); }
             }
         };
 
-        // ==========================================
-        // LOGIC: DATA MANAGER
-        // ==========================================
-        const DataMgr = {
-            add: async function(type) {
-                const container = document.getElementById('add-form-container');
-                container.innerHTML = '';
-                
-                const fields = type === 'linen' 
-                    ? [{id:'id',l:'ID'},{id:'name',l:'Nama'},{id:'cat',l:'Kat'},{id:'w',l:'Berat'},{id:'c',l:'Siklus'}]
-                    : [{id:'name',l:'Nama'},{id:'cat',l:'Kat'},{id:'stock',l:'Stok'},{id:'unit',l:'Unit'},{id:'min',l:'Min'}];
-                
-                fields.forEach(f => container.innerHTML += `<label>${f.l}</label><input id="inp-${f.id}">`);
-                
-                document.getElementById('btn-save-add').onclick = async () => {
-                    const d = {};
-                    fields.forEach(f => d[f.id] = document.getElementById(`inp-${f.id}`).value);
-                    
-                    const action = type === 'linen' ? 'save_linen' : 'save_inventory';
-                    const res = await API.post(action, d);
-                    UI.msg(res.message, res.status === 'success' ? 'success' : 'error');
-                    if(res.status === 'success') { UI.closeModal('modal-add'); API.load(); }
-                };
-                
-                UI.openModal('modal-add');
-            }
-        };
-
-        // ==========================================
-        // UI & APP CONTROLLER
-        // ==========================================
+        // ========================
+        // UI RENDER & UTILS
+        // ========================
         const App = {
-            renderAll: function() {
-                // Stats
-                document.getElementById('stat-linen').innerText = State.data.linen.length;
-                document.getElementById('stat-trans').innerText = State.data.transactions.length;
-                document.getElementById('stat-inv').innerText = State.data.inventory.length;
+            nav: (id) => {
+                $('div[id^="v-"]').hide(); $(`#v-${id}`).show();
+                $('.nav-item').removeClass('active'); $(event.currentTarget).addClass('active');
+            },
+            refresh: () => API.load(),
+            renderAll: () => {
+                // 1. KANBAN
+                const l = State.data.linen;
+                const r = (s) => l.filter(x => ['DIRTY','RECEIVED'].includes(x.CurrentStatus));
+                const p = (s) => l.filter(x => ['WASHING','FINISHING'].includes(x.CurrentStatus));
+                const o = (s) => l.filter(x => ['READY','CLEAN'].includes(x.CurrentStatus));
+                const a = (s) => l.filter(x => ['DAMAGED','MISSING'].includes(x.CurrentStatus));
+                
+                const renderC = (id, data, cls) => {
+                    const el = $(`#${id}`); el.html('');
+                    data.forEach(d => el.append(`<div class="l-card ${cls}" onclick="Workflow.click('${d.LinenID}','${d.CurrentStatus}')"><b>${d.LinenID}</b><br><small>${d.Name}</small></div>`));
+                };
+                renderC('kanban-dirty', r(), 'status-Dirty');
+                renderC('kanban-proc', p(), 'status-Washing');
+                renderC('kanban-out', o(), 'status-Ready');
+                renderC('kanban-alert', a(), 'status-Damaged');
 
-                // Tables
-                this.fill('table-wf', [...State.data.transactions].reverse(), ['Timestamp','LinenID','Tostatus','Operator']);
-                this.fill('table-linen', State.data.linen, ['LinenID','Name','Category','Status(Active/Damage)','CurrentLocation']);
-                this.fill('table-inv', State.data.inventory, ['ItemName','Category','Stock','MinStock']);
-                
-                // Users Table Custom
-                const t = document.getElementById('table-users'); t.innerHTML='';
-                State.data.users.forEach(u => {
-                    let btn = u['Status'] === 'Pending' ? `<button class="btn btn-primary" style="padding:5px 10px; font-size:12px;" onclick="Auth.approve('${u['Username']}')">Approve</button>` : '-';
-                    t.innerHTML += `<tr><td>${u['Username']}</td><td>${u['Fullname']}</td><td>${u['Role']}</td><td>${u['Status']}</td><td>${btn}</td></tr>`;
-                });
-            },
-            fill: function(id, data, keys) {
-                const t = document.getElementById(id); t.innerHTML = '';
-                data.forEach(r => {
-                    let row = '<tr>';
-                    keys.forEach(k => row += `<td>${r[k]||'-'}</td>`);
-                    row += '</tr>';
-                    t.innerHTML += row;
-                });
-                if(data.length===0) t.innerHTML = `<tr><td colspan="${keys.length}" style="text-align:center">Data Kosong</td></tr>`;
-            },
-            go: function(view) {
-                document.querySelectorAll('div[id^="view-"]').forEach(e => e.classList.add('hidden'));
-                document.getElementById('view-'+view).classList.remove('hidden');
-                
-                document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-                event.currentTarget.classList.add('active');
-                
-                document.getElementById('page-title').innerText = view.charAt(0).toUpperCase() + view.slice(1);
-            },
-            openAdd: function() {
-                const v = document.querySelector('div[id^="view-"]:not(.hidden)').id.replace('view-','');
-                if(v === 'linen') DataMgr.add('linen');
-                else if(v === 'inventory') DataMgr.add('inventory');
-                else UI.msg("Tambah data hanya tersedia di menu Linen/Inventory", "warning");
+                // Badges
+                $('#c-dirty').text(r().length); $('#c-proc').text(p().length); $('#c-out').text(o().length);
+
+                // 2. INVENTORY
+                const i = State.data.inventory;
+                $('#inv-tbody').html(i.map(x=>`<tr><td>${x.ItemName}</td><td>${x.Category}</td><td style="${x.Stock<x.MinStock?'color:red;font-weight:bold':''}">${x.Stock}</td><td>${x.Unit}</td><td>${x.Stock<x.MinStock?'LOW':'OK'}</td></tr>`).join(''));
+
+                // 3. MACHINES
+                $('#mach-tbody').html(State.data.machines.map(x=>`<tr><td>${x.MachineID}</td><td>${x.Name}</td><td>${x.Capacity}</td><td><span class="badge ${x.Status==='Running'?'bg-blue':'bg-green'}">${x.Status}</span></td><td><button class="btn btn-sm btn-outline">Log</button></td></tr>`).join(''));
+
+                // 4. UNITS DROPDOWN
+                $('#op-unit').html('<option>Pilih Unit...</option>' + State.data.units.map(u=>`<option value="${u.UnitCode}">${u.UnitName}</option>`).join(''));
             }
         };
 
         const UI = {
-            openModal: function(id) { document.getElementById(id).classList.add('active'); },
-            closeModal: function(id) { document.getElementById(id).classList.remove('active'); },
-            msg: function(txt, type='info') { // No Undefined Fix
-                const t = document.createElement('div');
-                t.className = `toast ${type}`;
-                t.innerText = txt || "Terjadi kesalahan sistem."; 
-                document.getElementById('toast-box').appendChild(t);
-                setTimeout(() => t.remove(), 3000);
-            },
-            loading: function(show) {
-                if(show) {
-                    const l = document.createElement('div');
-                    l.id = 'loader'; l.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);z-index:999;display:flex;align-items:center;justify-content:center;font-weight:bold;";
-                    l.innerText = "Processing...";
-                    document.body.appendChild(l);
-                } else document.getElementById('loader')?.remove();
-            }
+            load: (s) => s? $('#loading').show():$('#loading').remove(),
+            msg: (t,ty) => { const c=$('<div>').addClass('toast').css({position:'fixed',bottom:20,right:20,background:ty==='error'?'red':ty==='success'?'green':'blue',color:'white',padding:10,margin:5}).text(t); $('body').append(c); setTimeout(()=>c.remove(),3000); },
+            open: (id) => $(`#${id}`).addClass('active'),
+            close: (id) => $(`#${id}`).removeClass('active')
         };
 
         // INIT
-        document.getElementById('form-login').onsubmit = (e) => Auth.login(e);
-        window.onload = () => Auth.init();
+        $('#form-login').on('submit', Auth.login);
     </script>
 </body>
 </html>
