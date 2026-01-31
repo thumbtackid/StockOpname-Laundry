@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RS Charlie Laundry System</title>
     
-    <!-- 1. LIBRARIES (WAJIB ADA) -->
+    <!-- 1. LIBRARIES -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -51,6 +51,7 @@
         .login-box { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
         .hidden { display: none !important; }
         
+        /* MODAL */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; }
@@ -115,6 +116,7 @@
                 </div>
                 
                 <div class="kanban">
+                    <!-- COLUMN 1: INBOUND -->
                     <div class="kanban-col">
                         <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
                             <span style="color: var(--danger);"><i class="fas fa-inbox"></i> INBOUND</span>
@@ -123,6 +125,7 @@
                         <div id="k-inbound" class="kanban-cards"></div>
                     </div>
                     
+                    <!-- COLUMN 2: PROCESS -->
                     <div class="kanban-col">
                         <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
                             <span style="color: var(--warning);"><i class="fas fa-tshirt"></i> PROCESS</span>
@@ -131,6 +134,7 @@
                         <div id="k-process" class="kanban-cards"></div>
                     </div>
 
+                    <!-- COLUMN 3: OUTBOUND -->
                     <div class="kanban-col">
                         <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
                             <span style="color: var(--success);"><i class="fas fa-check-circle"></i> OUTBOUND</span>
@@ -139,6 +143,7 @@
                         <div id="k-outbound" class="kanban-cards"></div>
                     </div>
                     
+                    <!-- COLUMN 4: ALERTS -->
                     <div class="kanban-col" style="background: #fff1f2;">
                         <div style="font-weight: 700; margin-bottom: 10px; color: #be123c;">
                             <i class="fas fa-exclamation-triangle"></i> ALERTS
@@ -148,7 +153,7 @@
                 </div>
             </div>
 
-            <!-- VIEW: OPNAME -->
+            <!-- VIEW: STOCK OPNAME -->
             <div id="view-opname" class="hidden">
                 <div class="card">
                     <h3>Stock Opname (Audit)</h3>
@@ -238,17 +243,11 @@
     <script>
         // ================= CONFIG =================
         const CONFIG = {
-            // PASTE URL WEB APP KAMU DI SINI (Sudah benar ya?)
+            // PASTE URL WEB APP BARU (HASIL DEPLOY DARI KODE BACKEND TADI) DI SINI
             SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxL3d88GrbIv7iCpJu_IR2JPvV-SNmuUnxNPuwimlJe43XjV43wHnFuNECParQw3sPOFQ/exec"
         };
 
         const State = { user: null, data: {} };
-
-        // ================= ERROR HANDLER GLOBAL =================
-        window.onerror = function(message, source, lineno, colno, error) {
-            document.body.innerHTML = `<div class="error-box"><h1 style="color:red">FATAL ERROR</h1><p>${message}</p><p>Line: ${lineno}</p></div>`;
-            alert("System Error: " + message);
-        };
 
         // ================= API HELPERS =================
         const API = {
@@ -288,6 +287,7 @@
                     if(res.user.role === 'Admin') $('#adminMenu').removeClass('hidden');
                     App.loadData();
                 } else {
+                    // Tampilkan pesan error jelas dari backend
                     UI.toast(res.message || "Login Gagal", "error");
                 }
             },
@@ -311,11 +311,11 @@
                 State.actItem = { id, status };
                 const form = $('#actForm');
                 form.html('');
-                $('#actTitle').text(id); 
+                $('#actTitle').text(id);
                 $('#actInfo').text(`Status Sekarang: ${status}`);
 
                 let html = '';
-                // Logic tombol berdasarkan status (Case Insensitive)
+                // Logic Button berdasarkan Status (Case Insensitive)
                 const s = String(status).toUpperCase();
                 if(s.includes('DIRTY') || s.includes('RECEIVED')) {
                     html += `<button class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="Workflow.conf('WASHING')">Mulai Cuci (Washing)</button>`;
@@ -328,21 +328,31 @@
                 }
 
                 form.html(html);
+                // Populate Units jika perlu
                 if(s.includes('READY')) {
                     const opts = (State.data.units || []).map(u => `<option value="${u.UnitCode}">${u.UnitName}</option>`).join('');
                     $('#distUnit').append(opts);
                 }
+
                 UI.openModal('actionModal');
             },
             conf: async function(nextStatus) {
-                const payload = { linenIds: [State.actItem.id], toStatus: nextStatus, operator: State.user.name };
-                
+                const payload = {
+                    linenIds: [State.actItem.id],
+                    toStatus: nextStatus,
+                    operator: State.user.name
+                };
+
                 if(nextStatus === 'WASHING') {
+                    // Pilih Mesin
                     const machines = (State.data.machines || []).filter(m => String(m.Status).toUpperCase().includes('IDLE'));
                     if(machines.length === 0) return UI.toast("Tidak ada mesin kosong!", "error");
+                    
+                    // Prompt sederhana
                     const mId = prompt("Pilih Mesin ID:\n" + machines.map(m=>`${m.MachineID} - ${m.Name}`).join('\n'), machines[0].MachineID);
                     if(!mId) return;
                     payload.machineId = mId;
+
                 } else if (nextStatus === 'CLEAN') {
                     const uCode = $('#distUnit').val();
                     if(!uCode) return UI.toast("Pilih Unit Tujuan!", "warning");
@@ -365,9 +375,10 @@
                 const uCode = $('#opUnitSelect').val();
                 if(!uCode) return UI.toast("Pilih Unit dulu", "warning");
 
-                // Filter data dengan Safety Check
+                // Filter linen di unit tsb (Safe check)
                 const items = (State.data.linen || []).filter(l => String(l.CurrentLocation) === uCode && String(l.CurrentStatus).toUpperCase().includes('CLEAN'));
-                const tbody = $('#opTableBody'); tbody.html('');
+                const tbody = $('#opTableBody');
+                tbody.html('');
 
                 if(items.length === 0) return UI.toast("Tidak ada linen bersih di unit ini", "info");
 
@@ -387,12 +398,13 @@
             submit: async function() {
                 const items = [];
                 $('#opTableBody tr').each(function(){
-                    items.push({ 
-                        linenId: $(this).data('id'), 
-                        systemCount: 1,
-                        physical: parseInt($(this).find('.op-phy').val()) 
+                    items.push({
+                        linenId: $(this).data('id'),
+                        systemCount: 1, // Simplifikasi
+                        physical: parseInt($(this).find('.op-phy').val())
                     });
                 });
+
                 const res = await API.post('submit_opname', {
                     unit: $('#opUnitSelect').val(),
                     items: items,
@@ -407,7 +419,7 @@
             }
         };
 
-        // ================= APP CONTROLLER (FIXED RENDER) =================
+        // ================= APP CONTROLLER (SOLID RENDER) =================
         const App = {
             nav: function(id) {
                 $('div[id^="view-"]').hide();
@@ -423,15 +435,14 @@
                     this.render();
                 } else {
                     UI.toast("Gagal Load Data", "error");
-                    alert("Error Load Data: " + res.message);
+                    console.error("Load Error:", res);
                 }
             },
             render: function() {
                 try {
-                    console.log("Start Rendering...");
                     const l = State.data.linen || [];
                     
-                    // --- RENDER KANBAN ---
+                    // Helper Render Kanban
                     const renderCard = (id, data, cls) => {
                         const el = $(`#${id}`); el.html('');
                         if(data.length === 0) {
@@ -439,14 +450,14 @@
                             return;
                         }
                         data.forEach(d => {
-                            // Escape Character HTML
+                            // Escape Single Quote
                             const safeName = (d.Name || '').replace(/'/g, "&#39;");
                             const safeStatus = (d.CurrentStatus || '').replace(/'/g, "&#39;");
                             el.append(`<div class="l-card ${cls}" onclick="Workflow.click('${d.LinenID}','${safeStatus}')"><b>${d.LinenID}</b><br><small>${safeName}</small></div>`);
                         });
                     };
 
-                    // Filter Status (Case Insensitive Safety)
+                    // Filter Logic (Case Insensitive)
                     const dirty = l.filter(x => {
                         const s = String(x.CurrentStatus || '').toUpperCase();
                         return s.includes('DIRTY') || s.includes('RECEIVED');
@@ -467,9 +478,7 @@
                     $('#c-process').text(proc.length);
                     $('#c-outbound').text(out.length);
 
-                    // --- RENDER TABLES ---
-                    
-                    // Inventory
+                    // Inventory Table (Safe check)
                     $('#invTableBody').html((State.data.inventory || []).map(x => `
                         <tr>
                             <td>${x.ItemName}</td><td>${x.Category}</td>
@@ -479,7 +488,7 @@
                         </tr>
                     `).join(''));
 
-                    // Machines
+                    // Machine Table (Safe check)
                     $('#machTableBody').html((State.data.machines || []).map(x => `
                         <tr>
                             <td>${x.MachineID}</td><td>${x.Name}</td><td>${x.Capacity}</td>
@@ -488,7 +497,7 @@
                         </tr>
                     `).join(''));
 
-                    // Users
+                    // User Table (Admin)
                     $('#userTableBody').html((State.data.users || []).map(u => `
                         <tr>
                             <td>${u.Username}</td><td>${u.Fullname}</td><td>${u.Role}</td><td>${u.Status}</td>
@@ -496,14 +505,12 @@
                         </tr>
                     `).join(''));
 
-                    // Units Select
+                    // Unit Select
                     $('#opUnitSelect').html('<option value="">-- Pilih Unit --</option>' + (State.data.units || []).map(u => `<option value="${u.UnitCode}">${u.UnitName}</option>`).join(''));
-
-                    console.log("Rendering Complete.");
 
                 } catch (e) {
                     console.error("Render Error:", e);
-                    alert("Gagal Menampilkan Tampilan!\n\nError: " + e.message + "\n\nCek Console (F12) untuk detail.");
+                    UI.toast("Gagal Menampilkan Tampilan: " + e.message, "error");
                 }
             }
         };
@@ -522,6 +529,7 @@
                 else $('body').css('cursor', 'default');
             },
             toast: function(msg, type) { 
+                const t=$('#toast'); if(t.length) t.remove();
                 const c=document.createElement('div');
                 c.className='toast';
                 c.style.cssText=`position:fixed;bottom:20px;right:20px;background:${type==='error'?'#ef4444':type==='success'?'#22c55e':'#f59e0b'};color:white;padding:12px 20px;border-radius:8px;z-index:10000;animation:slide 0.3s;`;
