@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RS Charlie Laundry System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PUSTAKA (LIBRARIES) -->
+    <!-- 1. Font Awesome (Untuk Ikon) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 2. Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 3. JQUERY (Wajib untuk kode ini berjalan!) -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
     <style>
         :root {
             --primary: #0ea5e9; --dark: #0f172a; --bg: #f8fafc; --surface: #ffffff;
@@ -247,7 +254,7 @@
     <script>
         // ================= CONFIG =================
         const CONFIG = {
-            // GANTI INI DENGAN URL WEB APP KAMU DARI LANGKAH 2
+            // GANTI INI DENGAN URL WEB APP KAMU (PASTIKAN BENAR!)
             SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxjfQUFSwd30Cw4EhtuFN0Kj_kMcUL_nlyizW6NXsnR0WzNOUCUvwt6Ro0a-EaJPfjtjQ/exec"
         };
 
@@ -485,8 +492,7 @@
                 // User Table (Admin)
                 $('#userTableBody').html(State.data.users.map(u => `
                     <tr>
-                        <td>${u.Username}</td><td>${u.Fullname}</td><td>${u.Role}</td>
-                        <td>${u.Status}</td>
+                        <td>${u.Username}</td><td>${u.Fullname}</td><td>${u.Role}</td><td>${u.Status}</td>
                         <td>${u.Status==='Pending' ? '<button class="btn btn-sm btn-primary" onclick="approveUser(\''+u.Username+'\')">Approve</button>' : '-'}</td>
                     </tr>
                 `).join(''));
@@ -533,23 +539,18 @@
                 .catch(e => {
                     UI.loading(false);
                     alert("Koneksi GAGAL: " + e.message + "\nPastikan URL sudah benar.");
+                    console.error(e);
                 });
         }
 
         // State Global untuk Modal
         State.actItem = null;
-        $(document).on('click', '.l-card', function(e) {
-            // Capture item logic handled in inline onclick
-        });
-        $('#btnActSubmit').on('click', function() {
-            // Dummy click handler, actual logic in Workflow.conf triggers via inline onclick
-        });
 
         // Event Listeners
-        $('#loginForm').on('submit', Auth.login);
+        $(document).ready(function() {
+            $('#loginForm').on('submit', Auth.login);
+        });
 
     </script>
 </body>
 </html>
-
-
