@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistem Manajemen Laundry RS Charlie (Enterprise)</title>
+    <title>Sistem Laundry RS Charlie (Live Backend)</title>
     
-    <!-- External Assets (CDN) -->
+    <!-- External Assets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        /* --- 1. CSS VARIABLES & RESET --- */
         :root {
             --primary: #0284c7; --primary-dark: #0369a1; --primary-light: #e0f2fe;
             --secondary: #64748b; --secondary-light: #f1f5f9;
@@ -22,133 +21,67 @@
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --radius: 12px;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); font-size: 14px; height: 100vh; overflow: hidden; }
         
-        body { 
-            font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); 
-            font-size: 14px; line-height: 1.5; height: 100vh; overflow: hidden; 
-        }
-
-        /* --- 2. LOGIN SCREEN --- */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            z-index: 9999; display: flex; justify-content: center; align-items: center;
-        }
-        .login-card {
-            background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center;
-        }
-        .login-logo { font-size: 3rem; color: var(--primary); margin-bottom: 20px; }
-
-        /* --- 3. LAYOUT UTAMA --- */
+        /* Layout */
         .app-layout { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+        .sidebar { background: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 50; }
+        .main-content { overflow-y: auto; height: 100%; padding: 20px; }
         
-        /* Sidebar */
-        .sidebar { 
-            background: var(--bg-surface); border-right: 1px solid var(--border); 
-            display: flex; flex-direction: column; height: 100%; z-index: 50;
-        }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-        .sidebar-header h2 { font-size: 1.2rem; color: var(--primary-dark); font-weight: 800; }
-        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 10px; }
-        
-        .nav-category { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin: 15px 10px 5px; letter-spacing: 0.5px; }
-        .nav-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-            color: var(--text-muted); text-decoration: none; border-radius: 8px;
-            margin-bottom: 2px; transition: all 0.2s; cursor: pointer;
-        }
-        .nav-item:hover { background: var(--secondary-light); color: var(--primary); }
-        .nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
-        .nav-item i { width: 20px; text-align: center; }
-
-        .user-profile { padding: 15px; border-top: 1px solid var(--border); background: var(--secondary-light); display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Main Content */
-        .main-content { overflow-y: auto; height: 100%; padding: 20px; display: flex; flex-direction: column; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        h1.page-title { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
-
-        /* --- 4. COMPONENTS --- */
+        /* Components */
         .card { background: var(--bg-surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .stat-card { display: flex; align-items: center; gap: 15px; }
-        .stat-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
-        .stat-info h3 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
-        .stat-info p { font-size: 0.85rem; color: var(--text-muted); }
-
+        .btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn:hover { opacity: 0.9; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 500; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
+        
         /* Tables */
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; background: #f8fafc; white-space: nowrap; }
-        td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.9rem; }
-        tr:hover { background: #fdfdfd; }
-
-        /* Forms & Buttons */
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
-        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; transition: border 0.2s; }
-        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-        
-        .btn { padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 0.9rem; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-        .btn:hover { filter: brightness(90%); opacity: 0.9; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; font-weight: 600; color: var(--text-muted); }
 
         /* Badges */
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
         .bg-success-light { background: var(--success-bg); color: var(--success-text); }
-        .bg-warning-light { background: var(--warning-bg); color: var(--warning-text); }
         .bg-danger-light { background: var(--danger-bg); color: var(--danger-text); }
-        .bg-info-light { background: var(--primary-light); color: var(--primary-dark); }
-        .bg-secondary { background: var(--secondary-light); color: var(--text-muted); }
+        .bg-warning-light { background: var(--warning-bg); color: var(--warning-text); }
 
-        /* --- 5. UTILS & MODALS --- */
+        /* Screens */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .login-card { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
         .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-between { justify-content: space-between; }
-        .items-center { align-items: center; }
-        .text-center { text-align: center; }
+
+        /* Navigation */
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; }
         
-        #loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9); z-index: 2000; display: none;
-            justify-content: center; align-items: center; flex-direction: column;
-        }
-        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 1000; display: none;
-            justify-content: center; align-items: center; backdrop-filter: blur(2px);
-        }
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal.active { display: flex; }
-        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 12px; padding: 24px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-
+        .modal-content { background: white; padding: 24px; border-radius: 12px; width: 100%; max-width: 500px; }
+        
         /* Toast */
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; animation: slideIn 0.3s; display: flex; align-items: center; gap: 10px; min-width: 250px; box-shadow: var(--shadow); }
-        .toast.success { background: var(--success); }
-        .toast.error { background: var(--danger); }
-        .toast.info { background: var(--primary); }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #333; color: white; padding: 12px 20px; border-radius: 8px; animation: slideIn 0.3s; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        /* --- 6. RESPONSIVE --- */
+        /* Stats Grid */
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { padding: 20px; background: white; border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
+        .stat-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        
+        /* Responsive */
         @media (max-width: 768px) {
             .app-layout { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; left: -260px; width: 260px; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+            .sidebar { position: fixed; left: -260px; height: 100%; transition: 0.3s; }
             .sidebar.active { left: 0; }
-            .main-content { padding: 15px; padding-top: 70px; }
-            #mobile-header { display: flex; padding: 15px; background: white; border-bottom: 1px solid var(--border); position: fixed; top: 0; width: 100%; z-index: 40; justify-content: space-between; align-items: center; }
         }
-        @media (min-width: 769px) { #mobile-header { display: none; } }
     </style>
 </head>
 <body>
@@ -156,119 +89,73 @@
     <!-- LOGIN SCREEN -->
     <section id="login-screen">
         <div class="login-card">
-            <div class="login-logo"><i class="fas fa-hospital-alt"></i></div>
-            <h2 style="margin-bottom: 5px; color: var(--primary-dark);">Sistem Laundry RS</h2>
-            <p style="color: var(--text-muted); margin-bottom: 30px;">RS Charlie Enterprise Edition</p>
+            <h2 style="color: var(--primary); margin-bottom: 20px;">RS Charlie Laundry</h2>
             
+            <!-- Login Form -->
             <form id="loginForm">
-                <div class="form-group" style="text-align: left;">
-                    <label>Username</label>
-                    <input type="text" id="username" placeholder="Farhan" value="Farhan">
+                <div class="form-group">
+                    <input type="text" id="login-username" placeholder="Username" required>
                 </div>
-                <div class="form-group" style="text-align: left;">
-                    <label>Password</label>
-                    <input type="password" id="password" placeholder="123Farhan" value="123Farhan">
+                <div class="form-group">
+                    <input type="password" id="login-password" placeholder="Password" required>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">MASUK SISTEM</button>
+                <button type="submit" class="btn btn-primary" style="width:100%">Masuk</button>
             </form>
-            <p style="margin-top: 20px; font-size: 0.8rem; color: var(--text-muted);">V6.0 Enterprise Build</p>
+            
+            <p style="margin: 20px 0; color: var(--text-muted);">— atau —</p>
+            
+            <!-- Register Button -->
+            <button class="btn btn-outline" style="width:100%" onclick="UI.showModal('modal-register')">Daftar Akun Baru</button>
         </div>
     </section>
 
     <!-- MAIN APP -->
     <div class="app-layout hidden" id="main-app">
-        <!-- Mobile Header -->
-        <header id="mobile-header">
-            <button class="btn btn-outline btn-sm" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-            <h3>RS Charlie Laundry</h3>
-            <div class="avatar-small"><i class="fas fa-user-circle"></i></div>
-        </header>
-
-        <!-- Sidebar Navigation -->
         <nav class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <i class="fas fa-hospital fa-lg" style="color: var(--primary);"></i>
-                <h2>Laundry RS</h2>
+            <div style="padding: 20px; border-bottom: 1px solid var(--border); font-weight: 700; color: var(--primary);">
+                <i class="fas fa-hospital-alt"></i> Laundry RS
             </div>
-            
-            <div class="nav-menu">
-                <div class="nav-category">Utama</div>
-                <a class="nav-item active" onclick="App.nav('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</a>
-                <a class="nav-item" onclick="App.nav('workflow')"><i class="fas fa-tasks"></i> Workflow Proses</a>
+            <div style="padding: 10px;">
+                <div class="nav-item active" onclick="App.nav('dashboard')"><i class="fas fa-home"></i> Dashboard</div>
+                <div class="nav-item" onclick="App.nav('workflow')"><i class="fas fa-tasks"></i> Workflow</div>
+                <div class="nav-item" onclick="App.nav('linen')"><i class="fas fa-layer-group"></i> Master Linen</div>
+                <div class="nav-item" onclick="App.nav('unit')"><i class="fas fa-building"></i> Unit RS</div>
+                <div class="nav-item" onclick="App.nav('inventory')"><i class="fas fa-boxes"></i> Inventory</div>
                 
-                <div class="nav-category">Master Data</div>
-                <a class="nav-item" onclick="App.nav('linen')"><i class="fas fa-layer-group"></i> Master Linen</a>
-                <a class="nav-item" onclick="App.nav('unit')"><i class="fas fa-procedures"></i> Unit RS</a>
-                <a class="nav-item" onclick="App.nav('machine')"><i class="fas fa-cogs"></i> Mesin Laundry</a>
-                <a class="nav-item" onclick="App.nav('inventory')"><i class="fas fa-flask"></i> Inventory Bahan</a>
-                
-                <div class="nav-category">Laporan & Log</div>
-                <a class="nav-item" onclick="App.nav('audit')"><i class="fas fa-shield-alt"></i> Audit Log Transaksi</a>
-            </div>
-
-            <div class="user-profile">
-                <div>
-                    <div style="font-weight: 700;" id="user-display-name">Admin</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);" id="user-role-display">Administrator</div>
+                <!-- Hanya muncul untuk Admin -->
+                <div id="admin-menu" class="hidden">
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid var(--border);">
+                    <small style="padding: 0 20px; color: var(--text-muted);">ADMIN AREA</small>
+                    <div class="nav-item" onclick="App.nav('users')"><i class="fas fa-users-cog"></i> Manajemen User</div>
                 </div>
-                <button class="btn btn-sm btn-danger" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+            <div style="margin-top: auto; padding: 20px; border-top: 1px solid var(--border);">
+                <div id="user-info">Loading...</div>
+                <button class="btn btn-outline btn-sm" style="margin-top: 10px;" onclick="Auth.logout()">Logout</button>
             </div>
         </nav>
 
-        <!-- Main Content Area -->
         <main class="main-content">
-            <header>
-                <h1 class="page-title" id="page-title">Dashboard</h1>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-outline btn-sm" onclick="App.sync()"><i class="fas fa-sync-alt"></i> Sync Cloud</button>
-                    <button class="btn btn-primary btn-sm" id="btn-add-action" onclick="App.actionAdd()"><i class="fas fa-plus"></i> Tambah Data</button>
-                </div>
+            <header style="margin-bottom: 20px; display: flex; justify-content: space-between;">
+                <h2 id="page-title">Dashboard</h2>
+                <button class="btn btn-primary" onclick="App.openAddModal()"><i class="fas fa-plus"></i> Tambah Data</button>
             </header>
 
-            <!-- VIEWS CONTAINER -->
             <div id="views">
                 <!-- 1. DASHBOARD -->
                 <section id="view-dashboard" class="view-section">
                     <div class="grid-4">
-                        <div class="card stat-card">
+                        <div class="stat-card">
                             <div class="stat-icon bg-success-light text-success"><i class="fas fa-tshirt"></i></div>
-                            <div class="stat-info"><h3 id="stat-linen-ok">0</h3><p>Linen Aktif</p></div>
+                            <div><h3 id="stat-linen">0</h3><p>Total Linen</p></div>
                         </div>
-                        <div class="card stat-card">
-                            <div class="stat-icon bg-warning-light text-warning"><i class="fas fa-clock"></i></div>
-                            <div class="stat-info"><h3 id="stat-process">0</h3><p>Sedang Diproses</p></div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-warning-light text-warning"><i class="fas fa-sync"></i></div>
+                            <div><h3 id="stat-trans">0</h3><p>Transaksi</p></div>
                         </div>
-                        <div class="card stat-card">
-                            <div class="stat-icon bg-danger-light text-danger"><i class="fas fa-first-aid"></i></div>
-                            <div class="stat-info"><h3 id="stat-infected">0</h3><p>Unit Infeksius</p></div>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-icon bg-info-light text-info"><i class="fas fa-box-open"></i></div>
-                            <div class="stat-info"><h3 id="stat-low-stock">0</h3><p>Stok Menipis</p></div>
-                        </div>
-                    </div>
-
-                    <div class="grid-4" style="grid-template-columns: 2fr 1fr;">
-                        <div class="card">
-                            <h3><i class="fas fa-chart-bar"></i> Aktivitas Mencuci (Overview)</h3>
-                            <div style="height: 200px; display: flex; align-items: flex-end; justify-content: space-around; padding-top: 20px;">
-                                <div class="bar" style="width: 10%; height: 60%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Senin"></div>
-                                <div class="bar" style="width: 10%; height: 80%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Selasa"></div>
-                                <div class="bar" style="width: 10%; height: 40%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Rabu"></div>
-                                <div class="bar" style="width: 10%; height: 90%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Kamis"></div>
-                                <div class="bar" style="width: 10%; height: 50%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Jumat"></div>
-                                <div class="bar" style="width: 10%; height: 70%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Sabtu"></div>
-                                <div class="bar" style="width: 10%; height: 30%; background: var(--primary); border-radius: 4px 4px 0 0;" title="Minggu"></div>
-                            </div>
-                            <div class="flex-between" style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted);">
-                                <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Peringatan Stok</h3>
-                            <ul id="dashboard-warnings" style="list-style: none; margin-top: 15px; font-size: 0.9rem;">
-                                <!-- Populated by JS -->
-                            </ul>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-danger-light text-danger"><i class="fas fa-box"></i></div>
+                            <div><h3 id="stat-inv">0</h3><p>Item Inventory</p></div>
                         </div>
                     </div>
                 </section>
@@ -276,55 +163,27 @@
                 <!-- 2. WORKFLOW -->
                 <section id="view-workflow" class="view-section hidden">
                     <div class="card">
-                        <h3><i class="fas fa-random"></i> Pemindahan Status Linen</h3>
-                        <div class="form-group flex-between items-center" style="background: #f8fafc; padding: 15px; border-radius: 8px; flex-wrap: wrap; gap:10px;">
-                            <div style="flex: 1; min-width: 200px;">
-                                <label>Scan/Input ID Linen</label>
-                                <input type="text" id="wf-linen-id" placeholder="Contoh: SET-ICU-01" list="linen-list">
-                                <datalist id="linen-list"></datalist>
-                            </div>
-                            <div style="flex: 1; min-width: 200px;">
-                                <label>Pindah Status Ke:</label>
-                                <select id="wf-target-status">
-                                    <option value="" disabled selected>-- Pilih Proses --</option>
-                                    <optgroup label="Inbound (Masuk)">
-                                        <option value="Di Laundry">Di Laundry (Terima)</option>
-                                        <option value="Sortir Infeksius">Sortir Infeksius</option>
-                                        <option value="Sortir Non-Infeksius">Sortir Non-Infeksius</option>
-                                        <option value="Sortir Bedah">Sortir Bedah</option>
-                                    </optgroup>
-                                    <optgroup label="Processing (Cuci)">
-                                        <option value="Cuci">Cuci (Washing)</option>
-                                        <option value="Pengeringan">Pengeringan (Drying)</option>
-                                        <option value="Setrika">Setrika (Ironing)</option>
-                                        <option value="Pelipatan">Pelipatan (Folding)</option>
-                                    </optgroup>
-                                    <optgroup label="Outbound (Keluar)">
-                                        <option value="Siap Distribusi">Siap Distribusi</option>
-                                        <option value="Di Unit">Di Unit (Dikirim)</option>
-                                    </optgroup>
-                                    <optgroup label="Quality Control">
-                                        <option value="Inspeksi">Inspeksi</option>
-                                        <option value="Rusak Ringan">Rusak Ringan</option>
-                                        <option value="Gudang Rusak">Gudang Rusak</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-                            <div style="flex: 0 0 150px; min-width: 150px;">
-                                <label>Petugas</label>
-                                <input type="text" id="wf-operator" value="Operator" readonly style="background: #e2e8f0;">
-                            </div>
-                            <div style="flex: 0 0 100px; margin-top: 24px;">
-                                <button class="btn btn-primary" style="width:100%" onclick="Workflow.processStep()"><i class="fas fa-arrow-right"></i> Proses</button>
-                            </div>
+                        <h3>Input Proses Laundry</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px;">
+                            <input type="text" id="wf-id" placeholder="ID Linen (cth: SET-ICU-01)">
+                            <select id="wf-status">
+                                <option value="Di Laundry">Terima (Di Laundry)</option>
+                                <option value="Sortir Infeksius">Sortir Infeksius</option>
+                                <option value="Sortir Non-Infeksius">Sortir Non-Infeksius</option>
+                                <option value="Cuci">Cuci</option>
+                                <option value="Pengeringan">Pengeringan</option>
+                                <option value="Setrika">Setrika</option>
+                                <option value="Siap Distribusi">Siap Distribusi</option>
+                                <option value="Di Unit">Kirim ke Unit</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="Workflow.submit()">Proses</button>
                         </div>
                     </div>
-
                     <div class="card">
-                        <h3>Riwayat Proses Hari Ini</h3>
+                        <h3>Riwayat Transaksi</h3>
                         <div class="table-responsive">
-                            <table id="table-workflow-log">
-                                <thead><tr><th>Waktu</th><th>ID Linen</th><th>Nama Linen</th><th>Status Dari -> Ke</th><th>Petugas</th></tr></thead>
+                            <table id="table-transactions">
+                                <thead><tr><th>Waktu</th><th>Linen ID</th><th>Status</th><th>Petugas</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
@@ -334,455 +193,436 @@
                 <!-- 3. MASTER LINEN -->
                 <section id="view-linen" class="view-section hidden">
                     <div class="card">
+                        <h3>Data Linen</h3>
                         <div class="table-responsive">
                             <table id="table-linen">
-                                <thead><tr><th>LinenID</th><th>Name</th><th>Kategori</th><th>Berat Std</th><th>Siklus</th><th>Status</th><th>Lokasi</th></tr></thead>
+                                <thead><tr><th>ID</th><th>Nama</th><th>Kategori</th><th>Status</th><th>Lokasi</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- 4. UNIT RS -->
+                <!-- 4. UNIT & INVENTORY (Generic Table) -->
                 <section id="view-unit" class="view-section hidden">
                     <div class="card">
+                        <h3>Data Unit RS</h3>
                         <div class="table-responsive">
                             <table id="table-unit">
-                                <thead><tr><th>Kode</th><th>Nama Unit</th><th>Tipe</th><th>Kontak PIC</th><th>Aksi</th></tr></thead>
+                                <thead><tr><th>Kode</th><th>Nama</th><th>Tipe</th><th>Kontak</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
-
-                <!-- 5. MESIN -->
-                <section id="view-machine" class="view-section hidden">
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table id="table-machine">
-                                <thead><tr><th>MachineID</th><th>Nama Mesin</th><th>Tipe</th><th>Kap. (Kg)</th><th>Status</th><th>Maintenance</th><th>Aksi</th></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 6. INVENTORY -->
+                
                 <section id="view-inventory" class="view-section hidden">
                     <div class="card">
+                        <h3>Data Inventory</h3>
                         <div class="table-responsive">
                             <table id="table-inventory">
-                                <thead><tr><th>Nama Item</th><th>Kategori</th><th>Stok</th><th>Unit</th><th>Min. Stok</th><th>Status</th><th>Aksi</th></tr></thead>
+                                <thead><tr><th>Nama</th><th>Kategori</th><th>Stok</th><th>Min</th><th>Status</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- 7. AUDIT -->
-                <section id="view-audit" class="view-section hidden">
+                <!-- 5. USER MANAGEMENT (ADMIN ONLY) -->
+                <section id="view-users" class="view-section hidden">
                     <div class="card">
-                        <h3><i class="fas fa-history"></i> Log Aktivitas Sistem</h3>
+                        <h3>Manajemen Pengguna</h3>
                         <div class="table-responsive">
-                            <table id="table-audit">
-                                <thead><tr><th>Timestamp</th><th>User</th><th>Role</th><th>Aksi</th><th>Detail</th></tr></thead>
+                            <table id="table-users">
+                                <thead><tr><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
                                 <tbody></tbody>
                             </table>
                         </div>
                     </div>
                 </section>
-
             </div>
         </main>
     </div>
 
-    <!-- GENERIC MODAL -->
-    <div class="modal" id="generic-modal">
+    <!-- MODALS -->
+    <!-- Modal Register -->
+    <div class="modal" id="modal-register">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Form Data</h3>
-                <button class="btn btn-sm btn-outline" onclick="UI.closeModal()"><i class="fas fa-times"></i></button>
+            <h3>Registrasi Akun Baru</h3>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="reg-user">
             </div>
-            <div id="modal-body">
-                <!-- Dynamic Content -->
+            <div class="form-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="reg-name">
             </div>
-            <div style="margin-top: 20px; text-align: right;">
-                <button class="btn btn-outline" onclick="UI.closeModal()">Batal</button>
-                <button class="btn btn-primary" id="modal-save-btn">Simpan</button>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="reg-pass">
+            </div>
+            <div style="text-align: right;">
+                <button class="btn btn-outline" onclick="UI.closeModal('modal-register')">Batal</button>
+                <button class="btn btn-primary" onclick="Auth.register()">Daftar</button>
             </div>
         </div>
     </div>
 
-    <!-- UTILS: LOADING & TOAST -->
-    <div id="loading-overlay"><div class="spinner"></div><p style="margin-top:15px; font-weight:600;">Memproses...</p></div>
+    <!-- Modal Add Data (Generic) -->
+    <div class="modal" id="modal-add">
+        <div class="modal-content">
+            <h3 id="modal-title">Tambah Data</h3>
+            <div id="modal-form-body"></div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="UI.closeModal('modal-add')">Batal</button>
+                <button class="btn btn-primary" id="btn-save-data">Simpan</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
 
     <script>
-        /**
-         * ==========================================
-         * 1. DATA SEEDING (DARI SHEET KAMU)
-         * ==========================================
-         */
-        const DB = {
-            users: [
-                { user: "Farhan", pass: "123Farhan", role: "Admin", name: "Farhan Fadhlurrahman" }
-            ],
-            units: [
-                { code: "U-IGD-01", name: "Instalasi Gawat Darurat (IGD)", type: "Infectious", contact: "Ka. IGD - Ext 101" },
-                { code: "U-ICU-01", name: "Intensive Care Unit (ICU)", type: "Infectious", contact: "Ka. ICU - Ext 102" },
-                { code: "U-ISO-01", name: "Ruang Isolasi", type: "Infectious", contact: "IPC Nurse - Ext 103" },
-                { code: "U-RI-01", name: "Ruang Rawat Inap Dewasa", type: "Non", contact: "Ka. Ruang RI - Ext 201" },
-                { code: "U-RI-02", name: "Ruang Rawat Inap Anak", type: "Non", contact: "Ka. Ruang Anak - Ext 202" },
-                { code: "U-RI-03", name: "Ruang Rawat Inap VIP", type: "Non", contact: "Ka. Ruang VIP - Ext 203" },
-                { code: "U-OK-01", name: "Kamar Operasi (OK)", type: "Infectious", contact: "Ka. OK - Ext 301" },
-                { code: "U-CSSD-01", name: "Central Sterile Supply Dept", type: "Infectious", contact: "Ka. CSSD - Ext 302" },
-                { code: "U-BSL-01", name: "Ruang Bersalin", type: "Infectious", contact: "Ka. Bersalin - Ext 401" },
-                { code: "U-NICU-01", name: "NICU", type: "Infectious", contact: "Ka. NICU - Ext 402" },
-                { code: "U-HD-01", name: "Hemodialisa", type: "Infectious", contact: "Ka. HD - Ext 501" },
-                { code: "U-HD-02", name: "Hemodialisa Isolasi", type: "Infectious", contact: "IPC HD - Ext 502" },
-                { code: "U-POLI-01", name: "Poliklinik Umum", type: "Non", contact: "Koord. Poli - Ext 601" },
-                { code: "U-POLI-02", name: "Poli Gigi", type: "Non", contact: "Koord. Poli Gigi - Ext 602" },
-                { code: "U-LAB-01", name: "Laboratorium", type: "Non", contact: "Ka. Lab - Ext 701" },
-                { code: "U-RAD-01", name: "Radiologi", type: "Non", contact: "Ka. Radiologi - Ext 702" },
-                { code: "U-LAUN-01", name: "Instalasi Laundry", type: "Infectious", contact: "Ka. Laundry - Ext 802" }
-            ],
-            linen: [
-                { id: "SET-ICU-01", name: "Set Linen ICU Dewasa", cat: "ICU", weight: "4.5 Kg", cycle: 180, status: "Cuci Aktif", loc: "Laundry RS" },
-                { id: "SET-ICU-02", name: "Set Linen ICU Anak", cat: "ICU", weight: "4.0 Kg", cycle: 170, status: "Active", loc: "ICU Ward" },
-                { id: "SET-ICU-03", name: "Set Linen ICU Isolasi", cat: "ICU", weight: "5.0 Kg", cycle: 160, status: "Active", loc: "Ruang Isolasi" },
-                { id: "SET-RI-01", name: "Set Linen Rawat Inap Dewasa", cat: "Rawat Inap", weight: "3.8 Kg", cycle: 200, status: "Active", loc: "Ruang Rawat Inap" },
-                { id: "SET-RI-02", name: "Set Linen Rawat Inap VIP", cat: "Rawat Inap", weight: "4.2 Kg", cycle: 220, status: "Active", loc: "Ruang VIP" },
-                { id: "SET-OK-01", name: "Set Linen Operasi Mayor", cat: "OK / Bedah", weight: "6.5 Kg", cycle: 150, status: "Active", loc: "CSSD" },
-                { id: "SET-OK-02", name: "Set Linen Operasi Minor", cat: "OK / Bedah", weight: "5.0 Kg", cycle: 160, status: "Active", loc: "Ruang OK" },
-                { id: "SET-IGD-01", name: "Set Linen IGD Dewasa", cat: "IGD", weight: "3.6 Kg", cycle: 180, status: "Active", loc: "IGD" },
-                { id: "SET-BERSALIN-01", name: "Set Linen Persalinan Normal", cat: "Bersalin", weight: "5.2 Kg", cycle: 170, status: "Active", loc: "Ruang Bersalin" },
-                { id: "SET-DAMAGE-01", name: "Set Linen Rusak Ringan", cat: "Recovery", weight: "3.0 Kg", cycle: 0, status: "Damage", loc: "Gudang Linen Rusak" }
-            ],
-            machines: [
-                { id: "MC-W-01", name: "Washer Barrier 1", type: "Washer", cap: "50 Kg", status: "Active", maint: "2026-01-10" },
-                { id: "MC-W-02", name: "Washer Barrier 2", type: "Washer", cap: "50 Kg", status: "Active", maint: "2026-01-12" },
-                { id: "MC-W-03", name: "Washer Non-Barrier", type: "Washer", cap: "35 Kg", status: "Active", maint: "2026-01-15" },
-                { id: "MC-D-01", name: "Dryer Gas 1", type: "Dryer", cap: "50 Kg", status: "Active", maint: "2026-01-11" },
-                { id: "MC-D-02", name: "Dryer Gas 2", type: "Dryer", cap: "50 Kg", status: "Active", maint: "2026-01-13" },
-                { id: "MC-D-03", name: "Dryer Electric", type: "Dryer", cap: "30 Kg", status: "Maintenance", maint: "2026-01-25" },
-                { id: "MC-I-01", name: "Roller Ironer 1", type: "Ironer", cap: "60 Kg/Jam", status: "Active", maint: "2026-01-09" },
-                { id: "MC-F-01", name: "Automatic Folding Machine", type: "Folding", cap: "80 Kg/Jam", status: "Active", maint: "2026-01-08" }
-            ],
-            inventory: [
-                { name: "Detergent Powder Medical Grade", cat: "Chemical", stock: 250, unit: "Kg", min: 100 },
-                { name: "Oxygen Bleach", cat: "Chemical", stock: 120, unit: "Kg", min: 50 },
-                { name: "Chlorine Bleach", cat: "Chemical", stock: 90, unit: "Liter", min: 40 },
-                { name: "Softener Linen", cat: "Chemical", stock: 45, unit: "Liter", min: 50 }, // Low Stock
-                { name: "Plastic Linen Bag Infectious", cat: "Consumable", stock: 500, unit: "Pcs", min: 200 },
-                { name: "Yellow Infectious Bag", cat: "Consumable", stock: 150, unit: "Pcs", min: 200 }, // Low Stock
-                { name: "Sarung Tangan Karet", cat: "APD", stock: 90, unit: "Pasang", min: 100 }, // Low Stock
-                { name: "Masker Medis", cat: "APD", stock: 1500, unit: "Pcs", min: 500 },
-                { name: "Troli Linen Bersih", cat: "Equipment", stock: 18, unit: "Unit", min: 5 },
-                { name: "V-Belt Mesin Washer", cat: "Sparepart", stock: 8, unit: "Pcs", min: 10 } // Low Stock
-            ],
-            transactions: [
-                { time: "2026-01-30 7:15", linenId: "SET-ICU-01", from: "Di Unit", to: "Di Laundry", op: "Andi - Runner" },
-                { time: "2026-01-30 7:25", linenId: "SET-ICU-01", from: "Di Laundry", to: "Sortir Infeksius", op: "Siti - Laundry" },
-                { time: "2026-01-30 7:50", linenId: "SET-RI-01", from: "Sortir Non-Infeksius", to: "Cuci", op: "Budi - Operator" },
-                { time: "2026-01-30 8:55", linenId: "SET-DAMAGE-01", from: "Inspeksi", to: "Rusak Ringan", op: "Quality Control" }
-            ]
+        // ==========================================
+        // KONFIGURASI PENTING
+        // ==========================================
+        const CONFIG = {
+            // GANTI URL INI DENGAN URL WEB APP KAMU DARI GOOGLE SCRIPTS
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbznpOX_BAEiy-NPI14LmWDCuFuquehimQZByvGHBOMw38Z-4hh_XdpIfpRkleJQTjQHBw/exec" 
         };
 
-        /**
-         * ==========================================
-         * 2. GLOBAL STATE & CONFIG
-         * ==========================================
-         */
+        // State Aplikasi
         const State = {
             currentUser: null,
-            data: JSON.parse(JSON.stringify(DB)) // Deep copy for manipulation
+            data: { linen: [], units: [], inventory: [], transactions: [], users: [] }
         };
 
-        const Config = {
-            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxL3d88GrbIv7iCpJu_IR2JPvV-SNmuUnxNPuwimlJe43XjV43wHnFuNECParQw3sPOFQ/exec"
+        // ==========================================
+        // API HELPERS (COMMS TO GOOGLE SCRIPTS)
+        // ==========================================
+        const API = {
+            post: async function(action, payload = {}) {
+                UI.showLoading(true);
+                try {
+                    const res = await fetch(CONFIG.SCRIPT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action, ...payload })
+                    });
+                    const json = await res.json();
+                    UI.showLoading(false);
+                    return json;
+                } catch (err) {
+                    UI.showLoading(false);
+                    UI.showToast("Error koneksi ke server", "error");
+                    console.error(err);
+                    return { status: 'error', message: err.message };
+                }
+            },
+            
+            fetchData: async function() {
+                const res = await this.post('get_all_data');
+                if (res.status === 'success') {
+                    State.data = res.data;
+                    App.renderAll();
+                } else {
+                    UI.showToast("Gagal mengambil data", "error");
+                }
+            }
         };
 
-        /**
-         * ==========================================
-         * 3. AUTH MODULE
-         * ==========================================
-         */
+        // ==========================================
+        // MODULE: AUTHENTICATION
+        // ==========================================
         const Auth = {
             init: function() {
-                const sess = sessionStorage.getItem('rs_laundry_user');
+                const sess = localStorage.getItem('rs_laundry_user');
                 if (sess) {
                     this.setUser(JSON.parse(sess));
-                } else {
-                    document.getElementById('login-screen').classList.remove('hidden');
                 }
             },
-            login: function() {
-                const u = document.getElementById('username').value;
-                const p = document.getElementById('password').value;
-                const found = DB.users.find(x => x.user === u && x.pass === p);
+
+            login: async function(e) {
+                e.preventDefault();
+                const u = document.getElementById('login-username').value;
+                const p = document.getElementById('login-password').value;
                 
-                if (found) {
-                    sessionStorage.setItem('rs_laundry_user', JSON.stringify(found));
-                    this.setUser(found);
+                const res = await API.post('login', { username: u, password: p });
+                
+                if (res.status === 'success') {
+                    this.setUser(res.user);
+                    UI.showToast(`Selamat datang, ${res.user.name}`, "success");
+                } else if (res.status === 'pending') {
+                    UI.showToast(res.message, "warning");
                 } else {
-                    UI.showToast("Username atau Password Salah!", "error");
+                    UI.showToast(res.message, "error");
                 }
             },
+
+            register: async function() {
+                const u = document.getElementById('reg-user').value;
+                const n = document.getElementById('reg-name').value;
+                const p = document.getElementById('reg-pass').value;
+                
+                if(!u || !n || !p) return UI.showToast("Isi semua data", "warning");
+
+                const res = await API.post('register', { username: u, fullname: n, password: p });
+                UI.showToast(res.message, res.status === 'success' ? 'success' : 'error');
+                
+                if(res.status === 'success') {
+                    UI.closeModal('modal-register');
+                    document.getElementById('loginForm').reset();
+                }
+            },
+
             setUser: function(user) {
                 State.currentUser = user;
+                localStorage.setItem('rs_laundry_user', JSON.stringify(user));
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('user-display-name').innerText = user.name;
-                document.getElementById('user-role-display').innerText = user.role.toUpperCase();
-                document.getElementById('wf-operator').value = user.name;
+                document.getElementById('user-info').innerHTML = `<b>${user.name}</b> (${user.role})`;
                 
-                App.init();
-            },
-            logout: function() {
-                sessionStorage.removeItem('rs_laundry_user');
-                location.reload();
-            }
-        };
-
-        /**
-         * ==========================================
-         * 4. APP LOGIC & CONTROLLERS
-         * ==========================================
-         */
-        const App = {
-            init: function() {
-                this.initDashboard();
-                this.populateDatalist();
-            },
-            populateDatalist: function() {
-                const dl = document.getElementById('linen-list');
-                dl.innerHTML = '';
-                State.data.linen.forEach(l => {
-                    const opt = document.createElement('option');
-                    opt.value = l.id;
-                    dl.appendChild(opt);
-                });
-            },
-            nav: function(viewId) {
-                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                
-                document.getElementById('view-' + viewId).classList.remove('hidden');
-                const navs = document.querySelectorAll('.nav-item');
-                navs.forEach(nav => {
-                    if(nav.getAttribute('onclick').includes(viewId)) nav.classList.add('active');
-                });
-
-                // Titles
-                const titles = {
-                    dashboard: 'Dashboard Monitoring',
-                    workflow: 'Workflow & Proses',
-                    linen: 'Master Data Linen',
-                    unit: 'Master Unit RS',
-                    machine: 'Manajemen Mesin',
-                    inventory: 'Gudang Bahan (Inventory)',
-                    audit: 'Audit Log Transaksi'
-                };
-                document.getElementById('page-title').innerText = titles[viewId] || 'Halaman';
-
-                // Render Table based on View
-                if(viewId === 'linen') UI.renderTable('table-linen', State.data.linen);
-                if(viewId === 'unit') UI.renderTable('table-unit', State.data.units);
-                if(viewId === 'machine') UI.renderTable('table-machine', State.data.machines);
-                if(viewId === 'inventory') UI.renderTable('table-inventory', State.data.inventory);
-                if(viewId === 'audit') UI.renderTable('table-audit', State.data.transactions); // Reusing trans for audit in demo
-
-                // Mobile sidebar
-                if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('active');
-            },
-            initDashboard: function() {
-                // Stats Calculation
-                const activeLinen = State.data.linen.filter(l => l.status === 'Active').length;
-                const damageLinen = State.data.linen.filter(l => l.status === 'Damage').length;
-                const infectedUnits = State.data.units.filter(u => u.type === 'Infectious').length;
-                
-                const lowStockItems = State.data.inventory.filter(i => parseInt(i.stock) <= parseInt(i.min));
-                
-                document.getElementById('stat-linen-ok').innerText = activeLinen;
-                document.getElementById('stat-process').innerText = State.data.transactions.length; // Demo purpose
-                document.getElementById('stat-infected').innerText = infectedUnits;
-                document.getElementById('stat-low-stock').innerText = lowStockItems.length;
-
-                // Warnings List
-                const wList = document.getElementById('dashboard-warnings');
-                wList.innerHTML = '';
-                if(lowStockItems.length > 0) {
-                    lowStockItems.forEach(i => {
-                        wList.innerHTML += `<li style="margin-bottom:8px; color:var(--danger); font-size:0.85rem;">
-                            <i class="fas fa-exclamation-circle"></i> <b>${i.name}</b> sisa ${i.stock} ${i.unit}
-                        </li>`;
-                    });
-                } else {
-                    wList.innerHTML = '<li style="color:var(--success);">Stok Aman.</li>';
+                if(user.role === 'Admin') {
+                    document.getElementById('admin-menu').classList.remove('hidden');
                 }
-                
-                // Render Workflow Log
-                UI.renderTable('table-workflow-log', State.data.transactions);
+
+                // Load Data saat user sukses login
+                API.fetchData();
             },
-            sync: function() {
-                UI.showLoading(true);
-                setTimeout(() => {
-                    UI.showLoading(false);
-                    UI.showToast("Data berhasil disimpan ke LocalStorage (Simulasi Sync)", "success");
-                }, 1000);
+
+            logout: function() {
+                localStorage.removeItem('rs_laundry_user');
+                location.reload();
             },
-            actionAdd: function() {
-                alert("Fitur Tambah Data (CRUD) disimulasikan terbuka.\nDalam implementasi penuh, ini akan membuka Modal Form input data.");
+
+            approveUser: async function(username) {
+                if(!confirm("Setujui user ini?")) return;
+                const res = await API.post('approve_user', { 
+                    adminRole: State.currentUser.role, 
+                    targetUsername: username 
+                });
+                UI.showToast(res.message, res.status === 'success' ? 'success' : 'error');
+                if(res.status === 'success') API.fetchData(); // Refresh tabel user
             }
         };
 
+        // ==========================================
+        // MODULE: WORKFLOW & DATA
+        // ==========================================
         const Workflow = {
-            processStep: function() {
-                const id = document.getElementById('wf-linen-id').value;
-                const status = document.getElementById('wf-target-status').value;
-                const operator = document.getElementById('wf-operator').value;
-
-                if(!id || !status) return UI.showToast("Lengkapi ID Linen dan Status", "warning");
-
-                const linen = State.data.linen.find(l => l.id === id);
-                if(!linen) return UI.showToast("ID Linen tidak ditemukan!", "error");
-
-                // Logic Update Lokasi di Master
-                if(status === 'Siap Distribusi' || status === 'Gudang Rusak') linen.loc = 'Laundry / Gudang';
-                else if(status === 'Di Unit') linen.loc = 'Unit RS'; // Simplifikasi
+            submit: async function() {
+                const id = document.getElementById('wf-id').value;
+                const status = document.getElementById('wf-status').value;
                 
-                // Add Transaction
-                const newLog = {
-                    time: new Date().toLocaleString('id-ID'),
+                if(!id) return UI.showToast("Masukkan ID Linen", "warning");
+
+                // Cari linen di state untuk status 'from'
+                const linen = State.data.linen.find(l => l['LinenID'] === id || l['LinenID'] == id);
+                if(!linen) return UI.showToast("ID Linen tidak ditemukan di Master", "error");
+                
+                const fromStatus = linen['Status(Active/Damage)'] || linen['Status'] || 'Unknown';
+
+                const res = await API.post('workflow_process', {
                     linenId: id,
-                    from: linen.status, // Ambil status terakhir sebagai 'from'
-                    to: status,
-                    op: operator
-                };
-                
-                // Update status linen sementara untuk display
-                linen.status = status; 
-                
-                State.data.transactions.unshift(newLog);
-                
-                UI.renderTable('table-workflow-log', State.data.transactions);
-                document.getElementById('wf-linen-id').value = '';
-                document.getElementById('wf-target-status').value = '';
-                
-                UI.showToast(`Proses ${id} -> ${status} Berhasil`, "success");
-                App.initDashboard(); // Refresh stats
+                    fromStatus: fromStatus,
+                    toStatus: status,
+                    operator: State.currentUser.name,
+                    machineId: '-' 
+                });
+
+                UI.showToast(res.message, res.status === 'success' ? 'success' : 'error');
+                if(res.status === 'success') {
+                    document.getElementById('wf-id').value = '';
+                    API.fetchData(); // Reload semua data agar update terlihat
+                }
             }
         };
 
-        /**
-         * ==========================================
-         * 5. UI RENDERER & UTILS
-         * ==========================================
-         */
-        const UI = {
-            renderTable: function(tableId, data) {
-                const tbody = document.querySelector(`#${tableId} tbody`);
+        const DataManager = {
+            save: async function(type, data) {
+                const actionMap = {
+                    'linen': 'save_linen',
+                    'unit': 'save_unit',
+                    'inventory': 'save_inventory'
+                };
+                const res = await API.post(actionMap[type], data);
+                UI.showToast(res.message, res.status === 'success' ? 'success' : 'error');
+                if(res.status === 'success') {
+                    UI.closeModal('modal-add');
+                    API.fetchData();
+                }
+            }
+        };
+
+        // ==========================================
+        // APP UI CONTROLLER
+        // ==========================================
+        const App = {
+            renderAll: function() {
+                // Update Stats
+                document.getElementById('stat-linen').innerText = State.data.linen.length;
+                document.getElementById('stat-trans').innerText = State.data.transactions.length;
+                document.getElementById('stat-inv').innerText = State.data.inventory.length;
+
+                // Render Tables
+                this.renderTable('table-linen', State.data.linen, ['LinenID', 'Name', 'Category', 'Status(Active/Damage)', 'CurrentLocation']);
+                this.renderTable('table-unit', State.data.units, ['UnitCode', 'UnitName', 'Type(Infectious/Non)', 'ContactPIC']);
+                this.renderTable('table-inventory', State.data.inventory, ['ItemName', 'Category', 'Stock', 'MinStock']);
+                this.renderTable('table-users', State.data.users, ['Username', 'Fullname', 'Role', 'Status']); // Custom render below
+
+                // Custom Render Users Table (Add Action Button)
+                const tbodyUser = document.querySelector('#table-users tbody');
+                tbodyUser.innerHTML = '';
+                State.data.users.forEach(u => {
+                    let btn = '';
+                    if(u['Status'] === 'Pending') {
+                        btn = `<button class="btn btn-sm btn-primary" onclick="Auth.approveUser('${u['Username']}')">Approve</button>`;
+                    }
+                    const tr = `<tr>
+                        <td>${u['Username']}</td>
+                        <td>${u['Fullname']}</td>
+                        <td>${u['Role']}</td>
+                        <td><span class="badge ${u['Status']==='Active'?'bg-success-light':'bg-warning-light'}">${u['Status']}</span></td>
+                        <td>${btn}</td>
+                    </tr>`;
+                    tbodyUser.innerHTML += tr;
+                });
+
+                // Transactions Table (Reverse Order)
+                const transRev = [...State.data.transactions].reverse();
+                this.renderTable('table-transactions', transRev, ['Timestamp', 'LinenID', 'Tostatus', 'Operator']);
+            },
+
+            renderTable: function(id, data, keys) {
+                const tbody = document.querySelector(`#${id} tbody`);
                 if(!tbody) return;
                 tbody.innerHTML = '';
                 
-                if(data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="10" class="text-center">Tidak ada data</td></tr>`;
+                if(!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Data Kosong</td></tr>';
                     return;
                 }
 
                 data.forEach(row => {
                     const tr = document.createElement('tr');
-                    
-                    // Generate cells dynamically based on object keys or mapped logic
-                    if(tableId === 'table-linen') {
-                        tr.innerHTML = `
-                            <td><b>${row.id}</b></td>
-                            <td>${row.name}</td>
-                            <td>${row.cat}</td>
-                            <td>${row.weight}</td>
-                            <td>${row.cycle}</td>
-                            <td>${this.getStatusBadge(row.status)}</td>
-                            <td>${row.loc}</td>
-                        `;
-                    } else if (tableId === 'table-unit') {
-                        tr.innerHTML = `
-                            <td><b>${row.code}</b></td>
-                            <td>${row.name}</td>
-                            <td>${row.type === 'Infectious' ? '<span class="badge bg-danger-light">Infeksius</span>' : '<span class="badge bg-success-light">Non-Infeksius</span>'}</td>
-                            <td>${row.contact}</td>
-                            <td><button class="btn btn-sm btn-outline" onclick="UI.showToast('Detail Unit', 'info')"><i class="fas fa-eye"></i></button></td>
-                        `;
-                    } else if (tableId === 'table-machine') {
-                        tr.innerHTML = `
-                            <td><b>${row.id}</b></td>
-                            <td>${row.name}</td>
-                            <td>${row.type}</td>
-                            <td>${row.cap}</td>
-                            <td>${row.status === 'Active' ? '<span class="badge bg-success-light">Active</span>' : '<span class="badge bg-warning-light">Maintenance</span>'}</td>
-                            <td>${row.maint}</td>
-                            <td><button class="btn btn-sm btn-outline"><i class="fas fa-wrench"></i></button></td>
-                        `;
-                    } else if (tableId === 'table-inventory') {
-                        const isLow = parseInt(row.stock) <= parseInt(row.min);
-                        tr.innerHTML = `
-                            <td>${row.name}</td>
-                            <td>${row.cat}</td>
-                            <td style="font-weight:bold; color: ${isLow ? 'var(--danger)' : 'inherit'}">${row.stock} ${row.unit}</td>
-                            <td>${row.unit}</td>
-                            <td>${row.min}</td>
-                            <td>${isLow ? '<span class="badge bg-danger-light">Low Stock</span>' : '<span class="badge bg-success-light">Aman</span>'}</td>
-                            <td><button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button></td>
-                        `;
-                    } else if (tableId === 'table-workflow-log') {
-                        tr.innerHTML = `
-                            <td>${row.time}</td>
-                            <td><b>${row.linenId}</b></td>
-                            <td>-</td>
-                            <td>${row.from} <i class="fas fa-arrow-right" style="font-size:0.7rem; margin:0 5px;"></i> ${row.to}</td>
-                            <td>${row.op}</td>
-                        `;
-                    } else {
-                        // Generic Fallback (Audit)
-                        tr.innerHTML = `<td>${Object.values(row).join('</td><td>')}</td>`;
-                    }
+                    keys.forEach(k => {
+                        let val = row[k] || '-';
+                        // Formatting khusus
+                        if(k === 'Status(Active/Damage)' || k === 'Status') {
+                            const color = (val.includes('Active') || val.includes('Cuci Aktif')) ? 'bg-success-light' : (val === 'Damage' ? 'bg-danger-light' : 'bg-warning-light');
+                            val = `<span class="badge ${color}">${val}</span>`;
+                        }
+                        if(k === 'Stock') {
+                            // Cek low stock sederhana
+                            const min = row['MinStock'] || 0;
+                            val = `<span style="${parseInt(val) <= parseInt(min) ? 'color:red;font-weight:bold' : ''}">${val}</span>`;
+                        }
+                        
+                        const td = document.createElement('td');
+                        td.innerHTML = val;
+                        tr.appendChild(td);
+                    });
                     tbody.appendChild(tr);
                 });
             },
-            getStatusBadge: function(status) {
-                if(status.includes('Damage')) return `<span class="badge bg-danger-light">Damage</span>`;
-                if(status.includes('Active') || status.includes('Cuci Aktif')) return `<span class="badge bg-success-light">Active</span>`;
-                return `<span class="badge bg-secondary">${status}</span>`;
+
+            nav: function(viewId) {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                
+                document.getElementById('view-'+viewId).classList.remove('hidden');
+                event.target.closest('.nav-item').classList.add('active');
+                
+                const titles = {
+                    dashboard: 'Dashboard', workflow: 'Workflow', linen: 'Master Linen',
+                    unit: 'Master Unit', inventory: 'Inventory', users: 'User Management'
+                };
+                document.getElementById('page-title').innerText = titles[viewId];
             },
-            showToast: function(msg, type='success') {
-                const div = document.createElement('div');
-                div.className = `toast ${type}`;
-                div.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':'fa-info-circle'}"></i> ${msg}`;
-                document.getElementById('toast-container').appendChild(div);
-                setTimeout(() => div.remove(), 3000);
-            },
-            showLoading: function(show) {
-                document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
-            },
-            closeModal: function() {
-                document.getElementById('generic-modal').classList.remove('active');
+
+            openAddModal: function() {
+                // Tentukan modal berdasarkan view aktif
+                const activeView = document.querySelector('.view-section:not(.hidden)').id.replace('view-', '');
+                const modalBody = document.getElementById('modal-form-body');
+                modalBody.innerHTML = '';
+                
+                let fields = [];
+                let type = '';
+
+                if(activeView === 'linen') {
+                    type = 'linen';
+                    fields = [
+                        {id:'id', label:'Linen ID'}, {id:'name', label:'Nama Linen'},
+                        {id:'cat', label:'Kategori'}, {id:'weight', label:'Berat'}, {id:'cycle', label:'Siklus'}
+                    ];
+                } else if(activeView === 'unit') {
+                    type = 'unit';
+                    fields = [
+                        {id:'code', label:'Kode Unit'}, {id:'name', label:'Nama Unit'},
+                        {id:'type', label:'Tipe (Inf/Non)'}, {id:'contact', label:'PIC Kontak'}
+                    ];
+                } else if(activeView === 'inventory') {
+                    type = 'inventory';
+                    fields = [
+                        {id:'name', label:'Nama Item'}, {id:'cat', label:'Kategori'},
+                        {id:'stock', label:'Stok Awal'}, {id:'unit', label:'Satuan'}, {id:'min', label:'Min Stok'}
+                    ];
+                } else {
+                    return UI.showToast("Tambah data tidak tersedia di halaman ini", "warning");
+                }
+
+                // Generate Form Inputs
+                fields.forEach(f => {
+                    modalBody.innerHTML += `
+                        <div class="form-group">
+                            <label>${f.label}</label>
+                            <input type="text" id="inp-${f.id}">
+                        </div>`;
+                });
+
+                // Bind Save Button
+                const btn = document.getElementById('btn-save-data');
+                btn.onclick = () => {
+                    const data = {};
+                    fields.forEach(f => data[f.id] = document.getElementById(`inp-${f.id}`).value);
+                    DataManager.save(type, data);
+                };
+
+                UI.showModal('modal-add');
             }
         };
 
-        // Helpers
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
+        const UI = {
+            showModal: function(id) { document.getElementById(id).classList.add('active'); },
+            closeModal: function(id) { document.getElementById(id).classList.remove('active'); },
+            showLoading: function(show) {
+                if(show) {
+                    const div = document.createElement('div');
+                    div.id = 'loading-overlay';
+                    div.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.8);z-index:9999;display:flex;justify-content:center;align-items:center;";
+                    div.innerHTML = '<div style="font-weight:bold;">Loading...</div>';
+                    document.body.appendChild(div);
+                } else {
+                    const el = document.getElementById('loading-overlay');
+                    if(el) el.remove();
+                }
+            },
+            showToast: function(msg, type='info') {
+                const div = document.createElement('div');
+                div.className = 'toast';
+                div.style.borderLeft = `5px solid ${type==='success'?'green':type==='error'?'red':'orange'}`;
+                div.innerText = msg;
+                document.getElementById('toast-container').appendChild(div);
+                setTimeout(() => div.remove(), 3000);
+            }
+        };
 
         // Event Listeners
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            Auth.login();
-        });
+        document.getElementById('loginForm').addEventListener('submit', (e) => Auth.login(e));
 
+        // Init
         window.onload = function() {
             Auth.init();
         };
-
     </script>
 </body>
 </html>
