@@ -2,396 +2,552 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Laundry RS Charlie (Enterprise)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RS Charlie Laundry System</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #0ea5e9; --dark: #0f172a; --bg: #f1f5f9;
-            --card-bg: #ffffff; --border: #e2e8f0;
-            --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; --info: #3b82f6;
+            --primary: #0ea5e9; --dark: #0f172a; --bg: #f8fafc; --surface: #ffffff;
+            --border: #e2e8f0; --danger: #ef4444; --success: #22c55e; --warning: #f59e0b;
         }
-        * { box-sizing: border-box; margin:0; padding:0; outline:none; }
-        body { font-family:'Inter', sans-serif; background:var(--bg); color:var(--dark); height:100vh; overflow:hidden; font-size:14px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); height: 100vh; overflow: hidden; font-size: 14px; }
 
-        /* --- LAYOUT --- */
-        .app { display:grid; grid-template-columns:240px 1fr; height:100vh; }
-        .sidebar { background:var(--card-bg); border-right:1px solid var(--border); padding:20px; display:flex; flex-direction:column; }
-        .main { padding:20px; overflow-y:auto; display:flex; flex-direction:column; }
+        /* LAYOUT */
+        .app-container { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+        .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 20; }
+        .main-content { overflow-y: auto; height: 100%; padding: 20px; display: flex; flex-direction: column; }
         
-        /* --- COMPONENTS --- */
-        .nav-item { padding:12px; border-radius:8px; cursor:pointer; display:flex; gap:10px; align-items:center; color:#64748b; transition:0.2s; margin-bottom:5px; }
-        .nav-item:hover, .nav-item.active { background:#f0f9ff; color:var(--primary); font-weight:600; }
+        /* COMPONENTS */
+        .nav-item { padding: 12px 20px; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 12px; border-radius: 8px; transition: 0.2s; margin-bottom: 2px; }
+        .nav-item:hover, .nav-item.active { background: #f0f9ff; color: var(--primary); font-weight: 600; }
         
-        .card { background:var(--card-bg); border-radius:12px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid var(--border); margin-bottom:20px; }
-        .btn { padding:10px 16px; border-radius:8px; border:none; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:8px; transition:0.2s; }
-        .btn-primary { background:var(--primary); color:white; }
-        .btn-outline { background:transparent; border:1px solid var(--border); color:var(--dark); }
-        .btn-sm { padding:6px 12px; font-size:12px; }
+        .card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .btn { padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 13px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--dark); }
+        .btn:hover { opacity: 0.9; }
         
-        .badge { padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; text-transform:uppercase; }
-        .bg-red { background:#fee2e2; color:#b91c1c; }
-        .bg-blue { background:#e0f2fe; color:#0369a1; }
-        .bg-green { background:#dcfce7; color:#15803d; }
-        .bg-gray { background:#f1f5f9; color:#475569; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; font-family: inherit; }
+        
+        /* KANBAN BOARD */
+        .kanban { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; padding-bottom: 10px; overflow-x: auto; }
+        .kanban-col { background: #f1f5f9; border-radius: 12px; padding: 15px; border: 1px solid var(--border); min-height: 200px; display: flex; flex-direction: column; }
+        .kanban-cards { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        
+        .l-card { background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; font-size: 13px; }
+        .l-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .l-card.dirty { border-left-color: var(--danger); }
+        .l-card.process { border-left-color: var(--warning); }
+        .l-card.ready { border-left-color: var(--success); }
+        .l-card.alert { border-left-color: #8b5cf6; background: #fff1f2; }
 
-        /* --- KANBAN BOARD --- */
-        .kanban-board { display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:15px; height:100%; overflow-x:auto; padding-bottom:10px; }
-        .kanban-col { background:#f8fafc; border-radius:12px; padding:15px; display:flex; flex-direction:column; border:1px solid var(--border); min-height:200px; }
-        .kanban-header { font-weight:700; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; }
-        .kanban-cards { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; }
-        .l-card { background:white; padding:12px; border-radius:8px; border:1px solid var(--border); cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.05); transition:0.2s; border-left:4px solid transparent; }
-        .l-card:hover { transform:translateY(-2px); box-shadow:0 4px 6px rgba(0,0,0,0.05); }
-        .l-card.status-Dirty { border-left-color:var(--danger); }
-        .l-card.status-Washing { border-left-color:var(--warning); }
-        .l-card.status-Finishing { border-left-color:var(--info); }
-        .l-card.status-Ready, .l-card.status-CLEAN { border-left-color:var(--success); }
+        /* SCREENS */
+        #login-screen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--primary), #3b82f6); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .login-box { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
+        .hidden { display: none !important; }
         
-        /* --- SCREENS --- */
-        #login-screen { position:fixed; inset:0; background:linear-gradient(135deg,var(--primary),#3b82f6); display:flex; align-items:center; justify-content:center; z-index:50; }
-        .login-box { background:white; padding:40px; border-radius:16px; width:100%; max-width:360px; text-align:center; box-shadow:0 20px 25px rgba(0,0,0,0.2); }
-        .hidden { display:none !important; }
+        /* MODAL */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; }
         
-        /* --- MODAL --- */
-        .modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:100; }
-        .modal.active { display:flex; }
-        .modal-content { background:white; padding:25px; border-radius:12px; width:90%; max-width:400px; }
-        input, select { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; margin-bottom:10px; }
-        
-        /* --- TABLES --- */
-        table { width:100%; border-collapse:collapse; }
-        th, td { padding:10px; text-align:left; border-bottom:1px solid var(--border); font-size:13px; }
-        th { background:#f8fafc; color:#64748b; }
+        /* UTILS */
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .text-red { color: var(--danger); }
+        .text-green { color: var(--success); }
+        .font-bold { font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
+    <!-- LOGIN SCREEN -->
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-bottom:20px;">RS Charlie Laundry</h2>
-            <form id="form-login">
-                <input type="text" id="l-user" placeholder="Username" required>
-                <input type="password" id="l-pass" placeholder="Password" required>
-                <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Masuk</button>
+            <h2 style="color: var(--primary); margin-bottom: 20px;">RS Charlie Laundry</h2>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 10px;">MASUK</button>
             </form>
-            <p style="margin:15px 0; color:#94a3b8; font-size:12px;">atau</p>
-            <button class="btn btn-outline" style="width:100%; justify-content:center;" onclick="UI.open('reg-modal')">Daftar Akun</button>
+            <p style="color: #94a3b8; font-size: 12px; margin-bottom: 10px;">atau</p>
+            <button class="btn btn-outline" style="width: 100%; justify-content: center;" onclick="UI.openModal('regModal')">DAFTAR AKUN BARU</button>
+            
+            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
+                <button class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 11px;" onclick="testConnection()">🔧 Cek Koneksi Server</button>
+            </div>
         </div>
     </div>
 
-    <!-- APP -->
-    <div class="app hidden" id="app">
+    <!-- MAIN APP -->
+    <div class="app-container hidden" id="app">
         <nav class="sidebar">
-            <h3 style="color:var(--primary); margin-bottom:20px;">Laundry Pro</h3>
-            <div class="nav-item active" onclick="App.nav('dashboard')"><i class="fas fa-th-large"></i> Workflow</div>
-            <div class="nav-item" onclick="App.nav('opname')"><i class="fas fa-clipboard-check"></i> Stock Opname</div>
-            <div class="nav-item" onclick="App.nav('inventory')"><i class="fas fa-box"></i> Inventory</div>
-            <div class="nav-item" onclick="App.nav('machines')"><i class="fas fa-cogs"></i> Mesin</div>
-            <div id="admin-nav" class="hidden" style="margin-top:auto;">
-                <hr style="margin:10px 0; border:0; border-top:1px solid #eee;">
-                <div class="nav-item" onclick="App.nav('admin')"><i class="fas fa-users"></i> Admin</div>
+            <div style="padding: 20px; border-bottom: 1px solid var(--border);">
+                <h3 style="color: var(--primary);">Laundry Pro</h3>
             </div>
-            <div style="margin-top:20px;">
-                <div id="u-name" style="font-weight:700; font-size:13px;">-</div>
-                <button class="btn btn-outline btn-sm" style="width:100%; margin-top:5px;" onclick="location.reload()">Logout</button>
+            <div style="padding: 10px;">
+                <div class="nav-item active" onclick="App.nav('workflow')"><i class="fas fa-columns"></i> Workflow</div>
+                <div class="nav-item" onclick="App.nav('opname')"><i class="fas fa-clipboard-check"></i> Stock Opname</div>
+                <div class="nav-item" onclick="App.nav('inventory')"><i class="fas fa-boxes"></i> Inventory</div>
+                <div class="nav-item" onclick="App.nav('machines')"><i class="fas fa-cogs"></i> Mesin</div>
+                <div id="adminMenu" class="hidden" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 10px;">
+                    <small style="color: #94a3b8; padding: 0 20px;">ADMIN AREA</small>
+                    <div class="nav-item" onclick="App.nav('admin')"><i class="fas fa-users-cog"></i> User Management</div>
+                </div>
+            </div>
+            <div style="margin-top: auto; padding: 20px; border-top: 1px solid var(--border);">
+                <div id="userInfo" class="font-bold text-primary">User</div>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 10px;" onclick="location.reload()">Logout</button>
             </div>
         </nav>
 
-        <main class="main">
-            <!-- VIEW: WORKFLOW -->
-            <div id="v-dashboard">
-                <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <main class="main-content">
+            <!-- VIEW: WORKFLOW (KANBAN) -->
+            <div id="view-workflow">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2>Live Workflow</h2>
                     <button class="btn btn-primary btn-sm" onclick="App.refresh()"><i class="fas fa-sync"></i> Refresh</button>
                 </div>
-                <div class="kanban-board">
+                
+                <div class="kanban">
+                    <!-- COLUMN 1: INBOUND -->
                     <div class="kanban-col">
-                        <div class="kanban-header" style="color:#ef4444;"><i class="fas fa-inbox"></i> INBOUND <span id="c-dirty" class="badge bg-red">0</span></div>
-                        <div id="kanban-dirty" class="kanban-cards"></div>
+                        <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span style="color: var(--danger);"><i class="fas fa-inbox"></i> INBOUND</span>
+                            <span id="c-inbound" class="badge bg-red">0</span>
+                        </div>
+                        <div id="k-inbound" class="kanban-cards"></div>
                     </div>
+                    
+                    <!-- COLUMN 2: PROCESS -->
                     <div class="kanban-col">
-                        <div class="kanban-header" style="color:#3b82f6;"><i class="fas fa-tshirt"></i> PROCESS <span id="c-proc" class="badge bg-blue">0</span></div>
-                        <div id="kanban-proc" class="kanban-cards"></div>
+                        <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span style="color: var(--warning);"><i class="fas fa-tshirt"></i> PROCESS</span>
+                            <span id="c-process" class="badge bg-yellow">0</span>
+                        </div>
+                        <div id="k-process" class="kanban-cards"></div>
                     </div>
+
+                    <!-- COLUMN 3: OUTBOUND -->
                     <div class="kanban-col">
-                        <div class="kanban-header" style="color:#22c55e;"><i class="fas fa-check-circle"></i> OUTBOUND <span id="c-out" class="badge bg-green">0</span></div>
-                        <div id="kanban-out" class="kanban-cards"></div>
+                        <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                            <span style="color: var(--success);"><i class="fas fa-check-circle"></i> OUTBOUND</span>
+                            <span id="c-outbound" class="badge bg-green">0</span>
+                        </div>
+                        <div id="k-outbound" class="kanban-cards"></div>
                     </div>
-                    <div class="kanban-col" style="background:#fff1f2;">
-                        <div class="kanban-header" style="color:#be123c;"><i class="fas fa-exclamation-triangle"></i> ALERTS</div>
-                        <div id="kanban-alert" class="kanban-cards"></div>
+                    
+                    <!-- COLUMN 4: ALERTS -->
+                    <div class="kanban-col" style="background: #fff1f2;">
+                        <div style="font-weight: 700; margin-bottom: 10px; color: #be123c;">
+                            <i class="fas fa-exclamation-triangle"></i> ALERTS
+                        </div>
+                        <div id="k-alert" class="kanban-cards"></div>
                     </div>
                 </div>
             </div>
 
             <!-- VIEW: STOCK OPNAME -->
-            <div id="v-opname" class="hidden">
+            <div id="view-opname" class="hidden">
                 <div class="card">
                     <h3>Stock Opname (Audit)</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; margin-top:15px;">
-                        <select id="op-unit"><option>Pilih Unit...</option></select>
-                        <button class="btn btn-primary" onclick="Opname.start()">Mulai Opname</button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-top: 15px;">
+                        <select id="opUnitSelect"><option value="">-- Pilih Unit --</option></select>
+                        <button class="btn btn-primary" onclick="Opname.start()">Mulai Hitung</button>
                     </div>
                 </div>
-                <div id="op-workspace" class="hidden">
+                
+                <div id="opWorkspace" class="hidden">
                     <div class="card">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <h3>Hasil Fisik</h3>
-                            <button class="btn btn-primary btn-sm" onclick="Opname.submit()">Simpan Audit</button>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <h3>Input Fisik</h3>
+                            <button class="btn btn-primary" onclick="Opname.submit()">Simpan Audit</button>
                         </div>
-                        <table><thead><tr><th>Linen ID</th><th>Nama</th><th>Sistem</th><th>Fisik</th><th>Selisih</th></tr></thead><tbody id="op-tbody"></tbody></table>
+                        <table>
+                            <thead><tr><th>Linen ID</th><th>Nama</th><th>Sistem</th><th>Fisik</th><th>Selisih</th></tr></thead>
+                            <tbody id="opTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
             <!-- VIEW: INVENTORY -->
-            <div id="v-inventory" class="hidden">
+            <div id="view-inventory" class="hidden">
                 <div class="card">
-                    <h3>Chemical & Consumable</h3>
-                    <table><thead><tr><th>Item</th><th>Kat</th><th>Stok</th><th>Unit</th><th>Status</th></tr></thead><tbody id="inv-tbody"></tbody></table>
+                    <h3>Inventory & Chemical</h3>
+                    <table>
+                        <thead><tr><th>Item</th><th>Kategori</th><th>Stok</th><th>Unit</th><th>Status</th></tr></thead>
+                        <tbody id="invTableBody"></tbody>
+                    </table>
                 </div>
             </div>
 
             <!-- VIEW: MACHINES -->
-            <div id="v-machines" class="hidden">
+            <div id="view-machines" class="hidden">
                 <div class="card">
                     <h3>Status Mesin</h3>
-                    <table><thead><tr><th>ID</th><th>Nama</th><th>Kapasitas</th><th>Status</th><th>Action</th></tr></thead><tbody id="mach-tbody"></tbody></table>
+                    <table>
+                        <thead><tr><th>ID</th><th>Nama</th><th>Kapasitas</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="machTableBody"></tbody>
+                    </table>
                 </div>
             </div>
+
+             <!-- VIEW: ADMIN -->
+             <div id="view-admin" class="hidden">
+                <div class="card">
+                    <h3>Manajemen User</h3>
+                    <table>
+                        <thead><tr><th>Username</th><th>Nama</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <!-- MODAL: ACTION -->
-    <div class="modal" id="act-modal">
+    <div class="modal" id="actionModal">
         <div class="modal-content">
-            <h3 id="act-title">Aksi Linen</h3>
-            <p id="act-info" style="margin-bottom:15px; color:#64748b;">-</p>
-            <div id="act-form"></div>
-            <div style="text-align:right; margin-top:20px;">
-                <button class="btn btn-outline" onclick="UI.close('act-modal')">Batal</button>
-                <button class="btn btn-primary" id="btn-do-action">Proses</button>
+            <h3 id="actTitle">Aksi Linen</h3>
+            <p id="actInfo" style="color: #64748b; margin-bottom: 15px;"></p>
+            <div id="actForm"></div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="UI.closeModal('actionModal')">Batal</button>
+                <button class="btn btn-primary" id="btnActSubmit">Proses</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: REGISTER -->
-    <div class="modal" id="reg-modal">
+    <div class="modal" id="regModal">
         <div class="modal-content">
-            <h3>Daftar Akun Baru</h3>
-            <input type="text" id="reg-user" placeholder="Username">
-            <input type="text" id="reg-name" placeholder="Nama Lengkap">
-            <input type="password" id="reg-pass" placeholder="Password">
-            <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;" onclick="Auth.register()">Daftar</button>
-            <button class="btn btn-outline" style="width:100%; justify-content:center; margin-top:5px;" onclick="UI.close('reg-modal')">Batal</button>
+            <h3>Daftar Akun</h3>
+            <input type="text" id="regUser" placeholder="Username">
+            <input type="text" id="regName" placeholder="Nama Lengkap">
+            <input type="password" id="regPass" placeholder="Password">
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="UI.closeModal('regModal')">Batal</button>
+                <button class="btn btn-primary" onclick="Auth.register()">Daftar</button>
+            </div>
         </div>
     </div>
 
+    <!-- ALERT TOAST -->
+    <div id="toast" style="position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 15px; border-radius: 8px; display: none; z-index: 9999;"></div>
+
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // ========================
-        // KONFIGURASI
-        // ========================
+        // ================= CONFIG =================
         const CONFIG = {
-            // PASTE URL WEB APP BARU DARI HASIL DEPLOY KAMU DI SINI
-            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwytdGXjm8DLZ-ejc86bwnjFNf2mJEoMzO5rmEdCcd_SlLSgFN26QFuuIYq2mvNjGExFA/exec" 
+            // GANTI INI DENGAN URL WEB APP KAMU DARI LANGKAH 2
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxL3d88GrbIv7iCpJu_IR2JPvV-SNmuUnxNPuwimlJe43XjV43wHnFuNECParQw3sPOFQ/exec"
         };
 
-        const State = { data: {}, user: null, actItem: null };
+        const State = { user: null, data: {} };
 
-        // ========================
-        // API CONNECTION
-        // ========================
+        // ================= API HELPERS =================
         const API = {
-            post: async (act, d) => {
-                UI.load(true);
+            post: async function(action, data) {
+                UI.loading(true);
                 try {
                     const res = await fetch(CONFIG.SCRIPT_URL, {
-                        method: 'POST', body: JSON.stringify({ action: act, ...d, role: State.user?.role })
+                        method: 'POST',
+                        body: JSON.stringify({ action, ...data })
                     });
                     return await res.json();
-                } catch(e) { 
-                    console.error("API Error:", e);
-                    return { status:'error', message:'Koneksi Gagal: ' + e.message }; 
-                }
-                finally { UI.load(false); }
-            },
-            load: async () => {
-                const res = await API.post('get_all_data');
-                if(res.status==='success') {
-                    State.data = res.data;
-                    App.renderAll();
-                } else {
-                    console.error("Load Data Error:", res);
+                } catch (err) {
+                    console.error("Connection Error:", err);
+                    return { status: 'error', message: 'Koneksi Internet Bermasalah: ' + err.message };
+                } finally {
+                    UI.loading(false);
                 }
             }
         };
 
-        // ========================
-        // LOGIC: AUTH
-        // ========================
+        // ================= AUTHENTICATION =================
         const Auth = {
-            login: async (e) => {
+            login: async function(e) {
                 e.preventDefault();
-                const res = await API.post('login', { username:$('#l-user').val(), password:$('#l-pass').val() });
-                if(res.status==='success') Auth.set(res.user);
-                else if(res.status==='pending') UI.msg('Akun Pending Admin', 'warning');
-                else UI.msg(res.message || 'Login Gagal', 'error');
-            },
-            register: async () => {
-                const u=$('#reg-user').val(), n=$('#reg-name').val(), p=$('#reg-pass').val();
-                if(!u||!n||!p) return UI.msg('Lengkapi semua data', 'warning');
+                const u = $('#username').val();
+                const p = $('#password').val();
+                if(!u || !p) return UI.toast("Isi username & password", "warning");
+
+                const res = await API.post('login', { username: u, password: p });
                 
-                const res = await API.post('register', { username:u, fullname:n, password:p });
-                UI.msg(res.message || 'Terjadi kesalahan', res.status==='success'?'success':'error');
-                
-                if(res.status==='success') { 
-                    UI.close('reg-modal'); 
-                    $('#reg-user').val(''); $('#reg-name').val(''); $('#reg-pass').val('');
+                if (res.status === 'success') {
+                    State.user = res.user;
+                    UI.toast("Selamat Datang, " + res.user.name, "success");
+                    $('#login-screen').hide();
+                    $('#app').show();
+                    $('#userInfo').text(res.user.name);
+                    if(res.user.role === 'Admin') $('#adminMenu').removeClass('hidden');
+                    App.loadData();
+                } else {
+                    UI.toast(res.message || "Login Gagal", "error");
                 }
             },
-            set: (u) => {
-                State.user = u;
-                $('#login-screen').hide(); $('#app').show();
-                $('#u-name').text(u.name);
-                if(u.role==='Admin') $('#admin-nav').removeClass('hidden');
-                API.load();
+            register: async function() {
+                const u = $('#regUser').val(), n = $('#regName').val(), p = $('#regPass').val();
+                if(!u || !n || !p) return UI.toast("Lengkapi data", "warning");
+
+                const res = await API.post('register', { username: u, fullname: n, password: p });
+                UI.toast(res.message || "Terjadi kesalahan", res.status === 'success' ? 'success' : 'error');
+                
+                if(res.status === 'success') {
+                    UI.closeModal('regModal');
+                    $('#regUser').val(''); $('#regName').val(''); $('#regPass').val('');
+                }
             }
         };
 
-        // ========================
-        // LOGIC: WORKFLOW & OPNAME
-        // ========================
+        // ================= WORKFLOW LOGIC =================
         const Workflow = {
-            click: (id, status) => {
-                State.actItem = { id, status };
-                const form = $('#act-form'); form.html('');
-                $('#act-title').text(id); 
-                $('#act-info').text(`Status Saat Ini: ${status}`);
+            click: function(id, status) {
+                // Generate Buttons based on Current Status
+                const form = $('#actForm');
+                form.html('');
+                $('#actTitle').text(id);
+                $('#actInfo').text(`Status Sekarang: ${status}`);
 
-                let btns = '';
-                if(status==='DIRTY' || status==='RECEIVED') {
-                    btns += `<button class="btn btn-primary" style="width:100%; margin-bottom:5px;" onclick="Workflow.conf('WASHING')">Mulai Cuci</button>`;
-                    btns += `<button class="btn btn-outline" style="width:100%;" onclick="Workflow.conf('DAMAGED')">Lapor Rusak</button>`;
-                } else if(status==='WASHING' || status==='FINISHING') {
-                    btns += `<button class="btn btn-primary" style="width:100%; margin-bottom:5px;" onclick="Workflow.conf('READY')">Selesai</button>`;
-                } else if(status==='READY') {
-                    btns += `<select id="dist-unit"><option>Pilih Unit...</option>${State.data.units.map(u=>`<option value="${u.UnitCode}">${u.UnitName}</option>`).join('')}</select>`;
-                    btns += `<button class="btn btn-success" style="width:100%; margin-top:5px;" onclick="Workflow.conf('CLEAN')">Kirim Unit</button>`;
-                } else if(status==='DAMAGED') {
-                    btns = `<p>Tidak ada aksi.</p>`;
+                let html = '';
+                if(status === 'DIRTY' || status === 'RECEIVED') {
+                    html += `<button class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="Workflow.conf('WASHING')">Mulai Cuci (Washing)</button>`;
+                    html += `<button class="btn btn-outline" style="width:100%;" onclick="Workflow.conf('DAMAGED')">Lapor Rusak</button>`;
+                } else if (status === 'WASHING') {
+                    html += `<button class="btn btn-primary" style="width:100%;" onclick="Workflow.conf('READY')">Selesai Cuci</button>`;
+                } else if (status === 'READY') {
+                    html += `<select id="distUnit"><option value="">Pilih Unit...</option></select>`;
+                    html += `<button class="btn btn-success" style="width:100%; margin-top:10px;" onclick="Workflow.conf('CLEAN')">Kirim ke Unit</button>`;
                 }
 
-                form.html(btns);
-                UI.open('act-modal');
+                form.html(html);
+                // Populate Units if needed
+                if(status === 'READY') {
+                    const opts = State.data.units.map(u => `<option value="${u.UnitCode}">${u.UnitName}</option>`).join('');
+                    $('#distUnit').append(opts);
+                }
+
+                UI.openModal('actionModal');
             },
-            conf: async (toStatus) => {
-                const payload = { linenIds: [State.actItem.id], toStatus, operator: State.user.name };
-                
-                if(toStatus === 'WASHING') {
-                    const machines = State.data.machines.filter(m=>m.Status==='Idle');
-                    if(machines.length===0) return UI.msg('Mesin penuh/maintenance', 'error');
-                    payload.machineId = prompt("Pilih Mesin ID:\n" + machines.map(m=>`${m.MachineID} - ${m.Name}`).join('\n'), machines[0].MachineID);
-                    if(!payload.machineId) return;
-                } else if (toStatus === 'CLEAN') {
-                    payload.targetUnit = $('#dist-unit').val();
-                    if(!payload.targetUnit) return UI.msg('Pilih unit', 'warning');
+            conf: async function(nextStatus) {
+                const payload = {
+                    linenIds: [State.actItem.id],
+                    toStatus: nextStatus,
+                    operator: State.user.name
+                };
+
+                if(nextStatus === 'WASHING') {
+                    // Pilih Mesin
+                    const machines = State.data.machines.filter(m => m.Status === 'Idle');
+                    if(machines.length === 0) return UI.toast("Tidak ada mesin kosong!", "error");
+                    
+                    // Prompt sederhana (Dalam produksi gunakan Modal Select)
+                    const mId = prompt("Pilih Mesin ID:\n" + machines.map(m=>`${m.MachineID} - ${m.Name}`).join('\n'), machines[0].MachineID);
+                    if(!mId) return;
+                    payload.machineId = mId;
+
+                } else if (nextStatus === 'CLEAN') {
+                    const uCode = $('#distUnit').val();
+                    if(!uCode) return UI.toast("Pilih Unit Tujuan!", "warning");
+                    payload.targetUnit = uCode;
                 }
 
                 const res = await API.post('process_workflow', payload);
-                UI.msg(res.message, res.status==='success'?'success':'error');
-                if(res.status==='success') { UI.close('act-modal'); API.load(); }
+                UI.toast(res.message, res.status === 'success' ? 'success' : 'error');
+                
+                if(res.status === 'success') {
+                    UI.closeModal('actionModal');
+                    App.loadData();
+                }
             }
         };
 
+        // ================= OPNAME LOGIC =================
         const Opname = {
-            start: () => {
-                const uCode = $('#op-unit').val();
-                if(!uCode) return;
+            start: function() {
+                const uCode = $('#opUnitSelect').val();
+                if(!uCode) return UI.toast("Pilih Unit dulu", "warning");
+
+                // Filter linen di unit tsb
                 const items = State.data.linen.filter(l => l.CurrentLocation === uCode && l.CurrentStatus === 'CLEAN');
-                const tbody = $('#op-tbody'); tbody.html('');
-                if(items.length===0) return UI.msg('Tidak ada linen bersih', 'warning');
+                const tbody = $('#opTableBody');
+                tbody.html('');
+
+                if(items.length === 0) return UI.toast("Tidak ada linen bersih di unit ini", "info");
 
                 items.forEach(l => {
                     tbody.append(`
                         <tr data-id="${l.LinenID}" data-sys="1">
-                            <td>${l.LinenID}</td><td>${l.Name}</td><td>1</td>
-                            <td><input type="number" class="op-phy" value="1" style="width:60px; padding:5px;"></td>
+                            <td>${l.LinenID}</td>
+                            <td>${l.Name}</td>
+                            <td>1</td>
+                            <td><input type="number" class="op-phy" value="1" style="width:60px;"></td>
                             <td class="op-diff">0</td>
                         </tr>
                     `);
                 });
-                $('#op-workspace').removeClass('hidden');
+                $('#opWorkspace').removeClass('hidden');
             },
-            submit: async () => {
+            submit: async function() {
                 const items = [];
-                $('#op-tbody tr').each(function(){
-                    items.push({ 
-                        linenId: $(this).data('id'), 
-                        systemCount: 1, // Simplifikasi untuk demo
-                        physical: parseInt($(this).find('.op-phy').val()) 
+                $('#opTableBody tr').each(function(){
+                    items.push({
+                        linenId: $(this).data('id'),
+                        systemCount: 1, // Simplifikasi
+                        physical: parseInt($(this).find('.op-phy').val())
                     });
                 });
-                const res = await API.post('submit_opname', { unit: $('#op-unit').val(), items, auditor: State.user.name });
-                UI.msg(res.message, res.status==='success'?'success':'error');
-                if(res.status==='success') { $('#op-workspace').addClass('hidden'); API.load(); }
+
+                const res = await API.post('submit_opname', {
+                    unit: $('#opUnitSelect').val(),
+                    items: items,
+                    auditor: State.user.name
+                });
+
+                UI.toast(res.message, res.status === 'success' ? 'success' : 'error');
+                if(res.status === 'success') {
+                    $('#opWorkspace').addClass('hidden');
+                    App.loadData();
+                }
             }
         };
 
-        // ========================
-        // UI RENDER & UTILS
-        // ========================
+        // ================= APP CONTROLLER =================
         const App = {
-            nav: (id) => {
-                $('div[id^="v-"]').hide(); $(`#v-${id}`).show();
-                $('.nav-item').removeClass('active'); $(event.currentTarget).addClass('active');
+            nav: function(id) {
+                $('div[id^="view-"]').hide();
+                $(`#view-${id}`).show();
+                $('.nav-item').removeClass('active');
+                $(event.currentTarget).addClass('active');
             },
-            refresh: () => API.load(),
-            renderAll: () => {
-                // KANBAN
+            refresh: function() { this.loadData(); },
+            loadData: async function() {
+                const res = await API.post('get_all_data');
+                if(res.status === 'success') {
+                    State.data = res.data;
+                    this.render();
+                } else {
+                    UI.toast("Gagal Load Data", "error");
+                }
+            },
+            render: function() {
                 const l = State.data.linen;
-                const r = l.filter(x => ['DIRTY','RECEIVED'].includes(x.CurrentStatus));
-                const p = l.filter(x => ['WASHING','FINISHING'].includes(x.CurrentStatus));
-                const o = l.filter(x => ['READY','CLEAN'].includes(x.CurrentStatus));
-                const a = l.filter(x => ['DAMAGED','MISSING'].includes(x.CurrentStatus));
                 
-                const renderC = (id, data, cls) => {
+                // Helper Render Kanban
+                const renderCard = (id, data, cls) => {
                     const el = $(`#${id}`); el.html('');
-                    data.forEach(d => el.append(`<div class="l-card ${cls}" onclick="Workflow.click('${d.LinenID}','${d.CurrentStatus}')"><b>${d.LinenID}</b><br><small>${d.Name}</small></div>`));
+                    data.forEach(d => {
+                        el.append(`<div class="l-card ${cls}" onclick="Workflow.click('${d.LinenID}','${d.CurrentStatus}')"><b>${d.LinenID}</b><br><small>${d.Name}</small></div>`);
+                    });
                 };
-                renderC('kanban-dirty', r, 'status-Dirty');
-                renderC('kanban-proc', p, 'status-Washing');
-                renderC('kanban-out', o, 'status-Ready');
-                renderC('kanban-alert', a, 'status-Damaged');
 
-                $('#c-dirty').text(r().length); $('#c-proc').text(p().length); $('#c-out').text(o().length);
+                const dirty = l.filter(x => ['DIRTY','RECEIVED'].includes(x.CurrentStatus));
+                const proc = l.filter(x => ['WASHING'].includes(x.CurrentStatus));
+                const out = l.filter(x => ['READY','CLEAN'].includes(x.CurrentStatus));
+                const alert = l.filter(x => ['DAMAGED'].includes(x.CurrentStatus));
 
-                // INVENTORY
-                $('#inv-tbody').html(State.data.inventory.map(x=>`<tr><td>${x.ItemName}</td><td>${x.Category}</td><td style="${x.Stock<x.MinStock?'color:red;font-weight:bold':''}">${x.Stock}</td><td>${x.Unit}</td><td>${x.Stock<x.MinStock?'LOW':'OK'}</td></tr>`).join(''));
+                renderCard('k-inbound', dirty, 'dirty');
+                renderCard('k-process', proc, 'process');
+                renderCard('k-outbound', out, 'ready');
+                renderCard('k-alert', alert, 'alert');
 
-                // MACHINES
-                $('#mach-tbody').html(State.data.machines.map(x=>`<tr><td>${x.MachineID}</td><td>${x.Name}</td><td>${x.Capacity}</td><td><span class="badge ${x.Status==='Running'?'bg-blue':'bg-green'}">${x.Status}</span></td><td><button class="btn btn-sm btn-outline">Log</button></td></tr>`).join(''));
+                $('#c-inbound').text(dirty.length);
+                $('#c-process').text(proc.length);
+                $('#c-outbound').text(out.length);
 
-                // UNITS
-                $('#op-unit').html('<option>Pilih Unit...</option>' + State.data.units.map(u=>`<option value="${u.UnitCode}">${u.UnitName}</option>`).join(''));
+                // Inventory Table
+                $('#invTableBody').html(State.data.inventory.map(x => `
+                    <tr>
+                        <td>${x.ItemName}</td><td>${x.Category}</td>
+                        <td class="${x.Stock < x.MinStock ? 'text-red font-bold' : ''}">${x.Stock}</td>
+                        <td>${x.Unit}</td>
+                        <td>${x.Stock < x.MinStock ? 'LOW' : 'OK'}</td>
+                    </tr>
+                `).join(''));
+
+                // Machine Table
+                $('#machTableBody').html(State.data.machines.map(x => `
+                    <tr>
+                        <td>${x.MachineID}</td><td>${x.Name}</td><td>${x.Capacity}</td>
+                        <td><span class="badge ${x.Status==='Running'?'bg-blue':'bg-green'}">${x.Status}</span></td>
+                        <td><button class="btn btn-sm btn-outline">Log</button></td>
+                    </tr>
+                `).join(''));
+
+                // User Table (Admin)
+                $('#userTableBody').html(State.data.users.map(u => `
+                    <tr>
+                        <td>${u.Username}</td><td>${u.Fullname}</td><td>${u.Role}</td>
+                        <td>${u.Status}</td>
+                        <td>${u.Status==='Pending' ? '<button class="btn btn-sm btn-primary" onclick="approveUser(\''+u.Username+'\')">Approve</button>' : '-'}</td>
+                    </tr>
+                `).join(''));
+
+                // Unit Select
+                $('#opUnitSelect').html('<option value="">-- Pilih Unit --</option>' + State.data.units.map(u => `<option value="${u.UnitCode}">${u.UnitName}</option>`).join(''));
             }
         };
 
-        const UI = {
-            load: (s) => { if(s) { const l=$('#loading'); if(l.length) l.show(); else $('<div id="loading">').css({position:'fixed',inset:0,background:'rgba(255,255,255,0.8)',zIndex:999,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:'bold'}).text('Loading...').appendTo('body'); } else $('#loading').remove(); },
-            msg: (t,ty) => { 
-                const c=document.createElement('div');
-                c.className='toast';
-                c.style.cssText=`position:fixed;bottom:20px;right:20px;background:${ty==='error'?'#ef4444':ty==='success'?'#22c55e':'#3b82f6'};color:white;padding:12px 20px;border-radius:8px;z-index:10000;animation:slide 0.3s;`;
-                c.innerText=t; document.body.appendChild(c); setTimeout(()=>c.remove(),3000);
-            },
-            open: (id) => $(`#${id}`).addClass('active'),
-            close: (id) => $(`#${id}`).removeClass('active')
+        const approveUser = async function(username) {
+            if(!confirm("Setujui user ini?")) return;
+            const res = await API.post('approve_user', { targetUsername: username });
+            UI.toast(res.message, res.status === 'success' ? 'success' : 'error');
+            if(res.status === 'success') App.loadData();
         };
 
-        // INIT
-        $('#form-login').on('submit', Auth.login);
+        // ================= UTILS =================
+        const UI = {
+            loading: function(show) {
+                if(show) $('body').css('cursor', 'wait');
+                else $('body').css('cursor', 'default');
+            },
+            toast: function(msg, type) {
+                const t = $('#toast');
+                t.text(msg);
+                t.css('background', type === 'error' ? '#ef4444' : (type === 'success' ? '#22c55e' : '#f59e0b'));
+                t.fadeIn();
+                setTimeout(() => t.fadeOut(), 3000);
+            },
+            openModal: function(id) { $(`#${id}`).addClass('active'); },
+            closeModal: function(id) { $(`#${id}`).removeClass('active'); }
+        };
+
+        // ================= INIT =================
+        function testConnection() {
+            UI.loading(true);
+            fetch(CONFIG.SCRIPT_URL, { method: 'GET' })
+                .then(r => r.json())
+                .then(d => {
+                    UI.loading(false);
+                    if(d.message) alert("Koneksi BERHASIL! Server Ready.\n" + d.message);
+                    else alert("Koneksi Gagal. Cek URL Web App.");
+                })
+                .catch(e => {
+                    UI.loading(false);
+                    alert("Koneksi GAGAL: " + e.message + "\nPastikan URL sudah benar.");
+                });
+        }
+
+        // State Global untuk Modal
+        State.actItem = null;
+        $(document).on('click', '.l-card', function(e) {
+            // Capture item logic handled in inline onclick
+        });
+        $('#btnActSubmit').on('click', function() {
+            // Dummy click handler, actual logic in Workflow.conf triggers via inline onclick
+        });
+
+        // Event Listeners
+        $('#loginForm').on('submit', Auth.login);
+
     </script>
 </body>
 </html>
