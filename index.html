@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RS Charlie Laundry System</title>
     
-    <!-- 1. LIBRARIES -->
+    <!-- LIBRARIES -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -18,12 +18,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); height: 100vh; overflow: hidden; font-size: 14px; }
 
-        /* LAYOUT */
         .app-container { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
         .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 20; }
         .main-content { overflow-y: auto; height: 100%; padding: 20px; display: flex; flex-direction: column; }
         
-        /* COMPONENTS */
         .nav-item { padding: 12px 20px; color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 12px; border-radius: 8px; transition: 0.2s; margin-bottom: 2px; }
         .nav-item:hover, .nav-item.active { background: #f0f9ff; color: var(--primary); font-weight: 600; }
         
@@ -31,10 +29,10 @@
         .btn { padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 13px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--dark); }
+        .btn:hover { opacity: 0.9; }
         
         input, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; font-family: inherit; }
         
-        /* KANBAN */
         .kanban { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; padding-bottom: 10px; overflow-x: auto; }
         .kanban-col { background: #f1f5f9; border-radius: 12px; padding: 15px; border: 1px solid var(--border); min-height: 200px; display: flex; flex-direction: column; }
         .kanban-cards { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
@@ -46,32 +44,26 @@
         .l-card.ready { border-left-color: var(--success); }
         .l-card.alert { border-left-color: #8b5cf6; background: #fff1f2; }
 
-        /* SCREENS */
         #login-screen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--primary), #3b82f6); display: flex; align-items: center; justify-content: center; z-index: 50; }
         .login-box { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
         .hidden { display: none !important; }
         
-        /* MODAL */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; }
 
-        /* TABLE */
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
         th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; }
         
-        /* UTILS */
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-        .text-red { color: var(--danger); }
-        .text-green { color: var(--success); }
-        .font-bold { font-weight: 700; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 10000; animation: slide 0.3s; }
+        @keyframes slide { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .error-box { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 50px; }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="login-screen">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-bottom: 20px;">RS Charlie Laundry</h2>
@@ -85,7 +77,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- APP -->
     <div class="app-container hidden" id="app">
         <nav class="sidebar">
             <div style="padding: 20px; border-bottom: 1px solid var(--border);">
@@ -93,7 +85,6 @@
             </div>
             <div style="padding: 10px;">
                 <div class="nav-item active" onclick="App.nav('workflow')"><i class="fas fa-columns"></i> Workflow</div>
-                <div class="nav-item" onclick="App.nav('opname')"><i class="fas fa-clipboard-check"></i> Stock Opname</div>
                 <div class="nav-item" onclick="App.nav('inventory')"><i class="fas fa-boxes"></i> Inventory</div>
                 <div class="nav-item" onclick="App.nav('machines')"><i class="fas fa-cogs"></i> Mesin</div>
                 <div id="adminMenu" class="hidden" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 10px;">
@@ -116,7 +107,6 @@
                 </div>
                 
                 <div class="kanban">
-                    <!-- COLUMN 1: INBOUND -->
                     <div class="kanban-col">
                         <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
                             <span style="color: var(--danger);"><i class="fas fa-inbox"></i> INBOUND</span>
@@ -125,7 +115,6 @@
                         <div id="k-inbound" class="kanban-cards"></div>
                     </div>
                     
-                    <!-- COLUMN 2: PROCESS -->
                     <div class="kanban-col">
                         <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
                             <span style="color: var(--warning);"><i class="fas fa-tshirt"></i> PROCESS</span>
@@ -134,7 +123,6 @@
                         <div id="k-process" class="kanban-cards"></div>
                     </div>
 
-                    <!-- COLUMN 3: OUTBOUND -->
                     <div class="kanban-col">
                         <div style="font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between;">
                             <span style="color: var(--success);"><i class="fas fa-check-circle"></i> OUTBOUND</span>
@@ -143,35 +131,11 @@
                         <div id="k-outbound" class="kanban-cards"></div>
                     </div>
                     
-                    <!-- COLUMN 4: ALERTS -->
                     <div class="kanban-col" style="background: #fff1f2;">
                         <div style="font-weight: 700; margin-bottom: 10px; color: #be123c;">
                             <i class="fas fa-exclamation-triangle"></i> ALERTS
                         </div>
                         <div id="k-alert" class="kanban-cards"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VIEW: STOCK OPNAME -->
-            <div id="view-opname" class="hidden">
-                <div class="card">
-                    <h3>Stock Opname (Audit)</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-top: 15px;">
-                        <select id="opUnitSelect"><option value="">-- Pilih Unit --</option></select>
-                        <button class="btn btn-primary" onclick="Opname.start()">Mulai Hitung</button>
-                    </div>
-                </div>
-                <div id="opWorkspace" class="hidden">
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                            <h3>Input Fisik</h3>
-                            <button class="btn btn-primary" onclick="Opname.submit()">Simpan Audit</button>
-                        </div>
-                        <table>
-                            <thead><tr><th>Linen ID</th><th>Nama</th><th>Sistem</th><th>Fisik</th><th>Selisih</th></tr></thead>
-                            <tbody id="opTableBody"></tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -212,7 +176,7 @@
         </main>
     </div>
 
-    <!-- MODAL: ACTION -->
+    <!-- MODAL ACTION -->
     <div class="modal" id="actionModal">
         <div class="modal-content">
             <h3 id="actTitle">Aksi Linen</h3>
@@ -225,7 +189,7 @@
         </div>
     </div>
 
-    <!-- MODAL: REGISTER -->
+    <!-- MODAL REGISTER -->
     <div class="modal" id="regModal">
         <div class="modal-content">
             <h3>Daftar Akun</h3>
@@ -239,17 +203,17 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <div id="toast-container"></div>
+
     <script>
-        // ================= CONFIG =================
         const CONFIG = {
-            // PASTE URL WEB APP BARU (HASIL DEPLOY DARI KODE BACKEND TADI) DI SINI
-            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwr-arwmZHcgBTRj3VPGu8jENEx6FMgOTED27g_RIjx5y1mdKvXRJf_CtBBbcWztUrL7w/exec"
+            // GANTI DENGAN URL DARI LANGKAH 1
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxL3d88GrbIv7iCpJu_IR2JPvV-SNmuUnxNPuwimlJe43XjV43wHnFuNECParQw3sPOFQ/exec"
         };
 
         const State = { user: null, data: {} };
 
-        // ================= API HELPERS =================
+        // API
         const API = {
             post: async function(action, data) {
                 UI.loading(true);
@@ -260,7 +224,7 @@
                     });
                     return await res.json();
                 } catch (err) {
-                    console.error("Connection Error:", err);
+                    console.error("Error:", err);
                     return { status: 'error', message: 'Koneksi Gagal: ' + err.message };
                 } finally {
                     UI.loading(false);
@@ -268,7 +232,7 @@
             }
         };
 
-        // ================= AUTHENTICATION =================
+        // AUTH
         const Auth = {
             login: async function(e) {
                 e.preventDefault();
@@ -280,47 +244,39 @@
                 
                 if (res.status === 'success') {
                     State.user = res.user;
-                    UI.toast("Selamat Datang, " + res.user.name, "success");
+                    UI.toast("Selamat Datang", "success");
                     $('#login-screen').hide();
                     $('#app').show();
                     $('#userInfo').text(res.user.name);
                     if(res.user.role === 'Admin') $('#adminMenu').removeClass('hidden');
                     App.loadData();
                 } else {
-                    // Tampilkan pesan error jelas dari backend
                     UI.toast(res.message || "Login Gagal", "error");
                 }
             },
             register: async function() {
                 const u = $('#regUser').val(), n = $('#regName').val(), p = $('#regPass').val();
                 if(!u || !n || !p) return UI.toast("Lengkapi data", "warning");
-
                 const res = await API.post('register', { username: u, fullname: n, password: p });
-                UI.toast(res.message || "Terjadi kesalahan", res.status === 'success' ? 'success' : 'error');
-                
-                if(res.status === 'success') {
-                    UI.closeModal('regModal');
-                    $('#regUser').val(''); $('#regName').val(''); $('#regPass').val('');
-                }
+                UI.toast(res.message, res.status === 'success' ? 'success' : 'error');
+                if(res.status === 'success') { UI.closeModal('regModal'); $('#regUser').val(''); $('#regName').val(''); $('#regPass').val(''); }
             }
         };
 
-        // ================= WORKFLOW LOGIC =================
+        // WORKFLOW
         const Workflow = {
             click: function(id, status) {
                 State.actItem = { id, status };
-                const form = $('#actForm');
-                form.html('');
+                const form = $('#actForm'); form.html('');
                 $('#actTitle').text(id);
-                $('#actInfo').text(`Status Sekarang: ${status}`);
+                $('#actInfo').text(`Status: ${status}`);
 
                 let html = '';
-                // Logic Button berdasarkan Status (Case Insensitive)
                 const s = String(status).toUpperCase();
                 if(s.includes('DIRTY') || s.includes('RECEIVED')) {
-                    html += `<button class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="Workflow.conf('WASHING')">Mulai Cuci (Washing)</button>`;
+                    html += `<button class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="Workflow.conf('WASHING')">Mulai Cuci</button>`;
                     html += `<button class="btn btn-outline" style="width:100%;" onclick="Workflow.conf('DAMAGED')">Lapor Rusak</button>`;
-                } else if(s.includes('WASHING') || s.includes('FINISHING')) {
+                } else if (s.includes('WASHING') || s.includes('FINISHING')) {
                     html += `<button class="btn btn-primary" style="width:100%; margin-bottom:10px;" onclick="Workflow.conf('READY')">Selesai Cuci</button>`;
                 } else if(s.includes('READY')) {
                     html += `<select id="distUnit"><option value="">Pilih Unit...</option></select>`;
@@ -328,12 +284,10 @@
                 }
 
                 form.html(html);
-                // Populate Units jika perlu
                 if(s.includes('READY')) {
                     const opts = (State.data.units || []).map(u => `<option value="${u.UnitCode}">${u.UnitName}</option>`).join('');
                     $('#distUnit').append(opts);
                 }
-
                 UI.openModal('actionModal');
             },
             conf: async function(nextStatus) {
@@ -344,15 +298,12 @@
                 };
 
                 if(nextStatus === 'WASHING') {
-                    // Pilih Mesin
                     const machines = (State.data.machines || []).filter(m => String(m.Status).toUpperCase().includes('IDLE'));
                     if(machines.length === 0) return UI.toast("Tidak ada mesin kosong!", "error");
                     
-                    // Prompt sederhana
                     const mId = prompt("Pilih Mesin ID:\n" + machines.map(m=>`${m.MachineID} - ${m.Name}`).join('\n'), machines[0].MachineID);
                     if(!mId) return;
                     payload.machineId = mId;
-
                 } else if (nextStatus === 'CLEAN') {
                     const uCode = $('#distUnit').val();
                     if(!uCode) return UI.toast("Pilih Unit Tujuan!", "warning");
@@ -361,65 +312,11 @@
 
                 const res = await API.post('process_workflow', payload);
                 UI.toast(res.message, res.status === 'success' ? 'success' : 'error');
-                
-                if(res.status === 'success') {
-                    UI.closeModal('actionModal');
-                    App.loadData();
-                }
+                if(res.status === 'success') { UI.closeModal('actionModal'); App.loadData(); }
             }
         };
 
-        // ================= OPNAME LOGIC =================
-        const Opname = {
-            start: function() {
-                const uCode = $('#opUnitSelect').val();
-                if(!uCode) return UI.toast("Pilih Unit dulu", "warning");
-
-                // Filter linen di unit tsb (Safe check)
-                const items = (State.data.linen || []).filter(l => String(l.CurrentLocation) === uCode && String(l.CurrentStatus).toUpperCase().includes('CLEAN'));
-                const tbody = $('#opTableBody');
-                tbody.html('');
-
-                if(items.length === 0) return UI.toast("Tidak ada linen bersih di unit ini", "info");
-
-                items.forEach(l => {
-                    tbody.append(`
-                        <tr data-id="${l.LinenID}" data-sys="1">
-                            <td>${l.LinenID}</td>
-                            <td>${l.Name}</td>
-                            <td>1</td>
-                            <td><input type="number" class="op-phy" value="1" style="width:60px;"></td>
-                            <td class="op-diff">0</td>
-                        </tr>
-                    `);
-                });
-                $('#opWorkspace').removeClass('hidden');
-            },
-            submit: async function() {
-                const items = [];
-                $('#opTableBody tr').each(function(){
-                    items.push({
-                        linenId: $(this).data('id'),
-                        systemCount: 1, // Simplifikasi
-                        physical: parseInt($(this).find('.op-phy').val())
-                    });
-                });
-
-                const res = await API.post('submit_opname', {
-                    unit: $('#opUnitSelect').val(),
-                    items: items,
-                    auditor: State.user.name
-                });
-
-                UI.toast(res.message, res.status === 'success' ? 'success' : 'error');
-                if(res.status === 'success') {
-                    $('#opWorkspace').addClass('hidden');
-                    App.loadData();
-                }
-            }
-        };
-
-        // ================= APP CONTROLLER (SOLID RENDER) =================
+        // CONTROLLER
         const App = {
             nav: function(id) {
                 $('div[id^="view-"]').hide();
@@ -435,51 +332,39 @@
                     this.render();
                 } else {
                     UI.toast("Gagal Load Data", "error");
-                    console.error("Load Error:", res);
                 }
             },
             render: function() {
-                try {
-                    const l = State.data.linen || [];
-                    
-                    // Helper Render Kanban
-                    const renderCard = (id, data, cls) => {
-                        const el = $(`#${id}`); el.html('');
-                        if(data.length === 0) {
-                            el.html('<p style="text-align:center;color:#999;font-size:12px;padding:10px;">Kosong</p>');
-                            return;
-                        }
-                        data.forEach(d => {
-                            // Escape Single Quote
-                            const safeName = (d.Name || '').replace(/'/g, "&#39;");
-                            const safeStatus = (d.CurrentStatus || '').replace(/'/g, "&#39;");
-                            el.append(`<div class="l-card ${cls}" onclick="Workflow.click('${d.LinenID}','${safeStatus}')"><b>${d.LinenID}</b><br><small>${safeName}</small></div>`);
-                        });
-                    };
-
-                    // Filter Logic (Case Insensitive)
-                    const dirty = l.filter(x => {
-                        const s = String(x.CurrentStatus || '').toUpperCase();
-                        return s.includes('DIRTY') || s.includes('RECEIVED');
+                const l = State.data.linen || [];
+                
+                // Render Kanban
+                const renderCard = (id, data, cls) => {
+                    const el = $(`#${id}`); el.html('');
+                    if(data.length === 0) el.html('<p style="text-align:center;color:#999;font-size:12px;padding:10px;">Kosong</p>');
+                    data.forEach(d => {
+                        const safeName = (d.Name || '').replace(/'/g, "&#39;");
+                        const safeStatus = (d.CurrentStatus || '').replace(/'/g, "&#39;");
+                        el.append(`<div class="l-card ${cls}" onclick="Workflow.click('${d.LinenID}','${safeStatus}')"><b>${d.LinenID}</b><br><small>${safeName}</small></div>`);
                     });
-                    const proc = l.filter(x => String(x.CurrentStatus || '').toUpperCase().includes('WASHING'));
-                    const out = l.filter(x => {
-                        const s = String(x.CurrentStatus || '').toUpperCase();
-                        return s.includes('READY') || s.includes('CLEAN');
-                    });
-                    const alert = l.filter(x => String(x.CurrentStatus || '').toUpperCase().includes('DAMAGED'));
+                };
 
-                    renderCard('k-inbound', dirty, 'dirty');
-                    renderCard('k-process', proc, 'process');
-                    renderCard('k-outbound', out, 'ready');
-                    renderCard('k-alert', alert, 'alert');
+                const dirty = l.filter(x => ['DIRTY','RECEIVED'].includes(x.CurrentStatus));
+                const proc = l.filter(x => ['WASHING'].includes(x.CurrentStatus));
+                const out = l.filter(x => ['READY','CLEAN'].includes(x.CurrentStatus));
+                const alert = l.filter(x => ['DAMAGED'].includes(x.CurrentStatus));
 
-                    $('#c-inbound').text(dirty.length);
-                    $('#c-process').text(proc.length);
-                    $('#c-outbound').text(out.length);
+                renderCard('k-inbound', dirty, 'dirty');
+                renderCard('k-process', proc, 'process');
+                renderCard('k-outbound', out, 'ready');
+                renderCard('k-alert', alert, 'alert');
 
-                    // Inventory Table (Safe check)
-                    $('#invTableBody').html((State.data.inventory || []).map(x => `
+                $('#c-inbound').text(dirty.length);
+                $('#c-process').text(proc.length);
+                $('#c-outbound').text(out.length);
+
+                // Render Tables (Safe Check)
+                if(State.data.inventory) {
+                    $('#invTableBody').html(State.data.inventory.map(x => `
                         <tr>
                             <td>${x.ItemName}</td><td>${x.Category}</td>
                             <td class="${x.Stock < x.MinStock ? 'text-red font-bold' : ''}">${x.Stock}</td>
@@ -487,30 +372,28 @@
                             <td>${x.Stock < x.MinStock ? 'LOW' : 'OK'}</td>
                         </tr>
                     `).join(''));
+                }
 
-                    // Machine Table (Safe check)
-                    $('#machTableBody').html((State.data.machines || []).map(x => `
+                if(State.data.machines) {
+                    $('#machTableBody').html(State.data.machines.map(x => `
                         <tr>
                             <td>${x.MachineID}</td><td>${x.Name}</td><td>${x.Capacity}</td>
                             <td><span class="badge ${String(x.Status).toUpperCase().includes('RUNNING')?'bg-blue':'bg-green'}">${x.Status}</span></td>
                             <td><button class="btn btn-sm btn-outline">Log</button></td>
                         </tr>
                     `).join(''));
+                }
 
-                    // User Table (Admin)
-                    $('#userTableBody').html((State.data.users || []).map(u => `
+                if(State.data.users) {
+                    $('#userTableBody').html(State.data.users.map(u => `
                         <tr>
                             <td>${u.Username}</td><td>${u.Fullname}</td><td>${u.Role}</td><td>${u.Status}</td>
                             <td>${u.Status==='Pending' ? '<button class="btn btn-sm btn-primary" onclick="approveUser(\''+u.Username+'\')">Approve</button>' : '-'}</td>
                         </tr>
                     `).join(''));
 
-                    // Unit Select
-                    $('#opUnitSelect').html('<option value="">-- Pilih Unit --</option>' + (State.data.units || []).map(u => `<option value="${u.UnitCode}">${u.UnitName}</option>`).join(''));
-
-                } catch (e) {
-                    console.error("Render Error:", e);
-                    UI.toast("Gagal Menampilkan Tampilan: " + e.message, "error");
+                    // Populate Select Unit
+                    $('#distUnit').html('<option value="">-- Pilih Unit --</option>' + (State.data.units || []).map(u => `<option value="${u.UnitCode}">${u.UnitName}</option>`).join(''));
                 }
             }
         };
@@ -522,24 +405,21 @@
             if(res.status === 'success') App.loadData();
         };
 
-        // ================= UTILS =================
+        // UTILS
         const UI = {
-            loading: function(show) {
-                if(show) $('body').css('cursor', 'wait');
-                else $('body').css('cursor', 'default');
-            },
+            loading: function(show) { if(show) $('body').css('cursor', 'wait'); else $('body').css('cursor', 'default'); },
             toast: function(msg, type) { 
-                const t=$('#toast'); if(t.length) t.remove();
-                const c=document.createElement('div');
-                c.className='toast';
-                c.style.cssText=`position:fixed;bottom:20px;right:20px;background:${type==='error'?'#ef4444':type==='success'?'#22c55e':'#f59e0b'};color:white;padding:12px 20px;border-radius:8px;z-index:10000;animation:slide 0.3s;`;
-                c.innerText=msg; document.body.appendChild(c); setTimeout(()=>c.remove(),3000);
+                const c=$('#toast'); if(c.length) c.remove();
+                const c2=document.createElement('div');
+                c2.className='toast';
+                c2.style.cssText=`position:fixed;bottom:20px;right:20px;background:${type==='error'?'#ef4444':type==='success'?'#22c55e':'#f59e0b'};color:white;padding:12px 20px;border-radius:8px;z-index:10000;animation:slide 0.3s;`;
+                c2.innerText=msg; document.body.appendChild(c2); setTimeout(()=>c2.remove(),3000);
             },
             openModal: function(id) { $(`#${id}`).addClass('active'); },
             closeModal: function(id) { $(`#${id}`).removeClass('active'); }
         };
 
-        // ================= INIT =================
+        // INIT
         State.actItem = null;
         $(document).ready(function() {
             $('#loginForm').on('submit', Auth.login);
@@ -547,4 +427,3 @@
     </script>
 </body>
 </html>
-
