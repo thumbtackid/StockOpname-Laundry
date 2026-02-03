@@ -564,11 +564,10 @@
 <script>
 /**
  * FRONTEND CONFIGURATION
- * PENTING: Ganti URL di bawah ini dengan URL Web App dari Google Script Anda
+ * URL DEPLOYMENT APPS SCRIPT SUDAH DIISI
  */
 const CONFIG = {
-    // GANTI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
-    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzdOHgU-ioS0QUHh8uR8sgXXTiz4GuaK45CccKdQ3ASaZPjBB183mPG64I7Cq9-of3fGQ/exec"
+    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzz2z9AEJ5CrRdSVqacxHp9TUHp63SIqkk_zsTE_zAJlr4FFmq3mUmheuoBFR3oQB91AA/exec"
 };
 
 // --- STATE MANAGEMENT ---
@@ -1166,40 +1165,34 @@ const MasterData = {
 // --- APP CONTROLLER ---
 const App = {
     currentView: 'dashboard',
-    dashChart: null, // Variabel untuk menyimpan chart instance
+    dashChart: null,
     
     nav: function(viewId) {
-        // Hide all views
         document.querySelectorAll('.view-section').forEach(el => {
             el.classList.add('hidden');
         });
         
-        // Show selected view
         const targetView = document.getElementById('view-' + viewId);
         if (targetView) {
             targetView.classList.remove('hidden');
             this.currentView = viewId;
         }
         
-        // Update active nav item
         document.querySelectorAll('.nav-item').forEach(el => {
             el.classList.remove('active');
         });
         
-        // Set clicked nav as active
         const clickedNav = document.querySelector(`.nav-item[onclick*="${viewId}"]`);
         if (clickedNav) {
             clickedNav.classList.add('active');
         }
         
-        // Perform view-specific initialization
         this.initView(viewId);
     },
     
     initView: function(viewId) {
         switch(viewId) {
             case 'dashboard':
-                // Tunggu sebentar agar DOM siap
                 setTimeout(() => {
                     this.renderDashboard();
                 }, 100);
@@ -1227,14 +1220,11 @@ const App = {
     },
     
     renderDashboard: function() {
-        // Pastikan element chart sudah ada di DOM
         const chartCanvas = document.getElementById('dashChart');
         if (!chartCanvas) {
-            console.error('Chart canvas not found in DOM');
             return;
         }
         
-        // Dashboard Stats
         const linens = State.data.linen || [];
         document.getElementById('dash-linen').textContent = linens.length;
         
@@ -1247,7 +1237,6 @@ const App = {
         ).length;
         document.getElementById('dash-maint').textContent = activeMaint;
         
-        // Chemical Stock Status
         const chemicals = State.data.chemicals || [];
         const lowStock = chemicals.filter(c => {
             const stock = parseFloat(c.StockQuantity || 0);
@@ -1264,10 +1253,7 @@ const App = {
             chemBadge.style.color = 'var(--success)';
         }
         
-        // Render Chart
         this.renderChart();
-        
-        // Render Recent Activity
         this.renderRecentActivity();
     },
     
@@ -1275,7 +1261,6 @@ const App = {
         try {
             const linens = State.data.linen || [];
             
-            // Hitung statistik
             const statusCounts = {
                 'READY': 0,
                 'WASHING': 0,
@@ -1298,7 +1283,6 @@ const App = {
                 }
             });
             
-            // Destroy existing chart jika ada
             if (this.dashChart && typeof this.dashChart.destroy === 'function') {
                 this.dashChart.destroy();
                 this.dashChart = null;
@@ -1306,11 +1290,9 @@ const App = {
             
             const ctx = document.getElementById('dashChart');
             if (!ctx) {
-                console.error('Chart canvas element not found');
                 return;
             }
             
-            // Buat chart baru
             this.dashChart = new Chart(ctx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
@@ -1324,11 +1306,11 @@ const App = {
                             statusCounts.MISSING
                         ],
                         backgroundColor: [
-                            '#10b981', // Ready - green
-                            '#3b82f6', // Washing - blue
-                            '#ef4444', // Critical - red
-                            '#f59e0b', // Damaged - yellow
-                            '#64748b'  // Missing - gray
+                            '#10b981',
+                            '#3b82f6',
+                            '#ef4444',
+                            '#f59e0b',
+                            '#64748b'
                         ],
                         borderWidth: 2,
                         borderColor: '#1e293b',
@@ -1372,8 +1354,6 @@ const App = {
             });
             
         } catch (error) {
-            console.error('Error rendering chart:', error);
-            // Fallback: tampilkan data dalam bentuk teks
             const ctx = document.getElementById('dashChart');
             if (ctx) {
                 ctx.innerHTML = `
@@ -1394,7 +1374,6 @@ const App = {
         tbody.innerHTML = '';
         const transactions = State.data.transactions || [];
         
-        // Get last 5 transactions
         const recentTransactions = transactions.slice(0, 5);
         
         if (recentTransactions.length === 0) {
@@ -1434,6 +1413,7 @@ const App = {
         Maintenance.renderActiveTickets();
     }
 };
+
 // --- UI UTILS ---
 const UI = {
     showLoading: function(show) {
@@ -1453,14 +1433,12 @@ const UI = {
         
         container.appendChild(toast);
         
-        // Auto remove after 4 seconds
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.remove();
             }
         }, 4000);
         
-        // Limit to 3 toasts at a time
         const toasts = container.querySelectorAll('.toast');
         if (toasts.length > 3) {
             toasts[0].remove();
@@ -1491,16 +1469,6 @@ const UI = {
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if Script URL is configured
-    if(CONFIG.SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbzdOHgU-ioS0QUHh8uR8sgXXTiz4GuaK45CccKdQ3ASaZPjBB183mPG64I7Cq9-of3fGQ/exec")) {
-        const msg = "⚠ PERHATIAN: Anda belum memasukkan URL Deployment Google Script!\n\n1. Deploy Apps Script Anda sebagai Web App\n2. Copy URL Deployment-nya\n3. Ganti nilai CONFIG.SCRIPT_URL di file ini";
-        console.error(msg);
-        alert(msg);
-    }
-    
-    // Inisialisasi chart instance di App object
-    App.dashChart = null;
-    
     // Check for existing session
     Auth.checkSession();
     
@@ -1568,14 +1536,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add keyboard shortcuts
     document.addEventListener('keydown', function(e) {
-        // Ctrl+R to refresh data
         if (e.ctrlKey && e.key === 'r') {
             e.preventDefault();
             Data.sync();
             UI.showToast("Refreshing data...", 'info');
         }
         
-        // Escape to close sidebar on mobile
         if (e.key === 'Escape') {
             const sidebar = document.getElementById('sidebar');
             if (window.innerWidth <= 900 && sidebar && sidebar.classList.contains('active')) {
@@ -1584,12 +1550,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Initialize app - dengan timeout untuk memastikan DOM siap
+    // Initialize app
     setTimeout(() => {
         App.nav('dashboard');
     }, 100);
     
-    // Handle window resize untuk chart responsive
+    // Handle window resize
     window.addEventListener('resize', function() {
         if (App.dashChart && typeof App.dashChart.resize === 'function') {
             App.dashChart.resize();
@@ -1611,7 +1577,3 @@ window.UI = UI;
 </script>
 </body>
 </html>
-
-
-
-
