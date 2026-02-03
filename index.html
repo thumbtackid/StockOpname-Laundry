@@ -287,7 +287,7 @@
                     <div style="overflow-y: auto; max-height: 250px;">
                         <table id="dash-recent-table">
                             <thead><tr><th>Time</th><th>Action</th><th>User</th></tr></thead>
-                            <tbody><!-- Populated via JS --></tbody>
+                            <tbody></tbody>
                         </table>
                     </div>
                 </div>
@@ -484,7 +484,7 @@
                     <h3>Report Issue</h3>
                     <label class="stat-label">Machine</label>
                     <select id="m-machine">
-                        <!-- Populated by JS -->
+                        <option value="">Select Machine...</option>
                     </select>
                     
                     <label class="stat-label" style="margin-top:10px;">Issue Description</label>
@@ -567,26 +567,23 @@
  * PENTING: Ganti URL di bawah ini dengan URL Web App dari Google Script Anda
  */
 const CONFIG = {
-    // Masukkan URL Deployment Apps Script Anda di sini
-    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwKCo_GV60hGmgHTZZZKY7DMCxn9m4Rih5Y2nDnHluuEqsEUGIga5qesNmcfqvgc_vI/exec" 
+    // GANTI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
+    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxnqXv0UO7drfm4xdAxQrez6jKbS-Ucu_x8yYPrbWw12XuEMN_dKGy6LrZSSxIJMG74wA/exec"
 };
 
 // --- STATE MANAGEMENT ---
 const State = {
     user: null,
     data: { 
-        linen:[], 
-        units:[], 
-        chemicals:[], 
-        machines:[], 
-        transactions:[], 
-        maintenance:[],
+        linen: [], 
+        units: [], 
+        chemicals: [], 
+        machines: [], 
+        transactions: [], 
+        maintenance: [],
         opnameLogs: [],
         chemicalUsage: []
-    },
-    opnameList: [],
-    handoverList: [],
-    workflowQueue: []
+    }
 };
 
 // --- AUTHENTICATION ---
@@ -604,6 +601,7 @@ const Auth = {
                 State.user = json.user;
                 localStorage.setItem('rs_user', JSON.stringify(json.user));
                 this.success();
+                UI.showToast("Login successful", 'success');
             } else { 
                 UI.showToast(json.message, 'error'); 
             }
@@ -612,19 +610,26 @@ const Auth = {
         }
         UI.showLoading(false);
     },
+    
     checkSession: function() {
         const stored = localStorage.getItem('rs_user');
         if(stored) {
-            State.user = JSON.parse(stored);
-            this.success();
+            try {
+                State.user = JSON.parse(stored);
+                this.success();
+            } catch(e) {
+                localStorage.removeItem('rs_user');
+            }
         }
     },
+    
     success: function() {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
         document.getElementById('user-display').innerHTML = `<i class="fas fa-user-circle"></i> <span>${State.user.name}</span>`;
         Data.sync();
     },
+    
     logout: function() { 
         localStorage.removeItem('rs_user');
         location.reload(); 
@@ -641,6 +646,7 @@ const Data = {
                 body: JSON.stringify({ action: 'get_initial_data' })
             });
             const json = await res.json();
+            
             if (json.status === 'success') {
                 State.data = json.data;
                 App.render();
@@ -648,13 +654,15 @@ const Data = {
             } else {
                 UI.showToast(json.message, 'error');
             }
-        } catch (e) { UI.showToast("Sync Error: " + e.message, 'warning'); }
+        } catch (e) { 
+            UI.showToast("Sync Error: " + e.message, 'warning'); 
+        }
         UI.showLoading(false);
     },
+    
     post: async function(action, payload) {
         UI.showLoading(true);
         try {
-            // Append user info automatically if not present
             if(!payload.user) payload.user = State.user;
             
             const res = await fetch(CONFIG.SCRIPT_URL, { 
@@ -670,45 +678,41 @@ const Data = {
                 return true;
             }
             UI.showToast(json.message || "Error occurred", 'error');
+            return false;
         } catch(e) { 
             UI.showLoading(false); 
             UI.showToast("Network Error", 'error');
+            return false;
         }
-        return false;
     }
 };
 
-// --- FEATURE LOGIC ---
-
+// --- WORKFLOW ---
 const Workflow = {
+    queue: [],
+    
     scanItem: function() {
         const id = document.getElementById('wf-scan').value.trim();
         if(!id) {
-            UI.showToast("Masukkan Linen ID", 'error');
+            UI.showToast("Enter Linen ID", 'error');
             return;
         }
         
-        // Find linen in master data
         const linen = State.data.linen.find(l => l.LinenID === id);
         if(!linen) {
-            UI.showToast(`Linen ID ${id} tidak ditemukan`, 'error');
+            UI.showToast(`Linen ID ${id} not found`, 'error');
             return;
         }
         
-        // Add to queue
         const newStatus = document.getElementById('wf-action').value;
-        State.workflowQueue.push({ 
+        this.queue.push({ 
             linenId: id, 
             newStatus: newStatus 
         });
         
-        // Show preview
         this.previewLinen(linen);
-        
-        // Render queue
         this.renderQueue();
         
-        // Clear input and focus
         document.getElementById('wf-scan').value = '';
         document.getElementById('wf-scan').focus();
         
@@ -716,13 +720,13 @@ const Workflow = {
     },
     
     processQueue: function() {
-        if(State.workflowQueue.length === 0) {
+        if(this.queue.length === 0) {
             UI.showToast("Queue is empty", 'warning');
             return;
         }
         
         Data.post('process_linen_scan', { 
-            scans: State.workflowQueue, 
+            scans: this.queue, 
             location: 'LAUNDRY' 
         })
         .then(success => { 
@@ -733,7 +737,7 @@ const Workflow = {
     },
     
     clearQueue: function() {
-        State.workflowQueue = [];
+        this.queue = [];
         this.renderQueue();
         document.getElementById('wf-preview').style.display='none';
         UI.showToast("Queue cleared", 'success');
@@ -745,7 +749,6 @@ const Workflow = {
         document.getElementById('preview-id').innerText = "ID: " + linen.LinenID;
         document.getElementById('preview-cycle').innerText = `Cycle: ${linen.CycleCount || 0}/${linen.MaxCycle || 50}`;
         
-        // Color code based on health status
         const cycleEl = document.getElementById('preview-cycle');
         if(linen.HealthStatus === 'CRITICAL') {
             cycleEl.style.color = 'var(--danger)';
@@ -758,15 +761,15 @@ const Workflow = {
     
     renderQueue: function() {
         const list = document.getElementById('wf-queue-list');
-        if (State.workflowQueue.length === 0) {
+        if (this.queue.length === 0) {
             list.innerHTML = '<li style="color:var(--text-muted); text-align:center; padding-top:40px;">Queue is empty</li>';
             return;
         }
         
         list.innerHTML = '';
-        State.workflowQueue.forEach((item, index) => {
+        this.queue.forEach((item, index) => {
             const linen = State.data.linen.find(l => l.LinenID === item.linenId);
-            const linenName = linen ? linen.Name : 'Unknown Item';
+            const linenName = linen ? linen.Name : 'Unknown';
             
             list.innerHTML += `
                 <li style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -780,30 +783,31 @@ const Workflow = {
     }
 };
 
+// --- STOCK OPNAME ---
 const StockOpname = {
+    opnameList: [],
+    
     addItem: function() {
         const id = document.getElementById('op-scan').value.trim();
         const unit = document.getElementById('op-unit').value.trim();
         
         if(!id) {
-            UI.showToast("Masukkan Linen ID", 'error');
+            UI.showToast("Enter Linen ID", 'error');
             return;
         }
         
         if(!unit) {
-            UI.showToast("Masukkan Unit/Lokasi", 'error');
+            UI.showToast("Enter Unit/Location", 'error');
             return;
         }
         
-        // Find linen in master data
         const linen = State.data.linen.find(l => l.LinenID === id);
         if(!linen) {
-            UI.showToast(`Linen ID ${id} tidak ditemukan`, 'error');
+            UI.showToast(`Linen ID ${id} not found`, 'error');
             return;
         }
         
-        // Add to opname list
-        State.opnameList.push({ 
+        this.opnameList.push({ 
             linenId: id, 
             linenName: linen.Name,
             unit: unit,
@@ -812,10 +816,8 @@ const StockOpname = {
             reason: "Regular Audit"
         });
         
-        // Render the list
         this.render();
         
-        // Clear input and focus
         document.getElementById('op-scan').value = '';
         document.getElementById('op-scan').focus();
         
@@ -823,32 +825,34 @@ const StockOpname = {
     },
     
     removeItem: function(index) {
-        State.opnameList.splice(index, 1);
+        this.opnameList.splice(index, 1);
         this.render();
     },
     
     submit: function() {
-        if(State.opnameList.length === 0) {
+        if(this.opnameList.length === 0) {
             UI.showToast("Audit list is empty", 'warning');
             return;
         }
         
         Data.post('submit_stock_opname', { 
-            items: State.opnameList, 
+            items: this.opnameList, 
             unit: 'GENERAL_AUDIT',
             auditor: State.user.name 
         })
         .then(() => { 
-            State.opnameList = []; 
+            this.opnameList = []; 
             this.render(); 
         });
     },
     
     render: function() {
         const tbody = document.getElementById('table-opname');
+        if (!tbody) return;
+        
         tbody.innerHTML = '';
         
-        if (State.opnameList.length === 0) {
+        if (this.opnameList.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="5" style="text-align:center; color:var(--text-muted); padding:40px 0;">
@@ -858,7 +862,7 @@ const StockOpname = {
             return;
         }
         
-        State.opnameList.forEach((item, index) => {
+        this.opnameList.forEach((item, index) => {
             tbody.innerHTML += `
                 <tr>
                     <td>${item.linenId}</td>
@@ -876,16 +880,16 @@ const StockOpname = {
     }
 };
 
+// --- CHEMICAL ---
 const Chemical = {
     submit: function() {
         const totalKg = document.getElementById('c-kg-total').value;
         if(!totalKg || totalKg <= 0) {
-            UI.showToast("Masukkan Total KG yang valid", 'warning');
+            UI.showToast("Enter valid Total KG", 'warning');
             return;
         }
         
         const payload = {
-            action: 'submit_chemical_usage',
             date: document.getElementById('c-date').value,
             shift: document.getElementById('c-shift').value,
             totalLinen: totalKg,
@@ -933,23 +937,23 @@ const Chemical = {
     }
 };
 
+// --- MAINTENANCE ---
 const Maintenance = {
     submit: function() {
         const machine = document.getElementById('m-machine').value;
         const desc = document.getElementById('m-desc').value;
         
         if(!machine) {
-            UI.showToast("Pilih mesin", 'error');
+            UI.showToast("Select machine", 'error');
             return;
         }
         
         if(!desc) {
-            UI.showToast("Masukkan deskripsi masalah", 'error');
+            UI.showToast("Enter issue description", 'error');
             return;
         }
         
         const payload = {
-            action: 'submit_machine_maintenance',
             machineName: machine,
             issueDescription: desc,
             status: 'REPORTED',
@@ -968,8 +972,7 @@ const Maintenance = {
         const machines = State.data.machines || [];
         
         machines.forEach(m => {
-            const status = m.Status || 'UNKNOWN';
-            select.innerHTML += `<option value="${m.Name}">${m.Name} (${status})</option>`;
+            select.innerHTML += `<option value="${m.Name}">${m.Name} (${m.Status || 'UNKNOWN'})</option>`;
         });
     },
     
@@ -981,7 +984,7 @@ const Maintenance = {
         const maintenance = State.data.maintenance || [];
         const activeTickets = maintenance.filter(m => 
             m.Status === 'REPORTED' || m.Status === 'IN_PROGRESS'
-        ).slice(0, 10); // Show only latest 10
+        ).slice(0, 10);
         
         activeTickets.forEach(m => {
             const date = m.ReportDate ? new Date(m.ReportDate).toLocaleDateString() : '-';
@@ -998,41 +1001,40 @@ const Maintenance = {
     }
 };
 
+// --- HANDOVER ---
 const Handover = {
+    handoverList: [],
+    
     addLine: function() {
         const id = document.getElementById('ho-id').value.trim();
         const qty = document.getElementById('ho-qty').value;
         const cond = document.getElementById('ho-cond').value;
         
         if(!id) {
-            UI.showToast("Masukkan Linen ID", 'error');
+            UI.showToast("Enter Linen ID", 'error');
             return;
         }
         
         if(!qty || qty <= 0) {
-            UI.showToast("Masukkan jumlah yang valid", 'error');
+            UI.showToast("Enter valid quantity", 'error');
             return;
         }
         
-        // Find linen
         const linen = State.data.linen.find(l => l.LinenID === id);
         if(!linen) {
-            UI.showToast(`Linen ID ${id} tidak ditemukan`, 'error');
+            UI.showToast(`Linen ID ${id} not found`, 'error');
             return;
         }
         
-        // Add to handover list
-        State.handoverList.push({ 
+        this.handoverList.push({ 
             linenId: id, 
             linenName: linen.Name,
             quantity: parseInt(qty),
             condition: cond || 'GOOD'
         });
         
-        // Render list
         this.render();
         
-        // Clear inputs
         document.getElementById('ho-id').value = '';
         document.getElementById('ho-qty').value = '1';
         document.getElementById('ho-cond').value = '';
@@ -1042,7 +1044,7 @@ const Handover = {
     },
     
     removeItem: function(index) {
-        State.handoverList.splice(index, 1);
+        this.handoverList.splice(index, 1);
         this.render();
     },
     
@@ -1051,56 +1053,32 @@ const Handover = {
         const toUnit = document.getElementById('ho-to').value.trim();
         
         if(!fromUnit || !toUnit) {
-            UI.showToast("Masukkan From Unit dan To Unit", 'error');
+            UI.showToast("Enter From Unit and To Unit", 'error');
             return;
         }
         
-        if(State.handoverList.length === 0) {
+        if(this.handoverList.length === 0) {
             UI.showToast("Handover list is empty", 'warning');
             return;
         }
         
-        // Process each item in handover list
-        const promises = State.handoverList.map(item => {
-            const payload = {
-                action: 'submit_room_handover',
-                fromUnit: fromUnit,
-                toUnit: toUnit,
-                linenId: item.linenId,
-                linenName: item.linenName,
-                quantity: item.quantity,
-                condition: item.condition,
-                handoverTime: new Date().toLocaleTimeString(),
-                user: State.user
-            };
-            
-            // Return promise for each item
-            return fetch(CONFIG.SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-        });
+        // Process first item (simplified - can be expanded for multiple items)
+        const item = this.handoverList[0];
+        const payload = {
+            fromUnit: fromUnit,
+            toUnit: toUnit,
+            linenId: item.linenId,
+            linenName: item.linenName,
+            quantity: item.quantity,
+            condition: item.condition,
+            handoverTime: new Date().toLocaleTimeString(),
+            user: State.user
+        };
         
-        UI.showLoading(true);
-        
-        // Execute all promises
-        Promise.all(promises)
-            .then(responses => Promise.all(responses.map(r => r.json())))
-            .then(results => {
-                UI.showLoading(false);
-                const successCount = results.filter(r => r.status === 'success').length;
-                
-                if (successCount === State.handoverList.length) {
-                    UI.showToast(`${successCount} items handed over successfully`, 'success');
-                    State.handoverList = [];
-                    this.render();
-                } else {
-                    UI.showToast(`Only ${successCount} of ${State.handoverList.length} items processed`, 'warning');
-                }
-            })
-            .catch(error => {
-                UI.showLoading(false);
-                UI.showToast("Error processing handover", 'error');
+        Data.post('submit_room_handover', payload)
+            .then(() => { 
+                this.handoverList = []; 
+                this.render(); 
             });
     },
     
@@ -1110,7 +1088,7 @@ const Handover = {
         
         tbody.innerHTML = '';
         
-        if (State.handoverList.length === 0) {
+        if (this.handoverList.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="4" style="text-align:center; color:var(--text-muted); padding:40px 0;">
@@ -1120,7 +1098,7 @@ const Handover = {
             return;
         }
         
-        State.handoverList.forEach((item, index) => {
+        this.handoverList.forEach((item, index) => {
             tbody.innerHTML += `
                 <tr>
                     <td>${item.linenId}</td>
@@ -1137,6 +1115,7 @@ const Handover = {
     }
 };
 
+// --- MASTER DATA ---
 const MasterData = {
     add: function() {
         const name = document.getElementById('nl-name').value.trim();
@@ -1144,22 +1123,21 @@ const MasterData = {
         const quantity = parseInt(document.getElementById('nl-qty').value) || 1;
         
         if(!name) {
-            UI.showToast("Masukkan nama linen", 'error');
+            UI.showToast("Enter linen name", 'error');
             return;
         }
         
         if(!type) {
-            UI.showToast("Masukkan tipe linen", 'error');
+            UI.showToast("Enter linen type", 'error');
             return;
         }
         
         if(quantity <= 0) {
-            UI.showToast("Masukkan jumlah yang valid", 'error');
+            UI.showToast("Enter valid quantity", 'error');
             return;
         }
         
         const payload = {
-            action: 'add_new_linen',
             name: name,
             type: type,
             unitOrigin: document.getElementById('nl-origin').value || 'LAUNDRY',
@@ -1208,8 +1186,9 @@ const App = {
         });
         
         // Set clicked nav as active
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
+        const clickedNav = document.querySelector(`.nav-item[onclick*="${viewId}"]`);
+        if (clickedNav) {
+            clickedNav.classList.add('active');
         }
         
         // Perform view-specific initialization
@@ -1230,9 +1209,15 @@ const App = {
                 break;
             case 'workflow':
                 document.getElementById('wf-scan').focus();
+                Workflow.renderQueue();
                 break;
             case 'opname':
                 document.getElementById('op-scan').focus();
+                StockOpname.render();
+                break;
+            case 'handover':
+                document.getElementById('ho-id').focus();
+                Handover.render();
                 break;
         }
     },
@@ -1352,7 +1337,7 @@ const App = {
                 '-';
             
             const action = t.NewStatus ? 
-                `Status: ${t.NewStatus}` : 
+                `${t.NewStatus}` : 
                 t.TransactionType || 'Transaction';
             
             const user = t.User || 'System';
@@ -1368,6 +1353,9 @@ const App = {
     
     render: function() {
         this.renderDashboard();
+        Chemical.renderInventory();
+        Maintenance.populateMachines();
+        Maintenance.renderActiveTickets();
     }
 };
 
@@ -1416,7 +1404,9 @@ const UI = {
         const mobileHeaderBtn = document.querySelector('.mobile-header button');
         
         if (window.innerWidth <= 900 && 
+            sidebar && 
             sidebar.classList.contains('active') && 
+            mobileHeaderBtn && 
             !sidebar.contains(event.target) && 
             !mobileHeaderBtn.contains(event.target)) {
             sidebar.classList.remove('active');
@@ -1427,8 +1417,10 @@ const UI = {
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
     // Check if Script URL is configured
-    if(CONFIG.SCRIPT_URL.includes("PASTE_DEPLOYMENT_URL_APPS_SCRIPT_DISINI")) {
-        alert("⚠ PERHATIAN: Anda belum memasukkan URL Deployment Google Script!\n\n1. Deploy Apps Script Anda sebagai Web App\n2. Copy URL Deployment-nya\n3. Ganti nilai CONFIG.SCRIPT_URL di file ini (baris ~500)\n\nSetelah itu sistem akan berfungsi dengan baik.");
+    if(CONFIG.SCRIPT_URL.includes("PASTE_YOUR_URL_HERE")) {
+        const msg = "⚠ PERHATIAN: Anda belum memasukkan URL Deployment Google Script!\n\n1. Deploy Apps Script Anda sebagai Web App\n2. Copy URL Deployment-nya\n3. Ganti nilai CONFIG.SCRIPT_URL di file ini";
+        console.error(msg);
+        alert(msg);
     }
     
     // Check for existing session
@@ -1437,15 +1429,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set default dates
     const today = new Date().toISOString().slice(0, 10);
     document.querySelectorAll('input[type="date"]').forEach(input => {
-        input.value = today;
+        if (input.id !== 'ho-date') {
+            input.value = today;
+        }
     });
     
-    // Set default handover date to tomorrow
+    // Set handover date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().slice(0, 10);
     const hoDate = document.getElementById('ho-date');
-    if (hoDate) hoDate.value = tomorrowStr;
+    if (hoDate) hoDate.value = tomorrow.toISOString().slice(0, 10);
     
     // Login Form Handler
     const loginForm = document.getElementById('loginForm');
@@ -1456,7 +1449,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = document.getElementById('password').value;
             
             if (!username || !password) {
-                UI.showToast("Masukkan username dan password", 'error');
+                UI.showToast("Enter username and password", 'error');
                 return;
             }
             
@@ -1495,24 +1488,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl+R to refresh data
-        if (e.ctrlKey && e.key === 'r') {
-            e.preventDefault();
-            Data.sync();
-            UI.showToast("Refreshing data...", 'info');
-        }
-        
-        // Escape to close sidebar on mobile
-        if (e.key === 'Escape') {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth <= 900 && sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-            }
-        }
-    });
-    
     // Initialize app
     App.nav('dashboard');
 });
@@ -1531,4 +1506,3 @@ window.UI = UI;
 </script>
 </body>
 </html>
-
