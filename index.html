@@ -3,51 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RS Laundry Intelligence OS</title>
-    <!-- Font & Icons -->
+    <title>RS Laundry OS Enterprise</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js for Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
             --bg-dark: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8;
             --primary: #3b82f6; --primary-glow: rgba(59, 130, 246, 0.5);
             --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-            --glass: rgba(30, 41, 59, 0.7);
             --border: rgba(255,255,255,0.1);
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
         body {
             font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main);
             font-size: 13px; height: 100vh; overflow: hidden;
         }
+        h1, h2, h3 { font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
 
-        h1, h2, h3, .brand-font { font-family: 'Rajdhani', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* LOGIN SCREEN */
+        /* LOGIN */
         #login-screen {
-            position: fixed; inset: 0; background: linear-gradient(135deg, #020617, #172554);
+            position: fixed; inset: 0; background: linear-gradient(135deg, #020617, #1e1b4b);
             z-index: 9999; display: flex; justify-content: center; align-items: center;
-            background-image: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15), transparent 50%);
         }
         .login-box {
-            width: 90%; max-width: 360px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border);
+            width: 90%; max-width: 340px; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border);
             backdrop-filter: blur(20px); padding: 30px; border-radius: 16px; text-align: center;
-            box-shadow: 0 0 40px rgba(59, 130, 246, 0.2);
         }
 
         /* LAYOUT */
-        .app-layout { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
-
-        /* Sidebar */
+        .app-layout { display: grid; grid-template-columns: 250px 1fr; height: 100vh; }
         .sidebar {
             background: var(--bg-card); border-right: 1px solid var(--border); display: flex;
-            flex-direction: column; padding: 20px 0;
+            flex-direction: column; padding: 20px 0; overflow-y: auto;
         }
-        .brand { padding: 0 24px 20px; font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-
+        .brand { padding: 0 24px 20px; font-size: 1.2rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        
+        .nav-group { padding: 15px 24px 5px; font-size: 0.7rem; color: #64748b; font-weight: 700; letter-spacing: 1px; }
         .nav-item {
             padding: 12px 24px; color: var(--text-muted); display: flex; align-items: center; gap: 12px;
             cursor: pointer; transition: 0.3s; border-left: 3px solid transparent;
@@ -55,77 +50,57 @@
         .nav-item:hover, .nav-item.active {
             background: rgba(59, 130, 246, 0.1); color: var(--primary); border-left-color: var(--primary);
         }
-        .nav-group { padding: 15px 24px 5px; font-size: 0.7rem; color: #64748b; font-weight: 700; letter-spacing: 1px; }
 
-        /* Main Content */
-        .main-content { padding: 24px; overflow-y: auto; height: 100%; position: relative; }
-
-        /* Components */
+        /* CONTENT */
+        .main-content { padding: 24px; overflow-y: auto; height: 100%; }
         .card {
             background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-            padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden;
+            padding: 20px; margin-bottom: 20px;
         }
-        .card::before {
-            content:''; position: absolute; top:0; left:0; width:4px; height:100%;
-            background: var(--border); transition: 0.3s;
-        }
-        .card:hover::before { background: var(--primary); box-shadow: 2px 0 10px var(--primary-glow); }
-
         .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-
         .stat-value { font-size: 2rem; font-weight: 700; font-family: 'Rajdhani'; margin: 5px 0; }
         .stat-label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
-        .trend-up { color: var(--success); font-size: 0.8rem; }
-        .trend-down { color: var(--danger); font-size: 0.8rem; }
 
-        /* Forms */
+        /* FORMS & BUTTONS */
         input, select, textarea {
             width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border);
-            color: white; padding: 12px; border-radius: 8px; font-family: inherit; margin-bottom: 10px;
+            color: white; padding: 10px; border-radius: 6px; font-family: inherit; margin-bottom: 10px;
         }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
-
         .btn {
-            background: var(--primary); color: white; border: none; padding: 12px 20px;
-            border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-            transition: 0.2s;
+            background: var(--primary); color: white; border: none; padding: 10px 16px;
+            border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
         }
-        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .btn-outline { background: transparent; border: 1px solid var(--border); }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
         .btn-danger { background: var(--danger); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
 
-        /* Tables */
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.75rem; border-bottom: 1px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { text-align: left; padding: 10px; color: var(--text-muted); border-bottom: 1px solid var(--border); font-size: 0.7rem; }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Badges */
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        /* BADGES */
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
         .bg-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
         .bg-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
         .bg-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
         .bg-info { background: rgba(59, 130, 246, 0.2); color: var(--primary); }
 
-        /* Utilities */
+        /* UTILS */
         .hidden { display: none !important; }
-        .flex { display: flex; align-items: center; gap: 10px; }
-
+        .flex { display: flex; gap: 10px; align-items: center; }
+        .flex-between { justify-content: space-between; }
         #loading-overlay {
-            position: fixed; inset: 0; background: rgba(15,23,42,0.9); z-index: 5000;
+            position: fixed; inset: 0; background: rgba(15,23,42,0.95); z-index: 5000;
             display: none; justify-content: center; align-items: center; flex-direction: column;
         }
-        .scanner-line {
-            width: 200px; height: 2px; background: var(--success);
-            box-shadow: 0 0 10px var(--success); animation: scan 2s infinite;
-        }
-        @keyframes scan { 0% { width: 0; opacity: 0; } 50% { width: 200px; opacity: 1; } 100% { width: 0; opacity: 0; margin-left: 200px; } }
 
-        /* Mobile */
+        /* MOBILE */
         @media (max-width: 768px) {
             .app-layout { grid-template-columns: 1fr; }
-            .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; z-index: 1000; transition: 0.3s; }
+            .sidebar { position: fixed; left: -250px; top: 0; bottom: 0; z-index: 1000; transition: 0.3s; width: 250px; }
             .sidebar.active { left: 0; }
-            .mobile-header { display: flex !important; justify-content: space-between; padding: 15px; background: var(--bg-dark); border-bottom: 1px solid var(--border); }
+            .mobile-header { display: flex !important; padding: 15px; background: var(--bg-dark); justify-content: space-between; border-bottom: 1px solid var(--border); }
         }
         @media (min-width: 769px) { .mobile-header { display: none; } }
     </style>
@@ -134,206 +109,195 @@
 
 <!-- LOADING -->
 <div id="loading-overlay">
-    <div class="scanner-line"></div>
-    <p style="margin-top:20px; letter-spacing: 2px;">SYNCING DATA...</p>
+    <div style="font-size: 3rem; color: var(--primary);"><i class="fas fa-spinner fa-spin"></i></div>
+    <p style="margin-top:10px;">SYNCING ENTERPRISE DATA...</p>
 </div>
 
 <!-- LOGIN -->
 <section id="login-screen">
     <div class="login-box">
-        <div style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"><i class="fas fa-dna"></i></div>
-        <h1 style="margin-bottom: 5px;">RS Laundry OS</h1>
-        <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem;">INTELLIGENT ASSET MANAGEMENT</p>
-
+        <i class="fas fa-hospital-alt fa-3x" style="color:var(--primary); margin-bottom:15px;"></i>
+        <h1 style="margin-bottom:5px;">RS LAUNDRY OS</h1>
+        <p style="color:var(--text-muted); margin-bottom:20px; font-size:0.8rem;">ENTERPRISE EDITION</p>
         <form id="loginForm">
-            <input type="text" id="username" placeholder="NIP / Username" required>
+            <input type="text" id="username" placeholder="Username" required>
             <input type="password" id="password" placeholder="Password" required>
-            <button type="submit" class="btn" style="width: 100%; justify-content: center;">AUTHENTICATE</button>
+            <button type="submit" class="btn" style="width:100%;">LOGIN</button>
         </form>
-        <p style="margin-top: 20px; font-size: 0.7rem; color: var(--text-muted);">SECURE CONNECTION // ENCRYPTED</p>
     </div>
 </section>
 
-<!-- APP INTERFACE -->
+<!-- APP -->
 <div class="app-layout hidden" id="main-app">
-    <!-- Mobile Header -->
     <div class="mobile-header">
         <button class="btn-outline" style="border:none; color:white; padding:0;" onclick="toggleSidebar()"><i class="fas fa-bars fa-lg"></i></button>
         <span style="font-weight:700;">LAUNDRY OS</span>
         <i class="fas fa-user-circle fa-lg"></i>
     </div>
 
-    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
-        <div class="brand"><i class="fas fa-dna"></i> LAUNDRY OS</div>
-
+        <div class="brand"><i class="fas fa-hospital-alt"></i> RS LAUNDRY</div>
+        
         <div class="nav-group">MONITORING</div>
-        <div class="nav-item active" onclick="App.nav('dashboard')"><i class="fas fa-chart-pie"></i> Executive Dashboard</div>
-        <div class="nav-item" onclick="App.nav('live-track')"><i class="fas fa-satellite-dish"></i> Live Tracking</div>
-
+        <div class="nav-item active" onclick="App.nav('dashboard')"><i class="fas fa-chart-line"></i> Executive Dashboard</div>
+        
         <div class="nav-group">OPERATIONS</div>
-        <div class="nav-item" onclick="App.nav('workflow')"><i class="fas fa-random"></i> Workflow Scan</div>
-        <div class="nav-item" onclick="App.nav('opname')"><i class="fas fa-clipboard-check"></i> Stock Opname (Audit)</div>
+        <div class="nav-item" onclick="App.nav('workflow')"><i class="fas fa-qrcode"></i> Linen Scan Workflow</div>
+        <div class="nav-item" onclick="App.nav('opname')"><i class="fas fa-clipboard-check"></i> Stock Opname</div>
+        <div class="nav-item" onclick="App.nav('handover')"><i class="fas fa-exchange-alt"></i> Room Handover</div>
 
-        <div class="nav-group">INTELLIGENCE</div>
-        <div class="nav-item" onclick="App.nav('forensic')"><i class="fas fa-search-location"></i> Forensic Audit</div>
-        <div class="nav-item" onclick="App.nav('prediction')"><i class="fas fa-brain"></i> AI Prediction</div>
+        <div class="nav-group">RESOURCES</div>
+        <div class="nav-item" onclick="App.nav('chemical')"><i class="fas fa-flask"></i> Chemical & Usage</div>
+        <div class="nav-item" onclick="App.nav('maintenance')"><i class="fas fa-tools"></i> Machine Maintenance</div>
 
-        <div style="margin-top: auto; padding: 20px;">
-            <div style="font-size: 0.7rem; color: var(--text-muted);">LOGGED IN AS:</div>
-            <div id="user-display" style="font-weight: 600;">-</div>
-            <div id="role-display" style="color: var(--primary); font-size: 0.8rem; margin-bottom: 10px;">-</div>
-            <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="Auth.logout()"><i class="fas fa-power-off"></i> LOGOUT</button>
+        <div style="margin-top:auto; padding:20px;">
+            <div style="font-size:0.7rem; color:var(--text-muted);">LOGGED IN:</div>
+            <div id="user-display" style="font-weight:600;">-</div>
+            <button class="btn btn-danger" style="width:100%; margin-top:10px; justify-content:center;" onclick="Auth.logout()">LOGOUT</button>
         </div>
     </nav>
 
-    <!-- Main View -->
     <main class="main-content">
-
         <!-- DASHBOARD -->
         <section id="view-dashboard" class="view-section">
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <header class="flex-between" style="margin-bottom:20px;">
                 <h2>Executive Dashboard</h2>
-                <span class="badge bg-info" id="clock">00:00</span>
+                <span class="badge bg-info" id="clock">--:--</span>
             </header>
-
+            
             <div class="grid-4">
                 <div class="card">
-                    <div class="stat-label">Total Asset Value</div>
-                    <div class="stat-value">Rp 2.4M</div>
-                    <div class="trend-up"><i class="fas fa-arrow-up"></i> Stable</div>
+                    <div class="stat-label">Total Linen Asset</div>
+                    <div class="stat-value" id="dash-linen-total">0</div>
+                    <div class="stat-label">Items Managed</div>
                 </div>
                 <div class="card">
-                    <div class="stat-label">Active Linen</div>
-                    <div class="stat-value" id="dash-active">0</div>
-                    <div class="stat-label">Operational</div>
+                    <div class="stat-label">Chemical Cost (MTD)</div>
+                    <div class="stat-value" style="color:var(--success);">Rp 0</div>
+                    <div class="stat-label">Optimized Usage</div>
                 </div>
                 <div class="card">
-                    <div class="stat-label">Critical Loss (YTD)</div>
-                    <div class="stat-value" style="color: var(--danger);" id="dash-loss">0</div>
-                    <div class="stat-label">Items Missing</div>
+                    <div class="stat-label">Machine Issues</div>
+                    <div class="stat-value" style="color:var(--danger);" id="dash-maintenance">0</div>
+                    <div class="stat-label">Pending Repairs</div>
                 </div>
                 <div class="card">
-                    <div class="stat-label">Avg Lifecycle</div>
-                    <div class="stat-value">42<span style="font-size:1rem;">/50</span></div>
-                    <div class="trend-down"><i class="fas fa-arrow-down"></i> Optimized</div>
+                    <div class="stat-label">Critical Linen</div>
+                    <div class="stat-value" id="dash-critical">0</div>
+                    <div class="stat-label">Need Replacement</div>
                 </div>
             </div>
 
-            <div class="card" style="margin-top: 20px;">
-                <h3 style="margin-bottom: 15px;"><i class="fas fa-exclamation-triangle text-warning"></i> Critical Alerts</h3>
-                <ul id="dashboard-alerts" style="list-style: none; padding-left: 0;"></ul>
+            <div class="card">
+                <h3>System Health</h3>
+                <canvas id="dashboardChart" height="100"></canvas>
             </div>
         </section>
 
         <!-- WORKFLOW -->
         <section id="view-workflow" class="view-section hidden">
-            <h2>Workflow Processing</h2>
-            <p class="text-muted" style="margin-bottom: 20px;">Scan linen untuk update status dan lifecycle secara real-time.</p>
-
+            <h2>Linen Workflow</h2>
             <div class="card">
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <div style="flex: 2; min-width: 200px;">
-                        <label>SCAN LINEN (QR/RFID)</label>
-                        <input type="text" id="wf-scan" placeholder="Scan ID disini..." autofocus>
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <label>ACTION</label>
-                        <select id="wf-action">
-                            <option value="WASHING">1. Start Washing</option>
-                            <option value="DRYING">2. Drying Process</option>
-                            <option value="READY">3. Ready / Clean</option>
-                            <option value="DISTRIBUTED">4. Distributed to Unit</option>
-                            <option value="DAMAGED">X. Report Damaged</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1; min-width: 120px; display: flex; align-items: flex-end;">
-                        <button class="btn" style="width: 100%; justify-content: center;" onclick="Workflow.submit()">PROCESS</button>
-                    </div>
+                <div class="flex">
+                    <input type="text" id="wf-scan" placeholder="Scan Linen ID (QR/RFID)" style="flex:2;">
+                    <select id="wf-action" style="flex:1;">
+                        <option value="WASHING">Washing</option>
+                        <option value="READY">Ready</option>
+                        <option value="DISTRIBUTED">Distributed</option>
+                        <option value="DAMAGED">Damaged</option>
+                    </select>
+                    <button class="btn" onclick="Workflow.submit()">Process</button>
                 </div>
-                <div id="wf-preview" style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 6px; display: none;">
-                    <!-- Preview Item Scanned -->
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Recent Transactions</h3>
-                <div style="overflow-x: auto;">
-                    <table id="table-trans">
-                        <thead><tr><th>Time</th><th>ID</th><th>Status</th><th>Handler</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+                <div id="wf-preview" style="margin-top:15px; padding:10px; background:rgba(0,0,0,0.2); border-radius:6px; display:none;"></div>
             </div>
         </section>
 
-        <!-- STOCK OPNAME (FORENSIC) -->
+        <!-- OPNAME -->
         <section id="view-opname" class="view-section hidden">
-            <h2>Forensic Stock Opname</h2>
-            <p class="text-muted">Investigasi selisih stok dan validasi fisik vs sistem.</p>
-
+            <h2>Stock Opname</h2>
             <div class="card">
                 <div class="grid-4">
-                    <div>
-                        <label>Select Unit</label>
-                        <select id="op-unit"><option value="ICU">ICU</option><option value="OK">OK</option></select>
-                    </div>
-                    <div>
-                        <label>Input Linen ID</label>
-                        <input type="text" id="op-scan" placeholder="Scan...">
-                    </div>
-                    <div>
-                        <label>Action</label>
-                        <button class="btn btn-outline" onclick="StockOpname.addItem()">Add to List</button>
-                    </div>
-                    <div style="display: flex; align-items: flex-end;">
-                        <button class="btn btn-danger" onclick="StockOpname.submit()">Submit Investigation</button>
-                    </div>
+                    <input type="text" id="op-scan" placeholder="Scan Item">
+                    <input type="text" id="op-unit" placeholder="Unit Code">
+                    <button class="btn btn-outline" onclick="StockOpname.add()">Add List</button>
+                    <button class="btn btn-danger" onclick="StockOpname.submit()">Submit Audit</button>
                 </div>
-
-                <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                <div style="max-height:200px; overflow-y:auto; margin-top:15px;">
                     <table id="table-opname">
-                        <thead><tr><th>Linen ID</th><th>System Count</th><th>Physical Count</th><th>Diff</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Unit</th><th>System</th><th>Physical</th><th>Diff</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- PREDICTION -->
-        <section id="view-prediction" class="view-section hidden">
-            <h2>AI & Intelligence</h2>
+        <!-- CHEMICAL -->
+        <section id="view-chemical" class="view-section hidden">
+            <h2>Chemical Usage Log</h2>
             <div class="card">
-                <h3><i class="fas fa-chart-line"></i> Cost Projection (Next 6 Months)</h3>
-                <div style="padding: 20px; text-align: center; color: var(--text-muted);">
-                    [Chart Placeholder: Prediction of Linen Replacement Cost]
+                <div class="grid-4">
+                    <div><input type="date" id="chem-date"></div>
+                    <div><select id="chem-shift"><option value="I">Shift I</option><option value="II">Shift II</option></select></div>
+                    <div><input type="number" id="chem-kg" placeholder="Total Linen (Kg)"></div>
+                    <div><input type="number" id="chem-lpg" placeholder="LPG (Tabung)"></div>
                 </div>
-            </div>
-            <div class="card">
-                <h3>Replacement Schedule</h3>
-                <ul id="ai-replacement-list" style="list-style: none;"></ul>
+                <h4 style="margin:10px 0;">Chemical Consumption (Auto-Calc)</h4>
+                <div class="grid-4">
+                    <input type="number" id="c-detergent" placeholder="Deterjen (ml)" readonly>
+                    <input type="number" id="c-disinfectant" placeholder="Disinfektan (ml)" readonly>
+                    <input type="number" id="c-alkali" placeholder="Alkali (ml)" readonly>
+                    <input type="number" id="c-softener" placeholder="Softener (ml)" readonly>
+                </div>
+                <button class="btn" onclick="Chemical.submit()">Log Usage</button>
             </div>
         </section>
 
+        <!-- MAINTENANCE -->
+        <section id="view-maintenance" class="view-section hidden">
+            <h2>Machine Maintenance</h2>
+            <div class="card">
+                <div class="flex">
+                    <input type="text" id="m-machine" placeholder="Machine Name" style="flex:1;">
+                    <input type="text" id="m-desc" placeholder="Issue Description" style="flex:2;">
+                    <button class="btn btn-danger" onclick="Maintenance.submit()">Report</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Recent Logs</h3>
+                <table id="table-maint">
+                    <thead><tr><th>Date</th><th>Machine</th><th>Issue</th><th>Status</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- HANDOVER -->
+        <section id="view-handover" class="view-section hidden">
+            <h2>Room Handover</h2>
+            <div class="card">
+                <div class="flex"><input type="text" id="ho-from" placeholder="From Unit"></div>
+                <div class="flex"><input type="text" id="ho-to" placeholder="To Unit"></div>
+                <div class="flex"><input type="text" id="ho-id" placeholder="Linen ID"></div>
+                <div class="flex"><input type="number" id="ho-qty" placeholder="Qty"></div>
+                <button class="btn" onclick="Handover.submit()">Record Handover</button>
+            </div>
+        </section>
     </main>
 </div>
 
 <script>
-/**
- * RS LAUNDRY OS - FRONTEND CONTROLLER
- */
-
+// CONFIG: GANTI DENGAN URL DEPLOYMENT APPS SCRIPT KAMU
 const CONFIG = {
-    // GANTI DENGAN URL DEPLOYMENT APPS SCRIPT KAMU
-    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxAcD8kfIbR-U_2DE98hwX-RNqoT3VR1ZSbAHCbPqIM6zsILjE_eqjBM71lGKToKXEvXw/exec"
+    SCRIPT_URL: "MASUKKAN_URL_DEPLOYMENT_APPS_SCRIPT_DISINI"
 };
 
 const State = {
     user: null,
-    data: { master: [], units: [], transactions: [], opnameList: [] }
+    data: { linen:[], units:[], chemicals:[], machines:[], transactions:[], maintenance:[] },
+    opnameList: []
 };
 
-// --- AUTH ---
+// AUTH
 const Auth = {
     login: async function(u, p) {
         UI.showLoading(true);
@@ -343,33 +307,24 @@ const Auth = {
                 body: JSON.stringify({ action: 'login', username: u, password: p })
             });
             const json = await res.json();
-
             if (json.status === 'success') {
                 State.user = json.user;
-                // Simpan sesi lokal (opsional untuk offline)
                 AndroidNative.saveToLocal('user', JSON.stringify(json.user));
                 this.success();
-            } else {
-                UI.showToast(json.message, 'error');
-            }
-        } catch (e) {
-            UI.showToast("Connection Failed", 'error');
-        }
+            } else { UI.showToast(json.message, 'error'); }
+        } catch (e) { UI.showToast("Connection Failed", 'error'); }
         UI.showLoading(false);
     },
     success: function() {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('main-app').classList.remove('hidden');
         document.getElementById('user-display').innerText = State.user.name;
-        document.getElementById('role-display').innerText = State.user.role.toUpperCase();
         Data.sync();
     },
-    logout: function() {
-        location.reload();
-    }
+    logout: function() { location.reload(); }
 };
 
-// --- DATA ---
+// DATA
 const Data = {
     sync: async function() {
         UI.showLoading(true);
@@ -382,207 +337,181 @@ const Data = {
             if (json.status === 'success') {
                 State.data = json;
                 App.renderDashboard();
-                App.renderTransactions();
-                UI.showToast("System Synced", 'success');
+                App.renderMaintenance();
+                UI.showToast("Data Synced", 'success');
             }
-        } catch (e) {
-            UI.showToast("Sync Error (Check Internet)", 'warning');
-        }
+        } catch (e) { UI.showToast("Sync Error", 'warning'); }
         UI.showLoading(false);
     },
-    pushWorkflow: async function(scans) {
+    post: async function(payload) {
         UI.showLoading(true);
         try {
-            const res = await fetch(CONFIG.SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'submit_workflow', scans: scans, user: State.user, location: 'LAUNDRY_PLANT' })
-            });
+            const res = await fetch(CONFIG.SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
             const json = await res.json();
             UI.showLoading(false);
-            if (json.status === 'success') {
-                UI.showToast("Workflow Processed & Logged", 'success');
-                Data.sync(); // Refresh data
+            if(json.status === 'success') {
+                UI.showToast("Success", 'success');
+                this.sync(); // Refresh data
                 return true;
             }
-        } catch (e) {
-            UI.showLoading(false);
-            UI.showToast("Error Submitting", 'error');
-        }
-        return false;
-    },
-    pushOpname: async function(data) {
-         UI.showLoading(true);
-        try {
-            const res = await fetch(CONFIG.SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'submit_stock_opname', items: data, unit: document.getElementById('op-unit').value, auditor: State.user.name, user: State.user.username })
-            });
-            const json = await res.json();
-            UI.showLoading(false);
-            if (json.status === 'success') {
-                UI.showToast(`Audit Complete. ${json.discrepancies} Discrepancies Found.`, 'success');
-                State.data.opnameList = [];
-                App.renderOpnameTable();
-                Data.sync();
-            }
+            UI.showToast(json.message, 'error');
         } catch(e) { UI.showLoading(false); }
+        return false;
     }
 };
 
-// --- WORKFLOW ---
+// MODULES
 const Workflow = {
     queue: [],
     scan: function() {
-        const input = document.getElementById('wf-scan');
-        const id = input.value.trim();
-        const action = document.getElementById('wf-action').value;
-
+        const id = document.getElementById('wf-scan').value.trim();
         if(!id) return;
-
-        // Find linen in master
-        const linen = State.data.master.find(l => l.LinenID === id);
-        if (!linen) {
-            UI.showToast(`Linen ID ${id} NOT FOUND in Master Data`, 'error');
-            return;
-        }
-
-        // Preview
+        const linen = State.data.linen.find(l => l.LinenID == id);
+        if(!linen) return UI.showToast("Linen not found", 'error');
+        
         const preview = document.getElementById('wf-preview');
         preview.style.display = 'block';
-        preview.innerHTML = `
-            <div class="flex">
-                <div style="flex:1"><strong>${linen.LinenID}</strong><br><span style="color:var(--text-muted)">${linen.Name}</span></div>
-                <div style="text-align:right;">
-                    <span class="badge bg-info">${linen.Status}</span><br>
-                    Cycle: ${linen.CycleCount}/${linen.MaxCycle}
-                </div>
-            </div>
-        `;
-
-        this.queue.push({ linenId: id, newStatus: action });
-        input.value = '';
-        input.focus();
+        preview.innerHTML = `<strong>${linen.Name}</strong> - Status: ${linen.Status}`;
+        this.queue.push({ linenId: id, newStatus: document.getElementById('wf-action').value });
+        document.getElementById('wf-scan').value = '';
     },
     submit: function() {
-        if(this.queue.length === 0) return UI.showToast("No items scanned", 'warning');
-        Data.pushWorkflow(this.queue).then(success => {
-            if(success) {
-                this.queue = [];
-                document.getElementById('wf-preview').style.display = 'none';
-            }
-        });
+        if(this.queue.length === 0) return UI.showToast("Scan item first", 'warning');
+        Data.post({ action: 'process_linen_scan', scans: this.queue, user: State.user, location: 'LAUNDRY' })
+        .then(() => { this.queue = []; document.getElementById('wf-preview').style.display='none'; });
     }
 };
 
-// --- STOCK OPNAME ---
 const StockOpname = {
-    list: [],
-    addItem: function() {
+    add: function() {
         const id = document.getElementById('op-scan').value.trim();
-        const linen = State.data.master.find(l => l.LinenID === id);
-        if(!linen) return UI.showToast("Unknown Linen ID", 'error');
-
-        // Logic: System assumes count is 1. Physical count is 1 (default) until changed?
-        // For Forensic: We assume System=1. We scan it to say Physical=1. If we DON'T scan it, Physical=0 (Missing).
-        // But here we are SCANNING existing items. Let's assume default Diff is 0.
-
-        this.list.push({ linenId: id, systemCount: 1, physicalCount: 1, diff: 0 });
+        if(!id) return;
+        // Simple logic: Assume system count is 1. 
+        State.opnameList.push({ linenId: id, systemCount: 1, physicalCount: 1, diff: 0, unit: document.getElementById('op-unit').value });
         this.render();
         document.getElementById('op-scan').value = '';
     },
-    toggleDiff: function(idx) {
-        // Simulate finding a discrepancy manually or auto-calc
-        const item = this.list[idx];
-        if (item.diff === 0) {
-            item.physicalCount = 0; // Mark as MISSING
-            item.diff = 1;
-        } else {
-            item.physicalCount = 1; // Restore
-            item.diff = 0;
-        }
-        this.render();
-    },
     submit: function() {
-        if(this.list.length === 0) return UI.showToast("List is empty", 'warning');
-        Data.pushOpname(this.list).then(() => {
-            this.list = [];
-            this.render();
-        });
+        if(State.opnameList.length === 0) return UI.showToast("List empty", 'warning');
+        Data.post({ action: 'submit_stock_opname', items: State.opnameList, user: State.user, auditor: State.user.name })
+        .then(() => { State.opnameList = []; this.render(); });
     },
     render: function() {
         const tbody = document.querySelector('#table-opname tbody');
         tbody.innerHTML = '';
-        this.list.forEach((item, idx) => {
-            const row = `<tr>
-                <td>${item.linenId}</td>
-                <td>${item.systemCount}</td>
-                <td><span class="badge ${item.diff > 0 ? 'bg-danger' : 'bg-success'}">${item.physicalCount}</span></td>
-                <td><button class="btn-outline" style="padding:2px 6px; font-size:10px;" onclick="StockOpname.toggleDiff(${idx})">Toggle Loss</button></td>
+        State.opnameList.forEach((item, idx) => {
+            tbody.innerHTML += `<tr>
+                <td>${item.linenId}</td><td>${item.unit}</td><td>${item.systemCount}</td>
+                <td><input type="number" style="width:50px; padding:5px;" value="${item.physicalCount}" onchange="StockOpname.update(${idx}, this.value)"></td>
+                <td>${item.diff}</td>
             </tr>`;
-            tbody.innerHTML += row;
+        });
+    },
+    update: function(idx, val) {
+        State.opnameList[idx].physicalCount = parseInt(val);
+        State.opnameList[idx].diff = State.opnameList[idx].systemCount - parseInt(val);
+        this.render();
+    }
+};
+
+const Chemical = {
+    submit: function() {
+        const kg = document.getElementById('chem-kg').value;
+        if(!kg) return UI.showToast("Enter KG", 'warning');
+        
+        // Auto calculation logic based on typical recipe (Example: 10ml/kg)
+        document.getElementById('c-detergent').value = kg * 10;
+        document.getElementById('c-disinfectant').value = kg * 15; 
+        // ... other calc logic ...
+
+        Data.post({
+            action: 'submit_daily_chemical',
+            date: document.getElementById('chem-date').value,
+            shift: document.getElementById('chem-shift').value,
+            totalKg: kg, nonInfecKg: kg, infecKg: 0,
+            detergent: kg * 10, disinfectant: kg * 15, alkali: 0, softener: 0,
+            lpg: document.getElementById('chem-lpg').value,
+            operator: State.user.name
         });
     }
 };
 
-// --- APP ---
+const Maintenance = {
+    submit: function() {
+        Data.post({
+            action: 'submit_maintenance',
+            machineName: document.getElementById('m-machine').value,
+            issueDesc: document.getElementById('m-desc').value,
+            reportedBy: State.user.name
+        });
+    }
+};
+
+const Handover = {
+    submit: function() {
+        Data.post({
+            action: 'submit_room_handover',
+            fromUnit: document.getElementById('ho-from').value,
+            toUnit: document.getElementById('ho-to').value,
+            linenId: document.getElementById('ho-id').value,
+            qty: document.getElementById('ho-qty').value
+        });
+    }
+};
+
+// APP CONTROLLER
 const App = {
     nav: function(id) {
         document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden'));
         document.getElementById('view-' + id).classList.remove('hidden');
-
         document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
         event.currentTarget.classList.add('active');
     },
-
     renderDashboard: function() {
-        // Calculate Metrics
-        const active = State.data.master.filter(l => l.Status === 'READY' || l.Status === 'IN_USE').length;
-        const loss = State.data.master.filter(l => l.Status === 'MISSING').length;
-
-        document.getElementById('dash-active').innerText = active;
-        document.getElementById('dash-loss').innerText = loss;
-
-        // Alerts Logic (Critical Items)
-        const alerts = document.getElementById('dashboard-alerts');
-        alerts.innerHTML = '';
-
-        const critical = State.data.master.filter(l => l.HealthStatus && l.HealthStatus.includes('CRITICAL'));
-        if(critical.length > 0) {
-            critical.forEach(c => {
-                alerts.innerHTML += `<li style="padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span class="badge bg-danger">REPLACE</span> ${c.LinenID} (${c.Name}) - Reached EOL (Cycle: ${c.CycleCount})
-                </li>`;
-            });
-        } else {
-            alerts.innerHTML = '<li style="color:var(--success)">No Critical Alerts. System Optimal.</li>';
-        }
-    },
-
-    renderTransactions: function() {
-        const tbody = document.querySelector('#table-trans tbody');
-        tbody.innerHTML = '';
-        State.data.transactions.slice(0, 10).forEach(t => {
-            tbody.innerHTML += `<tr>
-                <td>${new Date(t.Timestamp).toLocaleTimeString()}</td>
-                <td>${t.LinenID}</td>
-                <td><span class="badge bg-info">${t.NewStatus}</span></td>
-                <td>${t.User}</td>
-            </tr>`;
+        document.getElementById('dash-linen-total').innerText = State.data.linen.length;
+        document.getElementById('dash-maintenance').innerText = State.data.maintenance.filter(m => m.Status === 'REPORTED').length;
+        document.getElementById('dash-critical').innerText = State.data.linen.filter(l => l.HealthStatus === 'CRITICAL').length;
+        
+        // Simple Chart Render
+        if(window.myChart) window.myChart.destroy();
+        const ctx = document.getElementById('dashboardChart').getContext('2d');
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Total', 'Ready', 'Critical', 'Missing'],
+                datasets: [{
+                    label: '# of Linen',
+                    data: [
+                        State.data.linen.length,
+                        State.data.linen.filter(l => l.Status === 'READY').length,
+                        State.data.linen.filter(l => l.HealthStatus === 'CRITICAL').length,
+                        State.data.linen.filter(l => l.Status === 'MISSING').length
+                    ],
+                    backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#f59e0b']
+                }]
+            },
+            options: { plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } }
         });
     },
-
-    renderOpnameTable: function() {
-        document.querySelector('#table-opname tbody').innerHTML = '';
+    renderMaintenance: function() {
+        const tbody = document.querySelector('#table-maint tbody');
+        tbody.innerHTML = '';
+        State.data.maintenance.forEach(m => {
+            tbody.innerHTML += `<tr>
+                <td>${new Date(m.ReportDate).toLocaleDateString()}</td>
+                <td>${m.MachineName}</td>
+                <td>${m.IssueDescription}</td>
+                <td><span class="badge bg-warning">${m.Status}</span></td>
+            </tr>`;
+        });
     }
 };
 
-// --- UI ---
 const UI = {
     showLoading: function(show) {
         document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
     },
     showToast: function(msg, type='info') {
-        // Simple toast implementation
         const el = document.createElement('div');
         el.style.cssText = `position:fixed; bottom:20px; right:20px; background:${type=='error'?'var(--danger)':'var(--success)'}; color:white; padding:10px 20px; border-radius:8px; z-index:9999; animation:slideIn 0.3s;`;
         el.innerText = msg;
@@ -591,25 +520,13 @@ const UI = {
     }
 };
 
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('active');
-}
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
 
-// Init
-document.getElementById('loginForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    Auth.login(document.getElementById('username').value, document.getElementById('password').value);
-});
-
-// Event Listener for Scan Input (Enter key)
-document.getElementById('wf-scan').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') Workflow.scan();
-});
-
-document.getElementById('op-scan').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') StockOpname.addItem();
-});
-
+// INIT
+document.getElementById('loginForm').addEventListener('submit', (e) => { e.preventDefault(); Auth.login(document.getElementById('username').value, document.getElementById('password').value); });
+document.getElementById('wf-scan').addEventListener('keypress', e => { if(e.key==='Enter') Workflow.scan(); });
+document.getElementById('op-scan').addEventListener('keypress', e => { if(e.key==='Enter') StockOpname.add(); });
+setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
 </script>
 </body>
 </html>
