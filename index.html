@@ -1498,6 +1498,9 @@ document.addEventListener('DOMContentLoaded', function() {
         alert(msg);
     }
     
+    // Inisialisasi chart instance di App object
+    App.dashChart = null;
+    
     // Check for existing session
     Auth.checkSession();
     
@@ -1563,8 +1566,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Initialize app
-    App.nav('dashboard');
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+R to refresh data
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            Data.sync();
+            UI.showToast("Refreshing data...", 'info');
+        }
+        
+        // Escape to close sidebar on mobile
+        if (e.key === 'Escape') {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth <= 900 && sidebar && sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+            }
+        }
+    });
+    
+    // Initialize app - dengan timeout untuk memastikan DOM siap
+    setTimeout(() => {
+        App.nav('dashboard');
+    }, 100);
+    
+    // Handle window resize untuk chart responsive
+    window.addEventListener('resize', function() {
+        if (App.dashChart && typeof App.dashChart.resize === 'function') {
+            App.dashChart.resize();
+        }
+    });
 });
 
 // Make functions globally available
@@ -1581,4 +1611,5 @@ window.UI = UI;
 </script>
 </body>
 </html>
+
 
