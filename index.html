@@ -1166,6 +1166,7 @@ const MasterData = {
 // --- APP CONTROLLER ---
 const App = {
     currentView: 'dashboard',
+    dashChart: null, // Variabel untuk menyimpan chart instance
     
     nav: function(viewId) {
         // Hide all views
@@ -1198,7 +1199,10 @@ const App = {
     initView: function(viewId) {
         switch(viewId) {
             case 'dashboard':
-                this.renderDashboard();
+                // Tunggu sebentar agar DOM siap
+                setTimeout(() => {
+                    this.renderDashboard();
+                }, 100);
                 break;
             case 'chemical':
                 Chemical.renderInventory();
@@ -1223,6 +1227,13 @@ const App = {
     },
     
     renderDashboard: function() {
+        // Pastikan element chart sudah ada di DOM
+        const chartCanvas = document.getElementById('dashChart');
+        if (!chartCanvas) {
+            console.error('Chart canvas not found in DOM');
+            return;
+        }
+        
         // Dashboard Stats
         const linens = State.data.linen || [];
         document.getElementById('dash-linen').textContent = linens.length;
@@ -1261,54 +1272,119 @@ const App = {
     },
     
     renderChart: function() {
-        const linens = State.data.linen || [];
-        
-        const readyCount = linens.filter(l => l.Status === 'READY').length;
-        const washingCount = linens.filter(l => l.Status === 'WASHING').length;
-        const criticalCount = linens.filter(l => l.HealthStatus === 'CRITICAL').length;
-        const damagedCount = linens.filter(l => l.Status === 'DAMAGED').length;
-        const missingCount = linens.filter(l => l.Status === 'MISSING').length;
-        
-        // Destroy existing chart if exists
-        if (window.dashChart) {
-            window.dashChart.destroy();
-        }
-        
-        const ctx = document.getElementById('dashChart');
-        if (!ctx) return;
-        
-        window.dashChart = new Chart(ctx.getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Ready', 'Washing', 'Critical', 'Damaged', 'Missing'],
-                datasets: [{
-                    data: [readyCount, washingCount, criticalCount, damagedCount, missingCount],
-                    backgroundColor: [
-                        '#10b981', // Ready - green
-                        '#3b82f6', // Washing - blue
-                        '#ef4444', // Critical - red
-                        '#f59e0b', // Damaged - yellow
-                        '#64748b'  // Missing - gray
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { 
-                        position: 'right', 
-                        labels: { 
-                            color: '#94a3b8',
-                            padding: 15,
-                            usePointStyle: true
-                        } 
-                    }
-                },
-                cutout: '60%'
+        try {
+            const linens = State.data.linen || [];
+            
+            // Hitung statistik
+            const statusCounts = {
+                'READY': 0,
+                'WASHING': 0,
+                'CRITICAL': 0,
+                'DAMAGED': 0,
+                'MISSING': 0
+            };
+            
+            linens.forEach(linen => {
+                if (linen.HealthStatus === 'CRITICAL') {
+                    statusCounts.CRITICAL++;
+                } else if (linen.Status === 'READY') {
+                    statusCounts.READY++;
+                } else if (linen.Status === 'WASHING') {
+                    statusCounts.WASHING++;
+                } else if (linen.Status === 'DAMAGED') {
+                    statusCounts.DAMAGED++;
+                } else if (linen.Status === 'MISSING') {
+                    statusCounts.MISSING++;
+                }
+            });
+            
+            // Destroy existing chart jika ada
+            if (this.dashChart && typeof this.dashChart.destroy === 'function') {
+                this.dashChart.destroy();
+                this.dashChart = null;
             }
-        });
+            
+            const ctx = document.getElementById('dashChart');
+            if (!ctx) {
+                console.error('Chart canvas element not found');
+                return;
+            }
+            
+            // Buat chart baru
+            this.dashChart = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ready', 'Washing', 'Critical', 'Damaged', 'Missing'],
+                    datasets: [{
+                        data: [
+                            statusCounts.READY,
+                            statusCounts.WASHING,
+                            statusCounts.CRITICAL,
+                            statusCounts.DAMAGED,
+                            statusCounts.MISSING
+                        ],
+                        backgroundColor: [
+                            '#10b981', // Ready - green
+                            '#3b82f6', // Washing - blue
+                            '#ef4444', // Critical - red
+                            '#f59e0b', // Damaged - yellow
+                            '#64748b'  // Missing - gray
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#1e293b',
+                        hoverOffset: 15
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { 
+                            position: 'right', 
+                            labels: { 
+                                color: '#94a3b8',
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 11,
+                                    family: "'Inter', sans-serif"
+                                }
+                            } 
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#cbd5e1',
+                            borderColor: 'rgba(59, 130, 246, 0.5)',
+                            borderWidth: 1,
+                            cornerRadius: 6,
+                            padding: 12
+                        }
+                    },
+                    cutout: '60%',
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error rendering chart:', error);
+            // Fallback: tampilkan data dalam bentuk teks
+            const ctx = document.getElementById('dashChart');
+            if (ctx) {
+                ctx.innerHTML = `
+                    <div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                        <i class="fas fa-chart-pie fa-2x" style="margin-bottom: 10px;"></i><br>
+                        Chart tidak dapat ditampilkan<br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+            }
+        }
     },
     
     renderRecentActivity: function() {
@@ -1345,7 +1421,7 @@ const App = {
             tbody.innerHTML += `
                 <tr>
                     <td>${time}</td>
-                    <td>${action}</td>
+                    <td><span class="badge bg-info">${action}</span></td>
                     <td>${user}</td>
                 </tr>`;
         });
@@ -1358,7 +1434,6 @@ const App = {
         Maintenance.renderActiveTickets();
     }
 };
-
 // --- UI UTILS ---
 const UI = {
     showLoading: function(show) {
@@ -1506,3 +1581,4 @@ window.UI = UI;
 </script>
 </body>
 </html>
+
